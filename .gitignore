@@ -1,0 +1,56 @@
+# Environment & Secrets (WAJIB DIABAIKAN)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*serviceAccount*.json
+*credentials*.json
+
+# Python / FastAPI
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Flutter / Dart / Mobile
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+**/build/
+*.iml
+.idea/
+.vscode/
+*.swp
+
+# Android / Gradle / Signing
+**/android/.gradle/
+**/android/app/build/
+**/android/captures/
+**/android/local.properties
+*.jks
+*.keystore
+*.apk
+*.aab
+
+# iOS / macOS (if generated)
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+
+# OS & Logs
+.DS_Store
+Thumbs.db
+*.log
