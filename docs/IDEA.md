@@ -3,7 +3,7 @@
 **Penyusun proyek:** Jiddan Ibnu Ali (`24051214203`)  
 **Mata kuliah:** Pemrograman Aplikasi Bergerak, Semester 5  
 **Tanggal:** 15 November 2026  
-**Status:** Usulan untuk konfirmasi sebelum PRD Hari 2; belum merupakan kontrak implementasi.
+**Status:** Keputusan Hari 1 **TERKUNCI** oleh user (15 November 2026); siap dijadikan dasar penyusunan `docs/PRD.md` pada Hari 2.
 
 Dasar: `AGENTS.md`, `README.md`, dan `docs/README.md`. Sesi ini tidak melakukan riset web. Versi stack mengikuti ketentuan proyek; ketersediaan paket, kompatibilitas wheel Python, dan cakupan feed sumber masih perlu diverifikasi pada tahap persiapan implementasi, tanpa mengganti stack sepihak.
 
@@ -15,7 +15,7 @@ Celah paling realistis adalah menjawab dua pertanyaan: **“Informasi mana yang 
 
 Posisi produk: **aplikasi informasi kejadian dan kondisi warga di sekitar satu titik pantau, dengan prioritas yang transparan dan status verifikasi yang dapat ditelusuri.** Keunikan karya terletak pada rancangan serta integrasi kedua alur tersebut, bukan klaim sebagai aplikasi pertama di pasar.
 
-Usulan cakupan MVP: sinkronisasi **gempa BMKG**, menampilkan keterangan potensi tsunami **hanya jika tersedia pada data resmi**, serta laporan warga berkategori dampak gempa, banjir, atau erupsi. README menyebut cakupan bencana lebih luas; tanpa verifikasi sumber, jangan menganggap BMKG menyediakan feed banjir/erupsi yang setara. Integrasi otomatis sumber tambahan ditunda; penajaman cakupan ini perlu dikonfirmasi sebelum PRD.
+Cakupan MVP terkunci: sinkronisasi resmi **BMKG Gempabumi & Potensi Tsunami (`DataMKG/TEWS` JSON)** ditambah **Peringatan Dini Cuaca Ekstrem BMKG (`alerts/nowcast/id` RSS/CAP XML — hujan lebat, petir, angin kencang)** dengan **toggle preferensi alert per pengguna** di pengaturan zona. Kanal **Maritim/Gelombang Tinggi (`maritim.bmkg.go.id` JSON)** dicatat sebagai bonus akhir opsional apabila fitur inti rampung sebelum freeze. Kualitas udara (`PM2.5`) dan erupsi gunung api tidak ditarik otomatis karena keterbatasan REST API publik terbuka yang setara, namun seluruh bencana tetap terakomodasi melalui **Laporan Warga** dengan 5 kategori: **Gempa, Banjir, Erupsi, Cuaca Ekstrem, dan Kabut Asap/Lainnya**.
 
 ## 2. Konsep & 2 Fitur Pembeda Unik Terpilih
 
@@ -108,7 +108,7 @@ Bukti UAS yang ditargetkan: sync dua kali tanpa duplikasi, perhitungan radius pa
 
 ## 5. Batasan Scope Anti-Bablas & Daftar Fitur yang Sengaja Ditolak
 
-**Batas tetap:** satu pengembang, dua role, satu zona aktif per pengguna, dua pembeda, lima layar utama dan satu detail, satu foto per laporan, satu sumber otomatis awal. REST tetap menjadi jalur data utama. Backend mengerjakan logika; Flutter hanya input, state tampilan, dan rendering.
+**Batas tetap:** satu pengembang, dua role, satu zona aktif per pengguna (+ toggle preferensi jenis peringatan), dua pembeda, lima layar utama dan satu detail, satu foto per laporan, dan satu instansi sumber otomatis (BMKG: `TEWS` Gempa/Tsunami + `Nowcast` Cuaca Ekstrem; Maritim hanya opsional akhir jika waktu cukup). REST tetap menjadi jalur data utama. Backend mengerjakan logika; Flutter hanya input, state tampilan, dan rendering.
 
 **Ditolak untuk rilis UAS:**
 
@@ -133,15 +133,15 @@ Bukti UAS yang ditargetkan: sync dua kali tanpa duplikasi, perhitungan radius pa
 
 Jika waktu menipis, sederhanakan visual dan filter tambahan; jangan menghapus REST API, PostgreSQL, audit, atau kedua alur inti. Git/GitHub dan commit bertahap sepenuhnya ditangani Antigravity. Tidak ada penambahan fitur setelah freeze. Mulai 03 Des, fokus video minimal 10 menit dan artikel maksimal 11–12 halaman.
 
-## 6. Empat Keputusan untuk Dikonfirmasi Sebelum `docs/PRD.md`
+## 6. Empat Keputusan Hari 1 — TERKUNCI
 
-Pilihan berikut belum dikunci; rekomendasi menjadi bahan keputusan user pada Hari 2.
+Keempat keputusan berikut **sudah dikunci oleh user (15 November 2026)** sebagai acuan langsung penyusunan `docs/PRD.md`:
 
-| No. | Keputusan | Pilihan yang jelas | Rekomendasi |
+| No. | Keputusan | Keputusan Terkunci | Catatan Cakupan & Guardrail |
 |---|---|---|---|
-| 1 | Cakupan kejadian MVP | **A:** Gempa BMKG + keterangan tsunami resmi bila tersedia; laporan warga dampak gempa/banjir/erupsi. **B:** Gempa dan laporan dampak gempa saja. | **A**, dengan feed otomatis banjir/erupsi tetap di luar MVP. |
-| 2 | Dua pembeda dan skor | **A:** Radar Radius dengan skor prioritas transparan + laporan berjejak verifikasi. **B:** Radar Radius memakai label aturan sederhana tanpa angka, dengan alur verifikasi yang sama. | **A**; bobot usulan dikunci saat PRD, tidak disebut skor risiko ilmiah. |
-| 3 | Pengaturan zona | **A:** Satu titik GPS/manual, radius preset 25/50/100 km, default 50 km. **B:** Satu titik GPS/manual, radius tetap 50 km. | **A**; multi-zona dan pelacakan kontinu tetap ditolak. |
-| 4 | Kanal moderasi MVP | **A:** Tab admin dalam layar Lapor Warga. **B:** Moderasi melalui Swagger FastAPI yang tetap memerlukan autentikasi admin. | **A**, lebih mudah didemokan dalam alur mobile; keduanya tetap memakai transaksi dan audit yang sama. |
+| 1 | Cakupan kejadian MVP | **BMKG Gempa & Tsunami (`TEWS JSON`) + BMKG Nowcast Cuaca Ekstrem/Petir (`CAP XML`) + Laporan Warga 5 kategori** | Dilengkapi **toggle preferensi alert per user**; **Maritim (`maritim.bmkg.go.id`)** hanya sebagai bonus akhir bila core beres sebelum 28 Nov. Laporan warga mencakup **Gempa, Banjir, Erupsi, Cuaca Ekstrem, Kabut Asap/Lainnya**. |
+| 2 | Dua pembeda dan skor | **Opsi A:** Radar Radius dengan skor prioritas transparan (`S = 60P + 25M + 15T`) + laporan berjejak verifikasi | Bobot final dikunci di `PRD.md`; tetap disebut skor prioritas informasi (bukan estimasi risiko ilmiah). Nowcast memakai aturan/label wilayah tanpa dipaksakan memakai rumus gempa. |
+| 3 | Pengaturan zona | **Opsi A:** Satu titik GPS/manual, radius preset `25 / 50 / 100 km` (default `50 km`) + preferensi jenis peringatan | Multi-zona dan pelacakan GPS kontinu tetap ditolak agar hemat baterai & sederhana. |
+| 4 | Kanal moderasi MVP | **Opsi A:** Role `admin` dengan tab **Tinjau** di dalam layar **Lapor Warga** | Memakai transaksi state machine & audit log `report_verifications`; Swagger tetap ada untuk uji endpoint backend. |
 
-Sesudah empat keputusan dijawab, PRD menetapkan acceptance criteria, batas akses role, state UI, dan perilaku gagal/offline. Batas pengiriman alert saat aplikasi tidak aktif serta pemisahan sumber resmi/warga wajib ikut ditulis sebagai perilaku produk.
+Pada Hari 2, `docs/PRD.md` langsung merinci acceptance criteria untuk keempat keputusan terkunci ini, batas akses role, state UI, perilaku gagal/offline, batas pengiriman alert saat aplikasi tidak aktif, serta pemisahan tegas antara sumber resmi BMKG dan laporan warga.
