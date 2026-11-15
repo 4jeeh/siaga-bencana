@@ -3,6 +3,8 @@
 Aplikasi mobile **Flutter** dengan backend **Python FastAPI REST API** dan database relasional **PostgreSQL (Supabase)** untuk informasi gempa bumi, potensi tsunami, bencana besar (erupsi gunung api & banjir) dari sumber terbuka **BMKG**, pemetaan lokasi terdampak, notifikasi berbasis radius pengguna, serta pelaporan kondisi oleh warga.
 
 > Proyek Tugas Besar / UAS — Pemrograman Aplikasi Bergerak (Semester 5)
+>
+> **Author:** Jiddan Ibnu Ali (`24051214203`)
 
 ---
 
