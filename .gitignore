@@ -17,6 +17,9 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.localdb/
+.storage/
+.tooling/
 .coverage
 htmlcov/
 
