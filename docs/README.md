@@ -7,7 +7,7 @@
 3. [ARCHITECTURE.md](ARCHITECTURE.md) — Layer, Mermaid, transaksi, lifecycle dan fallback.
 4. [ERD.sql](ERD.sql) — DDL PostgreSQL15+ dengan 12 tabel, constraint, indeks dan trigger audit.
 5. [API_CONTRACT.md](API_CONTRACT.md) — REST `/api/v1`, DTO/error, upload, auth, SSE/replay.
-6. [UI_SPEC.md](UI_SPEC.md) — Enam layar Material3, wireframe ASCII, state, endpoint dan a11y; wireframe visual FigCraft selesai di [siaga-bencana-v1.figcraft](wireframes/siaga-bencana-v1.figcraft) & [overview.png](wireframes/png/overview.png).
+6. [UI_SPEC.md](UI_SPEC.md) — Enam layar Material3, wireframe ASCII, state, endpoint dan a11y; wireframe visual, palet warna & prototype FigCraft selesai di [siaga-bencana-v1.figcraft](wireframes/siaga-bencana-v1.figcraft) ([overview.png](wireframes/png/overview.png) & [overview-hifi.png](wireframes/png/overview-hifi.png)).
 7. [HANDOFF.md](HANDOFF.md) — Keputusan final, hasil validasi dan instruksi Slice 1.
 8. [SCHEDULE.md](SCHEDULE.md) — Freeze24Nov, target rilis27Nov; bukan klaim rilis sudah dilakukan.
 

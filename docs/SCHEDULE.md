@@ -4,7 +4,7 @@
 **Revisi Jadwal (Final):** 16 November 2026 — dimajukan menjadi **13 hari kalender (`15–27 Nov 2026`)** agar **finalisasi rilis `v1.0.0` tercapai pada Jumat, 27 November 2026**.
 
 ## Ringkasan Penyesuaian
-* **Lock Planning (Selesai Hari Ini, `16 Nov`):** Seluruh dokumen perencanaan (`PRD.md`, `ARCHITECTURE.md`, `ERD.sql`, `API_CONTRACT.md`, `UI_SPEC.md`) serta wireframe visual FigCraft (`siaga-bencana-v1.figcraft` + `13` PNG) sudah selesai, dikunci, dan di-push pada **Senin, 16 November 2026**.
+* **Lock Planning (Selesai Hari Ini, `16 Nov`):** Seluruh dokumen perencanaan (`PRD.md`, `ARCHITECTURE.md`, `ERD.sql`, `API_CONTRACT.md`, `UI_SPEC.md`) serta full wireframe FigCraft (Page 1 Low-Fi `20` frame + Page 2 Palet, Hi-Fi `23` frame & Prototype interaktif + `45` PNG) sudah selesai, dikunci, dan di-push pada **Senin, 16 November 2026**.
 * **Fase Build (`17–24 Nov`, 8 hari penuh):** Seluruh Vertical Slice (Foundation -> Auth/Zona -> BMKG/Radar/Peta/Detail -> Lapor/Moderasi -> SSE/Notifikasi/Uji Perangkat) diselesaikan sebelum freeze.
 * **Feature Freeze (`24 Nov`):** Mutlak pada **Selasa malam, 24 November 2026** — dilarang menambah fitur setelah tanggal ini. Fitur bonus **Maritim (`maritim.bmkg.go.id`)** resmi ditangguhkan ke pasca-UAS `v1.0.0`.
 * **QA, Security, Deploy & Rilis (`25–27 Nov`, 3 hari):** QA & pengujian lengkap (`25 Nov`), Security Audit + Deploy Railway & verifikasi fallback `localhost`/`SIMULASI` (`26 Nov`), dan Smoke Test Final + tag rilis **`v1.0.0`** (`27 Nov`).

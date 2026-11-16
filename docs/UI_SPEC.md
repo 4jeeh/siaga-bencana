@@ -367,7 +367,7 @@ Detail expired/cancelled/superseded selalu status nonaktif jelas, bukan kartu pr
 
 ## 8. Referensi FigCraft dan gate implementasi
 
-Visual wireframe low-fidelity telah dibuat berdasarkan dokumen ini pada `c924d39` di [siaga-bencana-v1.figcraft](wireframes/siaga-bencana-v1.figcraft) beserta ekspor 13 PNG di `docs/wireframes/png/` ([overview.png](wireframes/png/overview.png), `UI-01..06`, dan 6 varian `STATE-*`). Visual ini melengkapi spesifikasi tanpa membuka kembali planning lock atau menambah layar baru; seluruh perilaku/kontrak tetap mengikuti UI-01..06 di atas.
+Visual wireframe lengkap (Page 1 Low-Fi `20` frame + Page 2 Palet `19` paint styles, Hi-Fi `23` frame & Prototype interaktif `2` flow / `205` interaksi) telah dibuat di [siaga-bencana-v1.figcraft](wireframes/siaga-bencana-v1.figcraft) beserta ekspor `45` PNG di [docs/wireframes/png/](wireframes/png/) ([overview.png](wireframes/png/overview.png), [overview-hifi.png](wireframes/png/overview-hifi.png), frame Low-Fi, dan `hifi/`). Visual ini melengkapi spesifikasi tanpa membuka kembali planning lock atau menambah layar baru; seluruh perilaku/kontrak tetap mengikuti UI-01..06 di atas.
 
 Brief visual: satu page “v1 Lock Planning”, enam frame utama nama UI-01..UI-06, baseline360 logical px, varian tambahan state (bukan layar baru): font200%, error, empty, stale/degraded, SIMULASI, konflik409 UI-04, tile-offline UI-03/06, permission-denied UI-01/05. Wireframe grayscale dengan label ikon sederhana; warna Material3 ditetapkan saat implementasi dengan pemeriksaan kontras. Tandai area scroll/Wrap dan bottom-sheet; anotasi setiap action dengan endpoint di tabel layar. Jangan membuat 6 tujuan bottom-nav, web admin, live chat atau peta offline penuh.
 

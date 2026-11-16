@@ -103,7 +103,7 @@ Seluruh path final berprefix `/api/v1`. DTO/contoh/error ada di [kontrak](API_CO
 - [x] Matriks per layar: loading/empty/error/offline/degraded/stale/SIMULASI/409/tile-offline/permission-denied/token-expired; relevansi dijelaskan.
 - [x] Wiring action ke endpoint/DTO, batas paging/marker/foto, retry idempoten/refetch409/privasi.
 - [x] Checklist48dp/360px/font200%/fokus/semantics, indikator ikon+teks dan batas Radar/notifikasi.
-- [x] Visual FigCraft [siaga-bencana-v1.figcraft](wireframes/siaga-bencana-v1.figcraft) + 13 PNG ([overview.png](wireframes/png/overview.png), `UI-01..06`, `STATE-*`) selesai dibuat & di-commit (`c924d39`) tanpa menambah layar/fitur baru.
+- [x] Visual FigCraft lengkap [siaga-bencana-v1.figcraft](wireframes/siaga-bencana-v1.figcraft) (Page 1 Low-Fi `20` frame + Page 2 Palet `19` style, Hi-Fi `23` frame, `2` flow / `205` interaksi prototype) + `45` PNG ([overview.png](wireframes/png/overview.png), [overview-hifi.png](wireframes/png/overview-hifi.png), `UI-01..06`, `STATE-*`, `hifi/*`) selesai tanpa menambah layar/fitur baru.
 
 ## 8. Kelanjutan Antigravity — mulai Slice 1
 

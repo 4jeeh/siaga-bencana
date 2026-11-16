@@ -1,0 +1,4272 @@
+{
+  "pages": 2,
+  "low_frames": 20,
+  "hifi_frames": 23,
+  "styles": 19,
+  "flows": [
+    {
+      "name": "Alur Utama Warga",
+      "start": 774
+    },
+    {
+      "name": "Alur Moderasi Admin",
+      "start": 1218
+    }
+  ],
+  "settings": {
+    "background": "#F8FAFC",
+    "color": null,
+    "customSize": {
+      "height": 800.0,
+      "width": 360.0
+    },
+    "device": "Custom size",
+    "ok": true,
+    "responsive": false,
+    "rotation": "portrait",
+    "screen": {
+      "height": 800.0,
+      "width": 360.0
+    }
+  },
+  "interactions": [
+    {
+      "source": "UI-02",
+      "trigger": "Icon Beranda",
+      "trigger_id": 906,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 906,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "Nav Beranda",
+      "trigger_id": 907,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 907,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "Icon Peta",
+      "trigger_id": 908,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 908,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "Nav Peta",
+      "trigger_id": 909,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 909,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "Icon Lapor",
+      "trigger_id": 910,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 910,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "Nav Lapor",
+      "trigger_id": 911,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 911,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "Icon Profil",
+      "trigger_id": 912,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 912,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "Nav Profil",
+      "trigger_id": 913,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 913,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-03",
+      "trigger": "Icon Beranda",
+      "trigger_id": 965,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 965,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-03",
+      "trigger": "Nav Beranda",
+      "trigger_id": 966,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 966,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-03",
+      "trigger": "Icon Peta",
+      "trigger_id": 968,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 968,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-03",
+      "trigger": "Nav Peta",
+      "trigger_id": 969,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 969,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-03",
+      "trigger": "Icon Lapor",
+      "trigger_id": 970,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 970,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-03",
+      "trigger": "Nav Lapor",
+      "trigger_id": 971,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 971,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-03",
+      "trigger": "Icon Profil",
+      "trigger_id": 972,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 972,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-03",
+      "trigger": "Nav Profil",
+      "trigger_id": 973,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 973,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Icon Beranda",
+      "trigger_id": 1104,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1104,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Nav Beranda",
+      "trigger_id": 1105,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1105,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Icon Peta",
+      "trigger_id": 1106,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1106,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Nav Peta",
+      "trigger_id": 1107,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1107,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Icon Lapor",
+      "trigger_id": 1109,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1109,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Nav Lapor",
+      "trigger_id": 1110,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1110,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Icon Profil",
+      "trigger_id": 1111,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1111,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Nav Profil",
+      "trigger_id": 1112,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1112,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "Icon Beranda",
+      "trigger_id": 1209,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1209,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "Nav Beranda",
+      "trigger_id": 1210,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1210,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "Icon Peta",
+      "trigger_id": 1211,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1211,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "Nav Peta",
+      "trigger_id": 1212,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1212,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "Icon Lapor",
+      "trigger_id": 1213,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1213,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "Nav Lapor",
+      "trigger_id": 1214,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1214,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "Icon Profil",
+      "trigger_id": 1216,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1216,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "Nav Profil",
+      "trigger_id": 1217,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1217,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "Icon Beranda",
+      "trigger_id": 1260,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1260,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "Nav Beranda",
+      "trigger_id": 1261,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1261,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "Icon Peta",
+      "trigger_id": 1262,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1262,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "Nav Peta",
+      "trigger_id": 1263,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1263,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "Icon Lapor",
+      "trigger_id": 1265,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1265,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "Nav Lapor",
+      "trigger_id": 1266,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1266,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "Icon Profil",
+      "trigger_id": 1267,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1267,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "Nav Profil",
+      "trigger_id": 1268,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1268,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "STATE-UI-02",
+      "trigger": "Icon Beranda",
+      "trigger_id": 1370,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1370,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "STATE-UI-02",
+      "trigger": "Nav Beranda",
+      "trigger_id": 1371,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1371,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "STATE-UI-02",
+      "trigger": "Icon Peta",
+      "trigger_id": 1372,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1372,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "STATE-UI-02",
+      "trigger": "Nav Peta",
+      "trigger_id": 1373,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1373,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "STATE-UI-02",
+      "trigger": "Icon Lapor",
+      "trigger_id": 1374,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1374,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "STATE-UI-02",
+      "trigger": "Nav Lapor",
+      "trigger_id": 1375,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1375,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "STATE-UI-02",
+      "trigger": "Icon Profil",
+      "trigger_id": 1376,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1376,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "STATE-UI-02",
+      "trigger": "Nav Profil",
+      "trigger_id": 1377,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1377,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "STATE-UI-03",
+      "trigger": "Icon Beranda",
+      "trigger_id": 1416,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1416,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "STATE-UI-03",
+      "trigger": "Nav Beranda",
+      "trigger_id": 1417,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1417,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "STATE-UI-03",
+      "trigger": "Icon Peta",
+      "trigger_id": 1419,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1419,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "STATE-UI-03",
+      "trigger": "Nav Peta",
+      "trigger_id": 1420,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1420,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "STATE-UI-03",
+      "trigger": "Icon Lapor",
+      "trigger_id": 1421,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1421,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "STATE-UI-03",
+      "trigger": "Nav Lapor",
+      "trigger_id": 1422,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1422,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "STATE-UI-03",
+      "trigger": "Icon Profil",
+      "trigger_id": 1423,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1423,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "STATE-UI-03",
+      "trigger": "Nav Profil",
+      "trigger_id": 1424,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1424,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "STATE-UI-05",
+      "trigger": "Icon Beranda",
+      "trigger_id": 1448,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1448,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "STATE-UI-05",
+      "trigger": "Nav Beranda",
+      "trigger_id": 1449,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1449,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "STATE-UI-05",
+      "trigger": "Icon Peta",
+      "trigger_id": 1450,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1450,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "STATE-UI-05",
+      "trigger": "Nav Peta",
+      "trigger_id": 1451,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1451,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "STATE-UI-05",
+      "trigger": "Icon Lapor",
+      "trigger_id": 1452,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1452,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "STATE-UI-05",
+      "trigger": "Nav Lapor",
+      "trigger_id": 1453,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1453,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "STATE-UI-05",
+      "trigger": "Icon Profil",
+      "trigger_id": 1455,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1455,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "STATE-UI-05",
+      "trigger": "Nav Profil",
+      "trigger_id": 1456,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1456,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Icon Beranda",
+      "trigger_id": 1488,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1488,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Nav Beranda",
+      "trigger_id": 1489,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1489,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Icon Peta",
+      "trigger_id": 1490,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1490,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Nav Peta",
+      "trigger_id": 1491,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1491,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Icon Lapor",
+      "trigger_id": 1493,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1493,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Nav Lapor",
+      "trigger_id": 1494,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1494,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Icon Profil",
+      "trigger_id": 1495,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1495,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Nav Profil",
+      "trigger_id": 1496,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1496,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Icon Beranda",
+      "trigger_id": 1562,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1562,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Nav Beranda",
+      "trigger_id": 1563,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1563,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Icon Peta",
+      "trigger_id": 1564,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1564,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Nav Peta",
+      "trigger_id": 1565,
+      "dest": "UI-03",
+      "back": false,
+      "params": {
+        "id": 1565,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 916
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Icon Lapor",
+      "trigger_id": 1567,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1567,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Nav Lapor",
+      "trigger_id": 1568,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1568,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Icon Profil",
+      "trigger_id": 1569,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1569,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Nav Profil",
+      "trigger_id": 1570,
+      "dest": "UI-05",
+      "back": false,
+      "params": {
+        "id": 1570,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1173
+      }
+    },
+    {
+      "source": "UI-01a",
+      "trigger": "Segment Daftar",
+      "trigger_id": 783,
+      "dest": "UI-01b",
+      "back": false,
+      "params": {
+        "id": 783,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 799
+      }
+    },
+    {
+      "source": "UI-01b",
+      "trigger": "Segment Masuk",
+      "trigger_id": 806,
+      "dest": "UI-01a",
+      "back": false,
+      "params": {
+        "id": 806,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 774
+      }
+    },
+    {
+      "source": "UI-01a",
+      "trigger": "FilledButton Masuk",
+      "trigger_id": 794,
+      "dest": "UI-01c",
+      "back": false,
+      "params": {
+        "id": 794,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 826
+      }
+    },
+    {
+      "source": "UI-01a",
+      "trigger": "Label Masuk",
+      "trigger_id": 795,
+      "dest": "UI-01c",
+      "back": false,
+      "params": {
+        "id": 795,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 826
+      }
+    },
+    {
+      "source": "UI-01b",
+      "trigger": "FilledButton Daftar",
+      "trigger_id": 823,
+      "dest": "UI-01c",
+      "back": false,
+      "params": {
+        "id": 823,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 826
+      }
+    },
+    {
+      "source": "UI-01b",
+      "trigger": "Label Daftar",
+      "trigger_id": 824,
+      "dest": "UI-01c",
+      "back": false,
+      "params": {
+        "id": 824,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 826
+      }
+    },
+    {
+      "source": "UI-01c",
+      "trigger": "OutlinedButton ⌖ Pilih titik di peta / manual",
+      "trigger_id": 838,
+      "dest": "UI-03-picker",
+      "back": false,
+      "params": {
+        "id": 838,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1041
+      }
+    },
+    {
+      "source": "UI-01c",
+      "trigger": "Label ⌖ Pilih titik di peta / manual",
+      "trigger_id": 839,
+      "dest": "UI-03-picker",
+      "back": false,
+      "params": {
+        "id": 839,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1041
+      }
+    },
+    {
+      "source": "UI-01c",
+      "trigger": "FilledButton Simpan Zona Pantau",
+      "trigger_id": 858,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 858,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-01c",
+      "trigger": "Label Simpan Zona Pantau",
+      "trigger_id": 859,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 859,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "STATE-UI-01",
+      "trigger": "Note",
+      "trigger_id": 1320,
+      "dest": "UI-03-picker",
+      "back": false,
+      "params": {
+        "id": 1320,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1041
+      }
+    },
+    {
+      "source": "STATE-UI-01",
+      "trigger": "FilledButton ⌖ Pilih titik di peta / manual",
+      "trigger_id": 1321,
+      "dest": "UI-03-picker",
+      "back": false,
+      "params": {
+        "id": 1321,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1041
+      }
+    },
+    {
+      "source": "STATE-UI-01",
+      "trigger": "Label ⌖ Pilih titik di peta / manual",
+      "trigger_id": 1322,
+      "dest": "UI-03-picker",
+      "back": false,
+      "params": {
+        "id": 1322,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1041
+      }
+    },
+    {
+      "source": "STATE-UI-01",
+      "trigger": "FilledButton Simpan Zona Pantau",
+      "trigger_id": 1337,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1337,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "STATE-UI-01",
+      "trigger": "Label Simpan Zona Pantau",
+      "trigger_id": 1338,
+      "dest": "UI-02",
+      "back": false,
+      "params": {
+        "id": 1338,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 860
+      }
+    },
+    {
+      "source": "UI-01c",
+      "trigger": "OutlinedButton ◎ Gunakan lokasi saya sekali",
+      "trigger_id": 836,
+      "dest": "STATE-UI-01",
+      "back": false,
+      "params": {
+        "id": 836,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1310
+      }
+    },
+    {
+      "source": "UI-01c",
+      "trigger": "Label ◎ Gunakan lokasi saya sekali",
+      "trigger_id": 837,
+      "dest": "STATE-UI-01",
+      "back": false,
+      "params": {
+        "id": 837,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1310
+      }
+    },
+    {
+      "source": "UI-03-picker",
+      "trigger": "FilledButton Gunakan titik ini",
+      "trigger_id": 1073,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1073,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-03-picker",
+      "trigger": "Label Gunakan titik ini",
+      "trigger_id": 1074,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1074,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-03-picker",
+      "trigger": "OutlinedButton Batal",
+      "trigger_id": 1075,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1075,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-03-picker",
+      "trigger": "Label Batal",
+      "trigger_id": 1076,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1076,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-03-picker",
+      "trigger": "Back 48dp",
+      "trigger_id": 1044,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1044,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-03-picker-report",
+      "trigger": "FilledButton Konfirmasi titik",
+      "trigger_id": 1529,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1529,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-03-picker-report",
+      "trigger": "Label Konfirmasi titik",
+      "trigger_id": 1530,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1530,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-03-picker-report",
+      "trigger": "OutlinedButton Batal",
+      "trigger_id": 1531,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1531,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-03-picker-report",
+      "trigger": "Label Batal",
+      "trigger_id": 1532,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1532,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-03-picker-report",
+      "trigger": "Back 48dp",
+      "trigger_id": 1500,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1500,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-01c",
+      "trigger": "Back 48dp",
+      "trigger_id": 829,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 829,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "AppBar action label",
+      "trigger_id": 865,
+      "dest": "UI-01c",
+      "back": false,
+      "params": {
+        "id": 865,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 826
+      }
+    },
+    {
+      "source": "STATE-UI-02",
+      "trigger": "AppBar action label",
+      "trigger_id": 1345,
+      "dest": "UI-01c",
+      "back": false,
+      "params": {
+        "id": 1345,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 826
+      }
+    },
+    {
+      "source": "STATE-UI-02",
+      "trigger": "FilledButton Ubah Zona",
+      "trigger_id": 1362,
+      "dest": "UI-01c",
+      "back": false,
+      "params": {
+        "id": 1362,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 826
+      }
+    },
+    {
+      "source": "STATE-UI-02",
+      "trigger": "Label Ubah Zona",
+      "trigger_id": 1363,
+      "dest": "UI-01c",
+      "back": false,
+      "params": {
+        "id": 1363,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 826
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "OutlinedButton Lihat Detail",
+      "trigger_id": 893,
+      "dest": "UI-06",
+      "back": false,
+      "params": {
+        "id": 893,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 974
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "Label Lihat Detail",
+      "trigger_id": 894,
+      "dest": "UI-06",
+      "back": false,
+      "params": {
+        "id": 894,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 974
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "OutlinedButton Lihat Detail",
+      "trigger_id": 900,
+      "dest": "UI-06-weather",
+      "back": false,
+      "params": {
+        "id": 900,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1008
+      }
+    },
+    {
+      "source": "UI-02",
+      "trigger": "Label Lihat Detail",
+      "trigger_id": 901,
+      "dest": "UI-06-weather",
+      "back": false,
+      "params": {
+        "id": 901,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1008
+      }
+    },
+    {
+      "source": "UI-03",
+      "trigger": "FilledButton Detail Bencana",
+      "trigger_id": 962,
+      "dest": "UI-06",
+      "back": false,
+      "params": {
+        "id": 962,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 974
+      }
+    },
+    {
+      "source": "UI-03",
+      "trigger": "Label Detail Bencana",
+      "trigger_id": 963,
+      "dest": "UI-06",
+      "back": false,
+      "params": {
+        "id": 963,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 974
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "OutlinedButton Ubah Zona & Preferensi",
+      "trigger_id": 1186,
+      "dest": "UI-01c",
+      "back": false,
+      "params": {
+        "id": 1186,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 826
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "Label Ubah Zona & Preferensi",
+      "trigger_id": 1187,
+      "dest": "UI-01c",
+      "back": false,
+      "params": {
+        "id": 1187,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 826
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "OutlinedButton Keluar",
+      "trigger_id": 1206,
+      "dest": "UI-01a",
+      "back": false,
+      "params": {
+        "id": 1206,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 774
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "Label Keluar",
+      "trigger_id": 1207,
+      "dest": "UI-01a",
+      "back": false,
+      "params": {
+        "id": 1207,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 774
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "ListTile notifikasi",
+      "trigger_id": 1197,
+      "dest": "UI-06",
+      "back": false,
+      "params": {
+        "id": 1197,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 974
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "ListTile notifikasi",
+      "trigger_id": 1200,
+      "dest": "UI-06-weather",
+      "back": false,
+      "params": {
+        "id": 1200,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1008
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "〰 Gempa M5.0 — Kota Contoh",
+      "trigger_id": 1198,
+      "dest": "UI-06",
+      "back": false,
+      "params": {
+        "id": 1198,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 974
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "☁ Hujan lebat — Area contoh",
+      "trigger_id": 1201,
+      "dest": "UI-06-weather",
+      "back": false,
+      "params": {
+        "id": 1201,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1008
+      }
+    },
+    {
+      "source": "UI-06",
+      "trigger": "Back 48dp",
+      "trigger_id": 977,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 977,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-06",
+      "trigger": "FilledButton Laporkan terkait",
+      "trigger_id": 1002,
+      "dest": "UI-04-form",
+      "back": false,
+      "params": {
+        "id": 1002,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1113
+      }
+    },
+    {
+      "source": "UI-06",
+      "trigger": "Label Laporkan terkait",
+      "trigger_id": 1003,
+      "dest": "UI-04-form",
+      "back": false,
+      "params": {
+        "id": 1003,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1113
+      }
+    },
+    {
+      "source": "UI-06",
+      "trigger": "08:20 WIB · [Lihat] → panel inli",
+      "trigger_id": 1007,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1007,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-06",
+      "trigger": "OutlinedButton ↗ Sumber resmi",
+      "trigger_id": 1000,
+      "dest": null,
+      "back": false,
+      "params": {
+        "id": 1000,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "openUrl",
+          "url": "https://www.bmkg.go.id/"
+        }
+      }
+    },
+    {
+      "source": "UI-06",
+      "trigger": "Label ↗ Sumber resmi",
+      "trigger_id": 1001,
+      "dest": null,
+      "back": false,
+      "params": {
+        "id": 1001,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "openUrl",
+          "url": "https://www.bmkg.go.id/"
+        }
+      }
+    },
+    {
+      "source": "UI-06-weather",
+      "trigger": "Back 48dp",
+      "trigger_id": 1011,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1011,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-06-weather",
+      "trigger": "FilledButton Laporkan terkait",
+      "trigger_id": 1035,
+      "dest": "UI-04-form",
+      "back": false,
+      "params": {
+        "id": 1035,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1113
+      }
+    },
+    {
+      "source": "UI-06-weather",
+      "trigger": "Label Laporkan terkait",
+      "trigger_id": 1036,
+      "dest": "UI-04-form",
+      "back": false,
+      "params": {
+        "id": 1036,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1113
+      }
+    },
+    {
+      "source": "UI-06-weather",
+      "trigger": "Lihat laporan",
+      "trigger_id": 1040,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1040,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-06-weather",
+      "trigger": "OutlinedButton ↗ Sumber resmi",
+      "trigger_id": 1033,
+      "dest": null,
+      "back": false,
+      "params": {
+        "id": 1033,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "openUrl",
+          "url": "https://www.bmkg.go.id/"
+        }
+      }
+    },
+    {
+      "source": "UI-06-weather",
+      "trigger": "Label ↗ Sumber resmi",
+      "trigger_id": 1034,
+      "dest": null,
+      "back": false,
+      "params": {
+        "id": 1034,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "openUrl",
+          "url": "https://www.bmkg.go.id/"
+        }
+      }
+    },
+    {
+      "source": "UI-04-panel",
+      "trigger": "Back 48dp",
+      "trigger_id": 1150,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1150,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "FilledButton ✎ Tulis Laporan",
+      "trigger_id": 1101,
+      "dest": "UI-04-form",
+      "back": false,
+      "params": {
+        "id": 1101,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1113
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Label ✎ Tulis Laporan",
+      "trigger_id": 1102,
+      "dest": "UI-04-form",
+      "back": false,
+      "params": {
+        "id": 1102,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1113
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "OutlinedButton Lihat",
+      "trigger_id": 1093,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1093,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Label Lihat",
+      "trigger_id": 1094,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1094,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "OutlinedButton Lihat",
+      "trigger_id": 1099,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1099,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Label Lihat",
+      "trigger_id": 1100,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1100,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Segment Saya",
+      "trigger_id": 1086,
+      "dest": "UI-04-mine",
+      "back": false,
+      "params": {
+        "id": 1086,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1457
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Segment Sekitar",
+      "trigger_id": 1084,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1084,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "FilledButton ✎ Tulis Laporan",
+      "trigger_id": 1485,
+      "dest": "UI-04-form",
+      "back": false,
+      "params": {
+        "id": 1485,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1113
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Label ✎ Tulis Laporan",
+      "trigger_id": 1486,
+      "dest": "UI-04-form",
+      "back": false,
+      "params": {
+        "id": 1486,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1113
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Lihat laporan",
+      "trigger_id": 1472,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1472,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Lihat laporan",
+      "trigger_id": 1476,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1476,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Lihat laporan",
+      "trigger_id": 1480,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1480,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Lihat laporan",
+      "trigger_id": 1484,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1484,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Segment Saya",
+      "trigger_id": 1466,
+      "dest": "UI-04-mine",
+      "back": false,
+      "params": {
+        "id": 1466,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1457
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Segment Sekitar",
+      "trigger_id": 1464,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1464,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "FilledButton ✎ Tulis Laporan",
+      "trigger_id": 1559,
+      "dest": "UI-04-form",
+      "back": false,
+      "params": {
+        "id": 1559,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1113
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Label ✎ Tulis Laporan",
+      "trigger_id": 1560,
+      "dest": "UI-04-form",
+      "back": false,
+      "params": {
+        "id": 1560,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1113
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "OutlinedButton Lihat",
+      "trigger_id": 1551,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1551,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Label Lihat",
+      "trigger_id": 1552,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1552,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "OutlinedButton Lihat",
+      "trigger_id": 1557,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1557,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Label Lihat",
+      "trigger_id": 1558,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1558,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Segment Saya",
+      "trigger_id": 1542,
+      "dest": "UI-04-mine",
+      "back": false,
+      "params": {
+        "id": 1542,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1457
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Segment Sekitar",
+      "trigger_id": 1540,
+      "dest": "UI-04-admin-nearby",
+      "back": false,
+      "params": {
+        "id": 1540,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1533
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Segment Tinjau",
+      "trigger_id": 1544,
+      "dest": "UI-04-admin",
+      "back": false,
+      "params": {
+        "id": 1544,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1218
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "Tab Sekitar",
+      "trigger_id": 1228,
+      "dest": "UI-04-admin-nearby",
+      "back": false,
+      "params": {
+        "id": 1228,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1533
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "FilledButton ✓ Setujui",
+      "trigger_id": 1249,
+      "dest": "UI-04-decision",
+      "back": false,
+      "params": {
+        "id": 1249,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1269
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "Label ✓ Setujui",
+      "trigger_id": 1250,
+      "dest": "UI-04-decision",
+      "back": false,
+      "params": {
+        "id": 1250,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1269
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "OutlinedButton ✕ Tolak",
+      "trigger_id": 1251,
+      "dest": "UI-04-decision-reject",
+      "back": false,
+      "params": {
+        "id": 1251,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1571
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "Label ✕ Tolak",
+      "trigger_id": 1252,
+      "dest": "UI-04-decision-reject",
+      "back": false,
+      "params": {
+        "id": 1252,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1571
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "AppBar action label",
+      "trigger_id": 1223,
+      "dest": "UI-04-form",
+      "back": false,
+      "params": {
+        "id": 1223,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1113
+      }
+    },
+    {
+      "source": "UI-04-admin",
+      "trigger": "▸ Jejak peninjauan (owner/admin)",
+      "trigger_id": 1253,
+      "dest": "UI-04-panel",
+      "back": false,
+      "params": {
+        "id": 1253,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1147
+      }
+    },
+    {
+      "source": "UI-04-decision",
+      "trigger": "Batal keputusan",
+      "trigger_id": 1289,
+      "dest": "UI-04-admin",
+      "back": false,
+      "params": {
+        "id": 1289,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1218
+      }
+    },
+    {
+      "source": "UI-04-decision",
+      "trigger": "FilledButton Simpan keputusan",
+      "trigger_id": 1287,
+      "dest": "STATE-UI-04-409",
+      "back": false,
+      "params": {
+        "id": 1287,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1291
+      }
+    },
+    {
+      "source": "UI-04-decision",
+      "trigger": "Label Simpan keputusan",
+      "trigger_id": 1288,
+      "dest": "STATE-UI-04-409",
+      "back": false,
+      "params": {
+        "id": 1288,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1291
+      }
+    },
+    {
+      "source": "STATE-UI-04-409",
+      "trigger": "OutlinedButton Tutup",
+      "trigger_id": 1305,
+      "dest": "UI-04-admin",
+      "back": false,
+      "params": {
+        "id": 1305,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1218
+      }
+    },
+    {
+      "source": "STATE-UI-04-409",
+      "trigger": "Label Tutup",
+      "trigger_id": 1306,
+      "dest": "UI-04-admin",
+      "back": false,
+      "params": {
+        "id": 1306,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1218
+      }
+    },
+    {
+      "source": "STATE-UI-04-409",
+      "trigger": "FilledButton ↻ Muat ulang",
+      "trigger_id": 1307,
+      "dest": "UI-04-admin",
+      "back": false,
+      "params": {
+        "id": 1307,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1218
+      }
+    },
+    {
+      "source": "STATE-UI-04-409",
+      "trigger": "Label ↻ Muat ulang",
+      "trigger_id": 1308,
+      "dest": "UI-04-admin",
+      "back": false,
+      "params": {
+        "id": 1308,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1218
+      }
+    },
+    {
+      "source": "UI-04-form",
+      "trigger": "OutlinedButton Batal",
+      "trigger_id": 1145,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1145,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-04-form",
+      "trigger": "Label Batal",
+      "trigger_id": 1146,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1146,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-04-form",
+      "trigger": "OutlinedButton ⌖ Pilih manual",
+      "trigger_id": 1132,
+      "dest": "UI-03-picker-report",
+      "back": false,
+      "params": {
+        "id": 1132,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1497
+      }
+    },
+    {
+      "source": "UI-04-form",
+      "trigger": "Label ⌖ Pilih manual",
+      "trigger_id": 1133,
+      "dest": "UI-03-picker-report",
+      "back": false,
+      "params": {
+        "id": 1133,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1497
+      }
+    },
+    {
+      "source": "UI-04-form",
+      "trigger": "Note",
+      "trigger_id": 1142,
+      "dest": "UI-04-mine",
+      "back": false,
+      "params": {
+        "id": 1142,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1457
+      }
+    },
+    {
+      "source": "UI-04-form",
+      "trigger": "FilledButton ↻ Coba kirim lagi",
+      "trigger_id": 1143,
+      "dest": "UI-04-mine",
+      "back": false,
+      "params": {
+        "id": 1143,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1457
+      }
+    },
+    {
+      "source": "UI-04-form",
+      "trigger": "Label ↻ Coba kirim lagi",
+      "trigger_id": 1144,
+      "dest": "UI-04-mine",
+      "back": false,
+      "params": {
+        "id": 1144,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1457
+      }
+    },
+    {
+      "source": "STATE-UI-03",
+      "trigger": "FilledButton Konfirmasi titik",
+      "trigger_id": 1413,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1413,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "STATE-UI-03",
+      "trigger": "Label Konfirmasi titik",
+      "trigger_id": 1414,
+      "dest": null,
+      "back": true,
+      "params": {
+        "id": 1414,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "action": {
+          "type": "back"
+        }
+      }
+    },
+    {
+      "source": "UI-04-decision",
+      "trigger": "Segment Tolak",
+      "trigger_id": 1279,
+      "dest": "UI-04-decision-reject",
+      "back": false,
+      "params": {
+        "id": 1279,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1571
+      }
+    },
+    {
+      "source": "UI-04-decision-reject",
+      "trigger": "Segment Setujui",
+      "trigger_id": 1579,
+      "dest": "UI-04-decision",
+      "back": false,
+      "params": {
+        "id": 1579,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1269
+      }
+    },
+    {
+      "source": "UI-04-decision-reject",
+      "trigger": "Batal keputusan",
+      "trigger_id": 1591,
+      "dest": "UI-04-admin",
+      "back": false,
+      "params": {
+        "id": 1591,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1218
+      }
+    },
+    {
+      "source": "UI-04-decision-reject",
+      "trigger": "FilledButton Simpan keputusan",
+      "trigger_id": 1589,
+      "dest": "STATE-UI-04-409",
+      "back": false,
+      "params": {
+        "id": 1589,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1291
+      }
+    },
+    {
+      "source": "UI-04-decision-reject",
+      "trigger": "Label Simpan keputusan",
+      "trigger_id": 1590,
+      "dest": "STATE-UI-04-409",
+      "back": false,
+      "params": {
+        "id": 1590,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1291
+      }
+    },
+    {
+      "source": "UI-01a",
+      "trigger": "Segment label",
+      "trigger_id": 784,
+      "dest": "UI-01b",
+      "back": false,
+      "params": {
+        "id": 784,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 799
+      }
+    },
+    {
+      "source": "UI-01b",
+      "trigger": "Segment label",
+      "trigger_id": 807,
+      "dest": "UI-01a",
+      "back": false,
+      "params": {
+        "id": 807,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 774
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "08:00 WIB · ● Belum dibaca · ⚗ S",
+      "trigger_id": 1199,
+      "dest": "UI-06",
+      "back": false,
+      "params": {
+        "id": 1199,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 974
+      }
+    },
+    {
+      "source": "UI-05",
+      "trigger": "07:30 WIB · ● Belum dibaca",
+      "trigger_id": 1202,
+      "dest": "UI-06-weather",
+      "back": false,
+      "params": {
+        "id": 1202,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1008
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Segment label",
+      "trigger_id": 1087,
+      "dest": "UI-04-mine",
+      "back": false,
+      "params": {
+        "id": 1087,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1457
+      }
+    },
+    {
+      "source": "UI-04-citizen",
+      "trigger": "Segment label",
+      "trigger_id": 1085,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1085,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Segment label",
+      "trigger_id": 1467,
+      "dest": "UI-04-mine",
+      "back": false,
+      "params": {
+        "id": 1467,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1457
+      }
+    },
+    {
+      "source": "UI-04-mine",
+      "trigger": "Segment label",
+      "trigger_id": 1465,
+      "dest": "UI-04-citizen",
+      "back": false,
+      "params": {
+        "id": 1465,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1077
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Segment label",
+      "trigger_id": 1543,
+      "dest": "UI-04-mine",
+      "back": false,
+      "params": {
+        "id": 1543,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1457
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Segment label",
+      "trigger_id": 1541,
+      "dest": "UI-04-admin-nearby",
+      "back": false,
+      "params": {
+        "id": 1541,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1533
+      }
+    },
+    {
+      "source": "UI-04-admin-nearby",
+      "trigger": "Segment label",
+      "trigger_id": 1545,
+      "dest": "UI-04-admin",
+      "back": false,
+      "params": {
+        "id": 1545,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1218
+      }
+    },
+    {
+      "source": "UI-04-decision",
+      "trigger": "Segment label",
+      "trigger_id": 1280,
+      "dest": "UI-04-decision-reject",
+      "back": false,
+      "params": {
+        "id": 1280,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1571
+      }
+    },
+    {
+      "source": "UI-04-decision-reject",
+      "trigger": "Segment label",
+      "trigger_id": 1580,
+      "dest": "UI-04-decision",
+      "back": false,
+      "params": {
+        "id": 1580,
+        "trigger": {
+          "type": "onClick"
+        },
+        "transition": {
+          "type": "smartAnimate"
+        },
+        "durationMs": 220,
+        "dest": 1269
+      }
+    }
+  ],
+  "frames": {
+    "low/UI-01": {
+      "id": 4,
+      "name": "UI-01 Akun & Setup Zona Pantau"
+    },
+    "low/UI-02": {
+      "id": 49,
+      "name": "UI-02 Beranda & Feed Bencana"
+    },
+    "low/UI-03": {
+      "id": 105,
+      "name": "UI-03 Peta Interaktif"
+    },
+    "low/UI-04": {
+      "id": 163,
+      "name": "UI-04 Lapor Warga — Tab Tinjau (admin)"
+    },
+    "low/UI-05": {
+      "id": 214,
+      "name": "UI-05 Profil, Zona & Riwayat Notifikasi"
+    },
+    "low/UI-06": {
+      "id": 259,
+      "name": "UI-06 Detail Bencana"
+    },
+    "low/STATE-UI-01": {
+      "id": 293,
+      "name": "STATE UI-01 permission-denied → manual"
+    },
+    "low/STATE-UI-02": {
+      "id": 323,
+      "name": "STATE UI-02 empty + degraded/stale"
+    },
+    "low/STATE-UI-03": {
+      "id": 361,
+      "name": "STATE UI-03 tile-offline fallback"
+    },
+    "low/STATE-UI-04-form": {
+      "id": 408,
+      "name": "STATE UI-04 form laporan (sheet) + retry"
+    },
+    "low/STATE-UI-04-409": {
+      "id": 442,
+      "name": "STATE UI-04 konflik 409 moderasi"
+    },
+    "low/STATE-UI-05": {
+      "id": 461,
+      "name": "STATE UI-05 polling/offline + izin ditolak"
+    },
+    "low/UI-01a": {
+      "id": 493,
+      "name": "UI-01a Masuk (Login)"
+    },
+    "low/UI-01b": {
+      "id": 518,
+      "name": "UI-01b Daftar (Register)"
+    },
+    "low/UI-01c": {
+      "id": 545,
+      "name": "UI-01c Setup Zona Pantau"
+    },
+    "low/UI-03-picker": {
+      "id": 579,
+      "name": "UI-03 Picker Peta — pick_zone"
+    },
+    "low/UI-04-citizen": {
+      "id": 615,
+      "name": "UI-04 Lapor Warga — Citizen Sekitar"
+    },
+    "low/UI-04-panel": {
+      "id": 651,
+      "name": "UI-04 ReportPanel — Foto & Jejak"
+    },
+    "low/UI-04-decision": {
+      "id": 677,
+      "name": "UI-04 Dialog Keputusan Admin"
+    },
+    "low/UI-06-weather": {
+      "id": 699,
+      "name": "UI-06 Detail Cuaca — Nowcast CAP"
+    },
+    "hi/UI-01a": {
+      "id": 774,
+      "name": "HIFI-UI-01a Masuk (Login)"
+    },
+    "hi/UI-01b": {
+      "id": 799,
+      "name": "HIFI-UI-01b Daftar (Register)"
+    },
+    "hi/UI-01c": {
+      "id": 826,
+      "name": "HIFI-UI-01c Setup Zona Pantau"
+    },
+    "hi/UI-02": {
+      "id": 860,
+      "name": "HIFI-UI-02 Beranda & Feed Bencana"
+    },
+    "hi/UI-03": {
+      "id": 916,
+      "name": "HIFI-UI-03 Peta Interaktif"
+    },
+    "hi/UI-06": {
+      "id": 974,
+      "name": "HIFI-UI-06 Detail Bencana"
+    },
+    "hi/UI-06-weather": {
+      "id": 1008,
+      "name": "HIFI-UI-06 Detail Cuaca — Nowcast CAP"
+    },
+    "hi/UI-03-picker": {
+      "id": 1041,
+      "name": "HIFI-UI-03 Picker Peta — pick_zone"
+    },
+    "hi/UI-04-citizen": {
+      "id": 1077,
+      "name": "HIFI-UI-04 Lapor Warga — Citizen Sekitar"
+    },
+    "hi/UI-04-form": {
+      "id": 1113,
+      "name": "HIFI-STATE UI-04 form laporan (sheet) + retry"
+    },
+    "hi/UI-04-panel": {
+      "id": 1147,
+      "name": "HIFI-UI-04 ReportPanel — Foto & Jejak"
+    },
+    "hi/UI-05": {
+      "id": 1173,
+      "name": "HIFI-UI-05 Profil, Zona & Riwayat Notifikasi"
+    },
+    "hi/UI-04-admin": {
+      "id": 1218,
+      "name": "HIFI-UI-04 Lapor Warga — Tab Tinjau (admin)"
+    },
+    "hi/UI-04-decision": {
+      "id": 1269,
+      "name": "HIFI-UI-04 Dialog Keputusan Admin"
+    },
+    "hi/STATE-UI-04-409": {
+      "id": 1291,
+      "name": "HIFI-STATE UI-04 konflik 409 moderasi"
+    },
+    "hi/STATE-UI-01": {
+      "id": 1310,
+      "name": "HIFI-STATE UI-01 permission-denied → manual"
+    },
+    "hi/STATE-UI-02": {
+      "id": 1340,
+      "name": "HIFI-STATE UI-02 empty + degraded/stale"
+    },
+    "hi/STATE-UI-03": {
+      "id": 1378,
+      "name": "HIFI-STATE UI-03 tile-offline fallback"
+    },
+    "hi/STATE-UI-05": {
+      "id": 1425,
+      "name": "HIFI-STATE UI-05 polling/offline + izin ditolak"
+    },
+    "hi/UI-04-mine": {
+      "id": 1457,
+      "name": "HIFI-UI-04 Lapor Warga — Citizen Saya"
+    },
+    "hi/UI-03-picker-report": {
+      "id": 1497,
+      "name": "HIFI-UI-03 Picker Peta — pick_report"
+    },
+    "hi/UI-04-admin-nearby": {
+      "id": 1533,
+      "name": "HIFI-UI-04 Lapor Warga — Admin Sekitar"
+    },
+    "hi/UI-04-decision-reject": {
+      "id": 1571,
+      "name": "HIFI-UI-04 Dialog Keputusan Admin — Tolak"
+    }
+  },
+  "source_sha256": "e6a7eb043c8ba9af061dc041bf6f99941db09a408f0f4017e96678fb1698d595",
+  "persisted_validation": {
+    "pages": 2,
+    "frames": 43,
+    "paint_styles": 19,
+    "flows": 2,
+    "interactions": 205,
+    "all_navigation_targets_exist": true,
+    "png": [
+      {
+        "file": "png\\hifi\\HIFI-STATE-UI-01.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 156897,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-STATE-UI-02.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 155513,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-STATE-UI-03.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 160574,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-STATE-UI-04-409.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 121907,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-STATE-UI-05.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 159617,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-01a.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 117242,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-01b.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 121214,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-01c.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 151211,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-02.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 231199,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-03-picker-report.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 110921,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-03-picker.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 107437,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-03.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 154260,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-04-admin-nearby.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 134207,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-04-admin.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 223700,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-04-citizen.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 132646,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-04-decision-reject.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 112387,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-04-decision.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 112518,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-04-form.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 168424,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-04-mine.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 144332,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-04-panel.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 176256,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-05.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 203796,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-06-weather.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 214634,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\hifi\\HIFI-UI-06.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 225091,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\overview-hifi.png",
+        "width": 2373,
+        "height": 4096,
+        "bytes": 1647174,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\overview.png",
+        "width": 2648,
+        "height": 4096,
+        "bytes": 1632862,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\STATE-UI-01.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 158383,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\STATE-UI-02.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 160324,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\STATE-UI-03.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 162941,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\STATE-UI-04-409.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 122024,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\STATE-UI-04-form.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 169418,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\STATE-UI-05.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 160312,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-01.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 181431,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-01a.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 117791,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-01b.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 121757,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-01c.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 151815,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-02.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 234008,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-03-picker.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 107813,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-03.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 155816,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-04-citizen.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 135102,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-04-decision.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 112491,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-04-panel.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 175837,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-04.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 224404,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-05.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 205669,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-06-weather.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 215508,
+        "crc_valid": true
+      },
+      {
+        "file": "png\\UI-06.png",
+        "width": 720,
+        "height": 1600,
+        "bytes": 225628,
+        "crc_valid": true
+      }
+    ]
+  }
+}
