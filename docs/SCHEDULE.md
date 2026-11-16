@@ -4,7 +4,7 @@
 **Revisi Jadwal (Final):** 16 November 2026 — dimajukan menjadi **13 hari kalender (`15–27 Nov 2026`)** agar **finalisasi rilis `v1.0.0` tercapai pada Jumat, 27 November 2026**.
 
 ## Ringkasan Penyesuaian
-* **Lock Planning (Dimajukan ke Hari Ini, `16 Nov`):** Karena `PRD.md` dan `ARCHITECTURE.md` selesai pagi hari `16 Nov`, penyusunan `ERD.sql`, `API_CONTRACT.md`, dan `UI_SPEC.md` (termasuk wireframe ASCII; visual FigCraft tindak lanjut terpisah) langsung dituntaskan dan dikunci pada **Senin, 16 November 2026**.
+* **Lock Planning (Selesai Hari Ini, `16 Nov`):** Seluruh dokumen perencanaan (`PRD.md`, `ARCHITECTURE.md`, `ERD.sql`, `API_CONTRACT.md`, `UI_SPEC.md`) serta wireframe visual FigCraft (`siaga-bencana-v1.figcraft` + `13` PNG) sudah selesai, dikunci, dan di-push pada **Senin, 16 November 2026**.
 * **Fase Build (`17–24 Nov`, 8 hari penuh):** Seluruh Vertical Slice (Foundation -> Auth/Zona -> BMKG/Radar/Peta/Detail -> Lapor/Moderasi -> SSE/Notifikasi/Uji Perangkat) diselesaikan sebelum freeze.
 * **Feature Freeze (`24 Nov`):** Mutlak pada **Selasa malam, 24 November 2026** — dilarang menambah fitur setelah tanggal ini. Fitur bonus **Maritim (`maritim.bmkg.go.id`)** resmi ditangguhkan ke pasca-UAS `v1.0.0`.
 * **QA, Security, Deploy & Rilis (`25–27 Nov`, 3 hari):** QA & pengujian lengkap (`25 Nov`), Security Audit + Deploy Railway & verifikasi fallback `localhost`/`SIMULASI` (`26 Nov`), dan Smoke Test Final + tag rilis **`v1.0.0`** (`27 Nov`).
@@ -17,7 +17,7 @@
 | Hari | Tanggal | Fase / Slice | Fokus & Deliverable Utama | Penanggung Jawab / Fokus Teknis | Status & Guardrail |
 |---|---|---|---|---|---|
 | **Hari 1** | Min, 15 Nov | Planning & Ide | Repo GitHub, [AGENTS.md](../AGENTS.md), form dosen, [IDEA.md](IDEA.md), kunci 4 keputusan | Codex + Antigravity | **SELESAI** (`280fe21`) |
-| **Hari 2** | Sen, 16 Nov | **PRD, Arsitektur & LOCK PLANNING** | [PRD.md](PRD.md), [ARCHITECTURE.md](ARCHITECTURE.md), pembaruan [SCHEDULE.md](SCHEDULE.md), lalu **Lock Planning:** [ERD.sql](ERD.sql), [API_CONTRACT.md](API_CONTRACT.md), [UI_SPEC.md](UI_SPEC.md) + wireframe ASCII; visual FigCraft sesi berikutnya | Codex (dokumen teks/SQL); Antigravity (review dan implementasi) | **LOCK PLANNING SELESAI**; siap Slice 1 pada 17 Nov |
+| **Hari 2** | Sen, 16 Nov | **PRD, Arsitektur & LOCK PLANNING** | [PRD.md](PRD.md), [ARCHITECTURE.md](ARCHITECTURE.md), pembaruan [SCHEDULE.md](SCHEDULE.md), [ERD.sql](ERD.sql), [API_CONTRACT.md](API_CONTRACT.md), [UI_SPEC.md](UI_SPEC.md), plus wireframe [siaga-bencana-v1.figcraft](wireframes/siaga-bencana-v1.figcraft) & PNG | Codex (dokumen teks/SQL); Antigravity (review, FigCraft & Git) | **SELESAI** (`04f44d7` & `c924d39`); siap Slice 1 pada 17 Nov |
 | **Hari 3** | Sel, 17 Nov | **Slice 1 — Foundation, Auth, & DB Migration** | Setup `backend/` + migrasi [ERD.sql](ERD.sql), fondasi JWT/Argon2 register/login/me, `/api/v1/health` dan `/api/v1/ready`; skeleton `mobile/` (`go_router` 5 layar + Detail) dan smoke auth/health | Antigravity (`fastapi`, `supabase`, `flutter`) | Maks. 5 layar utama (+ Detail) |
 | **Hari 4** | Rab, 18 Nov | Slice 2 — Auth & Zona | Finalisasi integrasi auth dan endpoint/UI zona setelah fondasi Slice 1; **Akun & Set Radius** (`25/50/100 km`, default `50 km`), koordinat GPS/manual, 2 toggle | Antigravity (`fastapi`, `flutter`, `geolocator`) | 1 titik aktif/akun; tanpa GPS background |
 | **Hari 5** | Kam, 19 Nov | Slice 3A — Backend BMKG & Radar | Sync worker `TEWS JSON` + `Nowcast CAP XML`, Haversine, `eq-priority-v1`, `cap-priority-v1`, `GET /api/v1/events` & `/api/v1/map/markers` | Antigravity (`fastapi`, `httpx`, `pytest`) | Tanpa `geopandas`/`shapely`; cache di PostgreSQL |
@@ -47,9 +47,9 @@ Agar baseline prompt tetap ringan dan kuota awet, buka **chat baru di tiap slice
 
 ### 2. Nyalakan On-Demand & Target Effort per Hari / Sesi
 
-| Sesi / Hari | Plugin & MCP yang Dinyalakan (sisanya matikan) | Skill Lokal Dibaca Saat Perlu | Saran Effort (`Claude Opus 5.5`) |
+| Sesi / Hari | Plugin & MCP yang Dinyalakan (sisanya matikan) | Skill Lokal Dibaca Saat Perlu | Saran Model / Effort (Hemat Kuota) |
 |---|---|---|---|
-| **Wireframe FigCraft (Live)** | Hanya MCP `figcraft` *(matikan setelah selesai menggambar)* | — | `Medium` / ringan *(hanya menjalankan skrip)* |
+| **Wireframe FigCraft** *(Selesai `c924d39`)* | MCP `figcraft` *(matikan setelah selesai)* | — | Sudah selesai (`siaga-bencana-v1.figcraft`) |
 | **Hari 3 — Slice 1** | `flutter`, `context7`, `supabase`, `superpowers` *(opsional)* | `fastapi` | `Medium` |
 | **Hari 4 — Slice 2** | `flutter`, `context7`, `superpowers` *(opsional; matikan `supabase`)* | `fastapi` | `Medium` |
 | **Hari 5 — Slice 3A** | `context7`, `codegraph` *(opsional)* | `fastapi`, `postgresql-optimization` | `High` *(geometri CAP, antimeridian, Haversine)* |
@@ -62,4 +62,4 @@ Agar baseline prompt tetap ringan dan kuota awet, buka **chat baru di tiap slice
 | **Hari 12 — Security & Deploy** | Matikan `postman`; nyalakan `supabase` *(`get_advisors`)*, `security-audit`, `coderabbit`, `railway` | `postgresql-code-review` | `High` |
 | **Hari 13 — Rilis `v1.0.0`** | Minimal (`flutter`/`context7` + `superpowers`); matikan `railway`, `security-audit`, `coderabbit` | — | `Medium` |
 
-> **Catatan `postman`:** Plugin `postman` membawa jumlah tool MCP paling besar beserta rule pemicu `api-engineer`, jadi pastikan **dimatikan di luar Hari 11** agar token tidak bocor di Slice 1–5.
+> **Catatan `postman` & model hemat kuota:** Plugin `postman` membawa jumlah tool MCP paling besar beserta rule pemicu `api-engineer`, jadi pastikan **dimatikan di luar Hari 11** agar token tidak bocor di Slice 1–5. Untuk menjaga kuota **Claude Opus 5.5**, implementasi rutin (`Slice 1–4`) bisa dijalankan langsung memakai model harian yang hemat/standar (atau Opus hanya di `Medium`), lalu cadangkan mode `High` khusus saat audit/logika rumit bila diperlukan.

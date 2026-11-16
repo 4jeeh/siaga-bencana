@@ -3,7 +3,7 @@
 **Author:** Jiddan Ibnu Ali — **NIM:** 24051214203  
 **Mata kuliah:** Pemrograman Aplikasi Bergerak, Semester 5  
 **Tanggal:** Senin, 16 November 2026 — Hari 2  
-**Status:** LOCKED 16 November 2026; [DDL](ERD.sql), [kontrak API](API_CONTRACT.md) dan [wireframe ASCII/UI](UI_SPEC.md) selesai. Visual FigCraft adalah tindak lanjut, tidak dibuat dalam sesi ini.
+**Status:** LOCKED 16 November 2026; [DDL](ERD.sql), [kontrak API](API_CONTRACT.md), [wireframe ASCII/UI](UI_SPEC.md), dan wireframe FigCraft ([siaga-bencana-v1.figcraft](wireframes/siaga-bencana-v1.figcraft)) selesai.
 
 Acuan: [aturan proyek](../AGENTS.md), [README](../README.md), [indeks dokumentasi](README.md), [keputusan Hari 1](IDEA.md), dan handoff Hari 1. Arsitektur pelaksanaan ada di [ARCHITECTURE.md](ARCHITECTURE.md); tugas Hari 3 ada di [HANDOFF.md](HANDOFF.md). Empat keputusan Hari 1 tetap terkunci. Angka yang dahulu berupa usulan dan dirinci di sini menjadi baseline implementasi Hari 2.
 

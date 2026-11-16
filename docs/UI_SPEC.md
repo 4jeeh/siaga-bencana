@@ -1,6 +1,6 @@
 # UI/UX dan Wireframe Low-Fidelity — Siaga Bencana
 
-**LOCKED: Senin, 16 November 2026.** Implementasi Material 3 Flutter 3.47.7 / Dart 3.13.5, Provider/ChangeNotifier MVVM, go_router, http, geolocator, flutter_map + OSM, flutter_local_notifications. Acuan normatif: [PRD](PRD.md), [kontrak API dan kamus DTO](API_CONTRACT.md), [arsitektur](ARCHITECTURE.md), [skema](ERD.sql), [handoff](HANDOFF.md). Wireframe ASCII berikut adalah deliverable sesi ini; belum ada file FigCraft/PNG atau implementasi Flutter.
+**LOCKED: Senin, 16 November 2026.** Implementasi Material 3 Flutter 3.47.7 / Dart 3.13.5, Provider/ChangeNotifier MVVM, go_router, http, geolocator, flutter_map + OSM, flutter_local_notifications. Acuan normatif: [PRD](PRD.md), [kontrak API dan kamus DTO](API_CONTRACT.md), [arsitektur](ARCHITECTURE.md), [skema](ERD.sql), [handoff](HANDOFF.md). Wireframe ASCII dan visual FigCraft ([siaga-bencana-v1.figcraft](wireframes/siaga-bencana-v1.figcraft) & [overview.png](wireframes/png/overview.png)) telah dibuat (`c924d39`); implementasi Flutter menyusul per slice.
 
 ## 1. Sistem layar, komponen dan state bersama
 
@@ -365,9 +365,9 @@ Detail expired/cancelled/superseded selalu status nonaktif jelas, bukan kartu pr
 
 **Checklist a11y UI-06:** [ ] back/link/expansion48dp; [ ] teks sumber/reasons200%360px tanpa truncation kritis; [ ] polygon punya alternatif daftar area/metode; [ ] lifecycle dan prioritas ikon+teks; [ ] heading Semantics berurutan; [ ] null terucap “tidak tersedia”, bukan kosong tak bermakna.
 
-## 8. Referensi persiapan FigCraft dan gate implementasi
+## 8. Referensi FigCraft dan gate implementasi
 
-Sesi berikutnya boleh membuat visual **berdasarkan dokumen ini** di `docs/wireframes/`, nama yang direncanakan `siaga-bencana-v1.figcraft`. **File/direktori itu belum merupakan artefak sesi ini**; tidak ada tautan palsu ke desain yang belum dibuat, tidak ada tool FigCraft dipanggil. Visual merupakan tindak lanjut representasi, tidak membuka kembali planning lock atau menghalangi Slice1. Semua perilaku/ASCII UI-01..06 sudah terkunci di sini.
+Visual wireframe low-fidelity telah dibuat berdasarkan dokumen ini pada `c924d39` di [siaga-bencana-v1.figcraft](wireframes/siaga-bencana-v1.figcraft) beserta ekspor 13 PNG di `docs/wireframes/png/` ([overview.png](wireframes/png/overview.png), `UI-01..06`, dan 6 varian `STATE-*`). Visual ini melengkapi spesifikasi tanpa membuka kembali planning lock atau menambah layar baru; seluruh perilaku/kontrak tetap mengikuti UI-01..06 di atas.
 
 Brief visual: satu page “v1 Lock Planning”, enam frame utama nama UI-01..UI-06, baseline360 logical px, varian tambahan state (bukan layar baru): font200%, error, empty, stale/degraded, SIMULASI, konflik409 UI-04, tile-offline UI-03/06, permission-denied UI-01/05. Wireframe grayscale dengan label ikon sederhana; warna Material3 ditetapkan saat implementasi dengan pemeriksaan kontras. Tandai area scroll/Wrap dan bottom-sheet; anotasi setiap action dengan endpoint di tabel layar. Jangan membuat 6 tujuan bottom-nav, web admin, live chat atau peta offline penuh.
 
