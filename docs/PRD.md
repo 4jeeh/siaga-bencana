@@ -3,7 +3,7 @@
 **Author:** Jiddan Ibnu Ali — **NIM:** 24051214203  
 **Mata kuliah:** Pemrograman Aplikasi Bergerak, Semester 5  
 **Tanggal:** Senin, 16 November 2026 — Hari 2  
-**Status:** Baseline kebutuhan Hari 2; DDL, kontrak API, dan wireframe dikunci pada 17 November 2026.
+**Status:** Baseline kebutuhan Hari 2; DDL, kontrak API, dan wireframe dikunci pada 16 November 2026.
 
 Acuan: [aturan proyek](../AGENTS.md), [README](../README.md), [indeks dokumentasi](README.md), [keputusan Hari 1](IDEA.md), dan handoff Hari 1. Arsitektur pelaksanaan ada di [ARCHITECTURE.md](ARCHITECTURE.md); tugas Hari 3 ada di [HANDOFF.md](HANDOFF.md). Empat keputusan Hari 1 tetap terkunci. Angka yang dahulu berupa usulan dan dirinci di sini menjadi baseline implementasi Hari 2.
 
@@ -22,7 +22,7 @@ Skor adalah **prioritas informasi**, bukan model risiko ilmiah, prediksi, estima
 | Radar dapat dijelaskan | Fixture skor dan batas radius menghasilkan nilai/alasan konsisten; Nowcast memiliki aturan terpisah; dua kali sync fixture identik tidak menambah event/notifikasi duplikat. |
 | Laporan dapat ditelusuri | Pending tidak bocor, admin tidak meninjau laporan sendiri, konflik dua admin menghasilkan satu pemenang dan audit utuh. |
 | Demo tetap berjalan | Akun, zona, feed, laporan/foto, moderasi, dan replay notifikasi berfungsi tanpa Railway/Supabase/internet menggunakan PostgreSQL lokal serta seed SIMULASI. |
-| Selesai sesuai batas waktu | Planning lock 17 Nov; feature freeze 26 Nov; QA, keamanan, deploy dan rilis 27–30 Nov; mulai 01 Des video minimal 10 menit dan artikel maksimal 11–12 halaman. |
+| Selesai sesuai batas waktu | Planning lock 16 Nov; feature freeze 24 Nov; QA, keamanan, deploy dan rilis 25–27 Nov; mulai 28 Nov video minimal 10 menit dan artikel maksimal 11–12 halaman. |
 
 Keberhasilan tidak diukur dari akurasi prediksi bencana atau pengiriman alert saat aplikasi mati. Semua target performa di bagian 10 merupakan target uji, bukan hasil benchmark yang sudah dicapai.
 
@@ -62,7 +62,7 @@ Istilah **feed publik** berarti terlihat oleh seluruh pengguna terautentikasi, b
 | Notifikasi | Hanya kejadian resmi; satu SSE saat aplikasi aktif, polling fallback, riwayat persisten dan notifikasi lokal bila izin tersedia. |
 | Fallback demo | API, PostgreSQL dan adapter file lokal; seed/snapshot terpisah dengan label SIMULASI. |
 
-Di luar scope: NoSQL; Firebase SDK; akses bisnis langsung Supabase; `dio`; `build_runner`; web admin; chat/komentar/voting; AI/hoaks/reputasi; OTP/login sosial/reset password otomatis; hapus akun; multi-zona; GPS latar belakang; push saat app mati; video/multi-foto; dispatch/rute evakuasi; peta offline penuh; feed erupsi/PM2.5 otomatis; Redis/broker/microservices/PostGIS sebagai syarat. **Maritim ditangguhkan ke pasca-UAS v1.0.0 (hanya dipertimbangkan sebelum 26 Nov bila seluruh inti telah lulus)**, bukan acceptance gate MVP dan tidak boleh menunda freeze.
+Di luar scope: NoSQL; Firebase SDK; akses bisnis langsung Supabase; `dio`; `build_runner`; web admin; chat/komentar/voting; AI/hoaks/reputasi; OTP/login sosial/reset password otomatis; hapus akun; multi-zona; GPS latar belakang; push saat app mati; video/multi-foto; dispatch/rute evakuasi; peta offline penuh; feed erupsi/PM2.5 otomatis; Redis/broker/microservices/PostGIS sebagai syarat. **Maritim ditangguhkan ke pasca-UAS v1.0.0**, bukan acceptance gate MVP dan tidak boleh menunda freeze.
 
 ## 4. Navigasi dan spesifikasi lima layar
 
@@ -287,6 +287,6 @@ Unit test: normalisasi TEWS/CAP, waktu UTC, Haversine/antimeridian, skor, polygo
 
 Risiko dan keputusan: toleransi key TEWS tidak mengatasi revisi koordinat; pencocokan luar polygon Nowcast bersifat perkiraan; CAP lifecycle tak lengkap tidak memicu alert; OSM/BMKG memerlukan jaringan live; SSE/timeout proxy dan koneksi pooler Railway harus dibuktikan pada deployment; pemegang klaim moderasi harus tersedia. Mitigasi berada dalam batas MVP: label jujur, fixture deterministik, fallback cache/lokal, PostgreSQL transaction, dan runbook.
 
-Urutan implementasi Antigravity (jadwal revisi rilis 30 Nov): **18–19 Nov foundation + akun/zona**, **20–22 Nov kedua sumber BMKG + radius/skor + peta/detail**, **23–24 Nov laporan/foto + moderasi/audit**, **25–26 Nov SSE/polling + polish + uji perangkat & feature freeze 26 Nov**. Setiap slice database → API → Flutter → test → commit oleh Antigravity. Tidak menunda rancangan notification_logs/eligibility sampai slice terakhir; skema dan transaksi sync disiapkan sejak slice sumber.
+Urutan implementasi Antigravity (jadwal padat rilis 27 Nov): **17–18 Nov foundation + akun/zona**, **19–21 Nov kedua sumber BMKG + radius/skor + peta/detail**, **22–23 Nov laporan/foto + moderasi/audit**, **24 Nov SSE/polling + uji perangkat & feature freeze 24 Nov**. Setiap slice database → API → Flutter → test → commit oleh Antigravity. Tidak menunda rancangan notification_logs/eligibility sampai slice terakhir; skema dan transaksi sync disiapkan sejak slice sumber.
 
-Definition of Done MVP: UI-01..06 dan FR-01..07 tersedia, AC-01..24 mempunyai hasil lulus/bukti, NFR diukur dan masalah material diperbaiki, tidak ada kebocoran kredensial/data privat, demo lokal serta live diuji, dan dokumentasi menjalankan aplikasi selesai. Hari 3 mengunci DDL, request/response/error/cursor, dan wireframe tanpa menambah layar/fitur. Tidak ada fitur baru setelah 26 November 2026.
+Definition of Done MVP: UI-01..06 dan FR-01..07 tersedia, AC-01..24 mempunyai hasil lulus/bukti, NFR diukur dan masalah material diperbaiki, tidak ada kebocoran kredensial/data privat, demo lokal serta live diuji, dan dokumentasi menjalankan aplikasi selesai. Lock Planning (16 Nov) mengunci DDL, request/response/error/cursor, dan wireframe tanpa menambah layar/fitur. Tidak ada fitur baru setelah 24 November 2026.

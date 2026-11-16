@@ -2,7 +2,7 @@
 
 **Author:** Jiddan Ibnu Ali — **NIM:** 24051214203  
 **Peran sesi:** Codex Planner & Architect  
-**Berikutnya:** Hari 3, Selasa 17 November 2026 — planning lock pada akhir hari.
+**Berikutnya:** Lanjutan Senin, 16 November 2026 — **Lock Planning** pada akhir hari (`ERD.sql`, `API_CONTRACT.md`, `UI_SPEC.md`).
 
 ## 1. Hasil sesi dan acuan
 
@@ -20,7 +20,7 @@ Narasi awal README tentang banjir/erupsi dari BMKG lebih luas dari scope final I
 
 ## 2. Empat keputusan Hari 1 tetap TERKUNCI
 
-1. **Cakupan:** BMKG Gempa & Potensi Tsunami dari tiga `DataMKG/TEWS` JSON serta Cuaca Ekstrem dari RSS `https://www.bmkg.go.id/alerts/nowcast/id` → CAP 1.2 XML. Toggle preferensi alert per user. Laporan warga tepat lima kategori: **Gempa, Banjir, Erupsi, Cuaca Ekstrem, Kabut Asap/Lainnya**. Maritim ditangguhkan ke pasca-UAS `v1.0.0` (hanya dipertimbangkan bila seluruh inti lulus lebih awal sebelum 26 Nov); tidak ada feed erupsi/PM2.5 otomatis.
+1. **Cakupan:** BMKG Gempa & Potensi Tsunami dari tiga `DataMKG/TEWS` JSON serta Cuaca Ekstrem dari RSS `https://www.bmkg.go.id/alerts/nowcast/id` → CAP 1.2 XML. Toggle preferensi alert per user. Laporan warga tepat lima kategori: **Gempa, Banjir, Erupsi, Cuaca Ekstrem, Kabut Asap/Lainnya**. Maritim ditangguhkan ke pasca-UAS `v1.0.0`; tidak ada feed erupsi/PM2.5 otomatis.
 2. **Dua pembeda:** Radar Radius dengan `S = 60P + 25M + 15T` khusus gempa dan alasan deterministik; Nowcast memakai wilayah/polygon, severity dan lifecycle CAP tanpa rumus gempa. Pembeda kedua laporan berjejak verifikasi. Skor adalah **prioritas informasi, bukan risiko ilmiah/peringatan resmi**; di luar radius bukan berarti aman.
 3. **Zona:** satu titik GPS sekali/manual per akun, radius `25 / 50 / 100 km`, default `50 km`; tanpa multi-zona/background GPS.
 4. **Moderasi:** role admin menggunakan **Tab Tinjau pada Lapor Warga**, state `pending → in_review → verified/rejected` dalam transaksi SQL dengan `report_verifications`; tanpa web admin terpisah.
@@ -117,18 +117,18 @@ Tujuan: wireframe rendah fidelitas yang siap dibangun dengan Material 3 ringan. 
 
 ## 8. Planning lock dan kelanjutan Antigravity
 
-Urutan Hari 3: **ERD → kontrak API → wireframe → cross-check tiga arah → update HANDOFF → planning lock akhir 17 Nov**. Iterasi field antar dokumen boleh, tanpa membuka ulang empat keputusan Hari 1.
+Urutan Lock Planning (16 Nov): **ERD → kontrak API → wireframe → cross-check tiga arah → update HANDOFF → planning lock akhir 16 Nov**. Iterasi field antar dokumen boleh, tanpa membuka ulang empat keputusan Hari 1.
 
 Checklist lock: field/enum/status/null/unit ERD–API–UI sama; akses foto/audit jelas; key sumber, lease, radius/CAP, versi skor, cursor, idempotensi dan version moderasi eksplisit; localhost/SIMULASI memakai kontrak sama; AC-01..24 punya rencana test; Mermaid valid; keterbatasan belum diuji tercatat.
 
-| Tanggal | Vertical slice Antigravity (Revisi Rilis 30 Nov) |
+| Tanggal | Vertical slice Antigravity (Revisi Rilis 27 Nov) |
 |---|---|
-| 18–19 Nov | Foundation Backend+DB+Mobile skeleton + akun/zona. Skema log/eligibility disiapkan sejak awal. |
-| 20–22 Nov | Kedua sumber BMKG + radius/skor/CAP match + peta/detail dan pengujian antimeridian. |
-| 23–24 Nov | Laporan/foto/privasi + moderasi transaksional/audit termasuk dua admin. |
-| 25–26 Nov | SSE/polling/catch-up + polish + uji perangkat & mode SIMULASI; **feature freeze 26 Nov**. |
-| 27–30 Nov | QA, security audit, perbaikan bug, ukur NFR, deploy Railway + fallback lokal dan **rilis v1.0.0 (30 Nov)**. |
-| Mulai 01 Des | Video minimal 10 menit dan artikel maksimal 11–12 halaman. |
+| 17–18 Nov | Foundation Backend+DB+Mobile skeleton + akun/zona. Skema log/eligibility disiapkan sejak awal. |
+| 19–21 Nov | Kedua sumber BMKG + radius/skor/CAP match + peta/detail dan pengujian antimeridian. |
+| 22–23 Nov | Laporan/foto/privasi + moderasi transaksional/audit termasuk dua admin. |
+| 24 Nov | SSE/polling/catch-up + uji perangkat & mode SIMULASI; **feature freeze 24 Nov**. |
+| 25–27 Nov | QA (`25 Nov`), security audit & deploy/fallback (`26 Nov`), smoke test final & **rilis v1.0.0 (`27 Nov`)**. |
+| Mulai 28 Nov | Video minimal 10 menit dan artikel maksimal 11–12 halaman. |
 
 Setiap slice **Database → FastAPI → Flutter → Test → Commit** oleh Antigravity. Baca skill relevan yang tersedia sebelum slice sesuai AGENTS.md; daftar skill Antigravity bukan klaim bahwa semua tersedia di sesi Codex. Codex tidak menjalankan git init/add/commit/push atau mengubah remote/branch.
 
