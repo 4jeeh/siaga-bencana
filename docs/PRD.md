@@ -3,7 +3,7 @@
 **Author:** Jiddan Ibnu Ali — **NIM:** 24051214203  
 **Mata kuliah:** Pemrograman Aplikasi Bergerak, Semester 5  
 **Tanggal:** Senin, 16 November 2026 — Hari 2  
-**Status:** Baseline kebutuhan Hari 2; DDL, kontrak API, dan wireframe dikunci pada 16 November 2026.
+**Status:** LOCKED 16 November 2026; [DDL](ERD.sql), [kontrak API](API_CONTRACT.md) dan [wireframe ASCII/UI](UI_SPEC.md) selesai. Visual FigCraft adalah tindak lanjut, tidak dibuat dalam sesi ini.
 
 Acuan: [aturan proyek](../AGENTS.md), [README](../README.md), [indeks dokumentasi](README.md), [keputusan Hari 1](IDEA.md), dan handoff Hari 1. Arsitektur pelaksanaan ada di [ARCHITECTURE.md](ARCHITECTURE.md); tugas Hari 3 ada di [HANDOFF.md](HANDOFF.md). Empat keputusan Hari 1 tetap terkunci. Angka yang dahulu berupa usulan dan dirinci di sini menjadi baseline implementasi Hari 2.
 
@@ -89,7 +89,7 @@ User story: sebagai citizen, saya ingin pengaturan rumah tersimpan per akun, mes
 - Autentikasi FastAPI memakai Argon2 melalui `pwdlib[argon2]` dan bearer JWT bertanda tangan melalui `pyjwt`. Baseline access token 60 menit, tanpa refresh flow MVP; expiry mengharuskan masuk kembali. Token hanya di memori sesi mobile untuk menghindari dependency penyimpanan token baru. Restart aplikasi meminta login kembali; zona/riwayat tetap di server.
 - Validasi lintang `[-90,90]`, bujur `[-180,180]`, angka finite; kanonisasi `180` menjadi `-180`. Radius selain preset ditolak `422`. Satu baris zona unik per `user_id`.
 - Panggilan GPS hanya setelah aksi pengguna; timeout 10 detik. Titik pantau tidak otomatis mengikuti pergerakan. Titik laporan adalah input terpisah, tidak otomatis mengganti titik pantau.
-- Setiap perubahan zona/toggle menaikkan `zone_version` dan menyetel `alert_eligible_since` dengan waktu UTC server. Tidak membangkitkan notifikasi dari event yang sudah ada. Feed dan jarak direfresh; respons perhitungan memuat versi zona agar respons lama tidak menimpa zona baru.
+- Setiap perubahan nyata zona/toggle menaikkan `zone_version` (PUT dengan nilai kanonik identik adalah no-op) dan menyetel `alert_eligible_since` dengan waktu UTC server. Tidak membangkitkan notifikasi dari event yang sudah ada. Feed dan jarak direfresh; respons perhitungan memuat versi zona agar respons lama tidak menimpa zona baru.
 
 ### FR-02 — Ingest dan kesegaran BMKG
 
@@ -125,7 +125,7 @@ S < 35        : biasa
 S >= 65       : prioritas tinggi
 ```
 
-Label memakai nilai sebelum pembulatan; `score` tampilan satu desimal dengan pembulatan desimal **half-up**, bukan default bankers rounding. Contoh terkunci: `d=10 km`, `r=50 km`, `m=5`, umur `2 jam` → `P=0.8`, `M=0.5`, `T=22/24`, **S=74.25**, tampilan **74.3**, label **prioritas tinggi**. Alasan urut tetap: jarak dan radius → magnitudo → umur → label aplikasi. Sertakan `rule_version`, `evaluated_at`, komponen mentah dan `zone_version` sehingga test memakai jam beku. Semua hitungan satu respons memakai evaluated_at yang sama.
+Label memakai nilai sebelum pembulatan; `priority_display` tampilan satu desimal dengan pembulatan desimal **half-up**, bukan default bankers rounding. Contoh terkunci: `d=10 km`, `r=50 km`, `m=5`, umur `2 jam` → `P=0.8`, `M=0.5`, `T=22/24`, **S=74.25**, tampilan **74.3**, label **prioritas tinggi**. Alasan urut tetap: jarak dan radius → magnitudo → umur → label aplikasi; bila input hilang, alasan missing_data disisipkan sebelum label aplikasi. Sertakan `priority_algo`, `evaluated_at`, komponen mentah dan `zone_version` sehingga test memakai jam beku. Semua hitungan satu respons memakai evaluated_at yang sama.
 
 Jika koordinat/waktu/magnitudo wajib hilang/invalid, skor null dan label **“Prioritas belum tersedia”**, bukan nol. Waktu di masa depan lebih dari 5 menit ditandai invalid untuk skor/alert; toleransi sampai 5 menit memakai umur nol. Kedalaman/Dirasakan/Potensi tidak mengubah skor. Di luar radius, skor masih dapat dijelaskan pada Detail tetapi tidak mengubah eligibility. Feed campuran diurutkan waktu terbaru lalu ID; urut skor hanya gempa dengan null terakhir, lalu waktu dan ID.
 
@@ -186,7 +186,7 @@ User story: sebagai warga, saya menerima informasi baru untuk zona saya saat apl
 
 - Satu SSE terautentikasi melalui header bearer saat lifecycle `resumed`, dengan heartbeat **20 detik**. Client tidak melihat heartbeat/data selama **45 detik** → koneksi dianggap putus. Server menutup stream saat JWT kedaluwarsa; client masuk ulang, bukan retry tanpa batas pada `401`.
 - Dua kegagalan SSE berturut-turut mengaktifkan polling REST: awal **60 detik**, lalu **120/240/300 detik** saat gagal, jitter ±10%; kembali 60 detik setelah sukses. Percobaan naik kembali ke SSE setiap 5 menit saat aktif/online. Poll dan SSE tidak berjalan bersamaan sebagai kanal aktif; koneksi berhasil menghentikan timer polling.
-- Cursor memakai **sequence per pengguna yang dialokasikan secara serial dalam transaksi**, bukan hanya timestamp/ID global yang dapat commit tidak berurutan. SSE `id` adalah cursor pengguna; REST catch-up memakai `after_sequence`, ascending, limit default 20 maksimum 50 sampai `has_more=false`. List riwayat biasa tetap `limit/offset` terbaru dahulu. API Hari 3 mengunci bentuk envelope.
+- Cursor memakai **sequence per pengguna yang dialokasikan secara serial dalam transaksi**, bukan hanya timestamp/ID global yang dapat commit tidak berurutan. SSE `id` adalah cursor pengguna; REST catch-up memakai `since_sequence` bersama `cursor_user_id`, ascending, limit default 20 maksimum 50 sampai `has_more=false`. List riwayat biasa tetap `limit/offset` terbaru dahulu. Bentuk envelope terkunci di API_CONTRACT.md; SSE id berformat user_uuid:sequence dan memverifikasi pemilik cursor.
 - Cursor maju hanya setelah record diterima/diproses; disconnect dapat mengirim ulang record (at-least-once). Client deduplikasi berdasarkan notification ID dan ID notifikasi lokal yang stabil, memisahkan last_received dari read_at. Deduplikasi/cursor di memori sesi; pada login/restart muat high-water mark dan riwayat sebagai baseline tanpa memunculkan ulang seluruh notifikasi lama. Reconnect/resume sesi yang sama catch-up dari cursor; jumlah notifikasi lokal saat backlog dibatasi satu ringkasan per catch-up, detail tetap di riwayat.
 - Saat aplikasi paused/inactive, tutup SSE dan hentikan polling/reconnect timer. Saat resumed, lakukan catch-up lalu buka SSE mulai cursor terakhir agar tidak ada celah. Stream sendiri juga harus mendukung replay. Tidak ada jaminan notifikasi ketika app ditutup/di-kill; OS izin ditolak tetap memungkinkan banner/riwayat dalam aplikasi.
 - MVP tidak memangkas log otomatis selama periode UAS. Cursor di luar rentang atau salah pengguna ditolak dengan error yang mengarahkan sinkronisasi baseline; tidak diam-diam melewatkan record. Logout menghentikan kanal dan membersihkan data akun lama.
@@ -247,7 +247,7 @@ Setiap AC di bawah harus menjadi fixture/test otomatis atau langkah demo yang di
 - Field teks dari laporan/BMKG ditampilkan sebagai teks biasa, bukan HTML executable. Query terparameterisasi melalui ORM. Validasi server dan CHECK SQL saling melengkapi.
 - Foto disanitasi sebelum penyimpanan. URL baca privat berlaku **5 menit**, diterbitkan backend hanya sesudah otorisasi; pemegang URL dapat membacanya selama masa berlaku sehingga UI tidak membagikan URL. Local adapter menerapkan token URL, expiry, dan validasi akses setara, bukan direktori statis publik.
 - Publik memperoleh titik kejadian yang memang disubmit, bukan titik pantau pengguna/email pelapor. Admin melihat data seperlunya; koordinat zona tidak masuk analytics/log umum. Jangan mengunggah foto wajah/identitas yang tidak diperlukan; tampilkan arahan singkat pada form.
-- Audit append-only pada API; akun DB runtime tidak diberi UPDATE/DELETE untuk audit. Perubahan status harus melalui service transaksi. Audit dan status privat tidak dikirim di list publik. Tidak ada hard delete akun/event/laporan selama MVP; FK RESTRICT untuk entitas yang dirujuk, dirinci Hari 3.
+- Audit append-only pada API; akun DB runtime tidak diberi UPDATE/DELETE untuk audit. Perubahan status harus melalui service transaksi. Audit dan status privat tidak dikirim di list publik. Tidak ada hard delete akun/event/laporan selama MVP; FK RESTRICT untuk entitas yang dirujuk, dirinci di ERD.sql.
 - Log operasional berisi request ID, sumber, durasi dan kode error; redaksi token, password, signed URL, email lengkap, koordinat zona dan isi foto. Endpoint health publik hanya status minimal; diagnosis internal tidak mengeluarkan DSN/stack trace.
 
 ## 9. Fallback dan mode demo
@@ -290,3 +290,9 @@ Risiko dan keputusan: toleransi key TEWS tidak mengatasi revisi koordinat; penco
 Urutan implementasi Antigravity (jadwal padat rilis 27 Nov): **17–18 Nov foundation + akun/zona**, **19–21 Nov kedua sumber BMKG + radius/skor + peta/detail**, **22–23 Nov laporan/foto + moderasi/audit**, **24 Nov SSE/polling + uji perangkat & feature freeze 24 Nov**. Setiap slice database → API → Flutter → test → commit oleh Antigravity. Tidak menunda rancangan notification_logs/eligibility sampai slice terakhir; skema dan transaksi sync disiapkan sejak slice sumber.
 
 Definition of Done MVP: UI-01..06 dan FR-01..07 tersedia, AC-01..24 mempunyai hasil lulus/bukti, NFR diukur dan masalah material diperbaiki, tidak ada kebocoran kredensial/data privat, demo lokal serta live diuji, dan dokumentasi menjalankan aplikasi selesai. Lock Planning (16 Nov) mengunci DDL, request/response/error/cursor, dan wireframe tanpa menambah layar/fitur. Tidak ada fitur baru setelah 24 November 2026.
+
+## 12. Penamaan final saat Lock Planning
+
+Kontrak wire/SQL memakai `is_simulated` untuk flag SIMULASI, `priority_algo` untuk versi algoritma, `priority_score` mentah dan `priority_display` satu desimal. Source resmi `BMKG_TEWS|BMKG_NOWCAST`; source warga `CITIZEN` hanya DTO. Kategori wire `earthquake|flood|eruption|extreme_weather|haze_other`, resmi hanya earthquake/extreme_weather. Status CAP pada `disaster_events.status` berbeda dari `citizen_reports.status`; `lifecycle_status` dihitung server. Schema SQL `siaga`, UUID seluruh PK, koordinat bumi finite (bukan pembatas Indonesia), longitude kanonik [-180,180).
+
+`GET /api/v1/me/notifications/sync` memakai `since_sequence` dan `cursor_user_id`, baseline eksplisit saat login; SSE id `user_uuid:sequence` mendeteksi perpindahan akun. Mark-read `POST /api/v1/me/notifications/{notification_id}/read` idempoten. `payload_hash` laporan dihitung server dengan `report-payload-v1`; client hanya mengirim `client_request_id` bersama snapshot multipart yang sama. Zone baru/berubah tidak memberi backlog, PUT identik tidak mereset cutoff. Jam simulasi hanya domain, JWT/URL/lease memakai jam dinding. Detail request/DTO/error, canonical hash, freshness, urutan dan guard zona mengikuti [API_CONTRACT.md](API_CONTRACT.md); tidak ada alias nama lama.

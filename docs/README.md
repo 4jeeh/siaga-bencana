@@ -1,12 +1,14 @@
 # Dokumentasi Perencanaan — Siaga Bencana
 
-Folder ini menyimpan seluruh artefak perencanaan yang disusun oleh **Codex (`gpt-6-astra`)** dan direview/di-commit oleh **Antigravity**:
+**Lock Planning selesai: 16 November 2026.** Siap Slice 1 (17 Nov): Foundation, Auth, & DB Migration. Implementasi dan seluruh urusan Git/GitHub ditangani Antigravity.
 
-1. `IDEA.md` — Hasil brainstorming konsep & 1–2 fitur unik pembeda aplikasi.
-2. `PRD.md` — Product Requirements Document (role, scope MVP, user stories, acceptance criteria).
-3. `ARCHITECTURE.md` — User Flowchart & System Architecture Diagram (Mermaid).
-4. `ERD.sql` — Skema DDL PostgreSQL relasional lengkap (Primary Key, Foreign Key, Index).
-5. `API_CONTRACT.md` — Daftar endpoint REST API FastAPI + format request/response JSON.
-6. `UI_SPEC.md` — Ringkasan desain layar & referensi Figma.
-7. `HANDOFF.md` — Catatan keputusan terakhir & instruksi lanjut untuk sesi berikutnya.
-8. `SCHEDULE.md` — Jadwal harian revisi (target rilis `v1.0.0` pada 27 November 2026).
+1. [IDEA.md](IDEA.md) — Konsep dan dua fitur pembeda.
+2. [PRD.md](PRD.md) — Kebutuhan, scope, UI/FR/AC/NFR dan aturan bisnis.
+3. [ARCHITECTURE.md](ARCHITECTURE.md) — Layer, Mermaid, transaksi, lifecycle dan fallback.
+4. [ERD.sql](ERD.sql) — DDL PostgreSQL15+ dengan 12 tabel, constraint, indeks dan trigger audit.
+5. [API_CONTRACT.md](API_CONTRACT.md) — REST `/api/v1`, DTO/error, upload, auth, SSE/replay.
+6. [UI_SPEC.md](UI_SPEC.md) — Enam layar Material3, wireframe ASCII, state, endpoint dan a11y. Brief FigCraft tersedia; visual `.figcraft`/PNG belum dibuat.
+7. [HANDOFF.md](HANDOFF.md) — Keputusan final, hasil validasi dan instruksi Slice 1.
+8. [SCHEDULE.md](SCHEDULE.md) — Freeze24Nov, target rilis27Nov; bukan klaim rilis sudah dilakukan.
+
+Nama/DDL normatif di ERD.sql, wire DTO/endpoint di API_CONTRACT.md, presentasi di UI_SPEC.md; semuanya mengimplementasikan PRD. Jangan mengubah kontrak salah satu tanpa menyelaraskan lainnya dan mencatat handoff. Runtime paket, UI dan deployment tetap gate implementasi.

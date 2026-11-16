@@ -2,7 +2,7 @@
 
 **Author:** Jiddan Ibnu Ali — **NIM:** 24051214203  
 **Tanggal:** Senin, 16 November 2026 — Hari 2  
-**Status:** Baseline arsitektur untuk DDL, kontrak API dan wireframe Hari 3.
+**Status:** LOCKED 16 November 2026; [ERD.sql](ERD.sql), [API_CONTRACT.md](API_CONTRACT.md), dan [UI_SPEC.md](UI_SPEC.md) selesai untuk implementasi mulai 17 Nov.
 
 Acuan normatif: [AGENTS.md](../AGENTS.md), [IDEA.md](IDEA.md), dan [PRD.md](PRD.md). Nilai numerik serta acceptance criteria mengikuti PRD; dokumen ini menjelaskan penempatan tanggung jawab dan batas transaksi. Semua diagram memakai blok Mermaid standar GitHub tanpa HTML, ikon eksternal, atau konfigurasi JavaScript. Label node flowchart selalu dikutip. Nama direktori di bawah adalah rancangan implementasi, belum dibuat pada sesi dokumentasi.
 
@@ -187,7 +187,7 @@ sequenceDiagram
         alt Ada batch valid dan lease masih milik worker
             W->>D: BEGIN dan validasi lease token
             W->>D: Upsert event serta area polygon dan provenance
-            W->>D: Lock zona dan counter user dalam urutan ID
+            W->>D: Lock users lalu zona dalam urutan UUID user
             W->>N: Event baru serta zona dan waktu evaluasi
             N-->>W: Eligibility radius preferensi dan lifecycle
             W->>D: Insert log unik dengan sequence per user
@@ -237,7 +237,7 @@ Geometri tanpa GIS berat:
 2. Unwrap longitudes per ring supaya selisih antartitik memakai lintasan terpendek; simpan bbox antimeridian sebagai dua interval atau flag crossing. Centroid dihitung pada ring yang telah di-unwrap lalu longitude dinormalisasi. Centroid polygon konkaf bisa di luar area; karena itu marker hanya representatif.
 3. Ray casting dengan pemeriksaan point-on-segment menentukan inside termasuk boundary. Uji semua polygon area. Polar/degenerate shape yang algoritmanya tidak mendukung ditandai kecocokan belum tersedia, tidak diberi inside palsu.
 4. Di luar polygon, minimum Haversine centroid/vertex dipakai sebagai **jarak sampel perkiraan**. Bbox hanya pruning konservatif; jarak sampel tidak diberi nama jarak minimum ke tepi. Contoh false negative pada tengah sisi panjang menjadi fixture wajib AC-09.
-5. Simpan/paparkan `match_method`, `match_distance_km`, `area_description`, `rule_version` dan reasons. Nowcast tidak memiliki S/P/M/T; label berdasarkan severity dan waktu/status CAP sebagaimana PRD.
+5. Simpan/paparkan `match_method`, `match_distance_km`, `area_description`, `priority_algo` dan `priority_reasons`. Nowcast tidak memiliki S/P/M/T; label berdasarkan severity dan waktu/status CAP sebagaimana PRD.
 
 Payload XML dibatasi sebelum parse pada hasil dekompresi, bukan hanya Content-Length. Terapkan allowlist URL/redirect, larangan DTD/entity, encoding UTF-8, batas kedalaman/node/vertex dan tidak menjalankan XInclude sesuai PRD. Parser stdlib bukan alasan mengabaikan input berbahaya. Jika satu dokumen tidak layak, dokumen valid lain tetap dapat diproses sebagai partial.
 
@@ -246,14 +246,14 @@ Payload XML dibatasi sebelum parse pada hasil dekompresi, bukan hanya Content-Le
 notification_logs berfungsi sebagai riwayat sekaligus sumber replay; tidak perlu message broker. Pada batch baru:
 
 1. Upsert event mengembalikan apakah event benar-benar baru atau pengayaan. Bootstrap pertama sumber hanya memasukkan cache.
-2. Ambil kandidat zona; lock zona dan users dalam urutan user ID yang konsisten untuk menghindari deadlock. Semua jalur update zona/counter mengikuti urutan lock yang sama; baca ulang versi zona setelah lock.
+2. Ambil kandidat zona; lock users lebih dahulu, lalu alert_zones, dalam urutan UUID user yang konsisten untuk menghindari deadlock. Semua jalur update zona/counter mengikuti urutan lock yang sama; baca ulang versi zona setelah lock.
 3. Terapkan jenis preferensi, cutoff `alert_eligible_since`, umur/active window dan kecocokan lokasi. Hitungan server tidak bergantung pada izin notifikasi OS.
 4. Untuk kandidat yang belum memiliki log unik, increment `users.last_notification_sequence` dan insert log dalam transaksi yang sama. Sequence per pengguna menjadi monoton sesuai urutan commit karena counter row lock dipegang sampai commit. Unique `(user_id, sequence)` dan `(user_id, event_id, kind)` wajib.
 5. Simpan snapshot alasan/zone_version/evaluated_at untuk menjelaskan alasan saat notifikasi diterbitkan. Detail event boleh menampilkan keadaan terkini setelah update; jangan mengubah riwayat alasan secara diam-diam.
 
 SSE membaca log ascending dari cursor lewat query kecil setiap sekitar 2 detik saat ada koneksi, heartbeat 20 detik; tidak memegang transaksi/koneksi DB selama stream idle. Gunakan pool terbatas dan release sesi setiap query. Dengan target 20 client aktif desain ini cukup; fan-out in-memory boleh optimasi tetapi tidak boleh menjadi satu-satunya sumber replay. Proxy harus menonaktifkan buffering SSE dan punya idle timeout melebihi heartbeat; verifikasi deployment masih diperlukan.
 
-Delivery at-least-once; Flutter memakai ID log untuk deduplikasi dan ID notifikasi lokal stabil. Startup/login membaca high-water mark **lebih dahulu**, lalu riwayat, lalu SSE `after_sequence` dari mark tersebut: commit yang terjadi setelah mark akan direplay; data riwayat yang overlap dideduplikasi. Resume dalam sesi menggunakan cursor terakhir tanpa membuang notifikasi yang terlewat. History `read_at` berbeda dari cursor diterima. Replay juga mengambil lifecycle event terkini: CAP expired/cancelled/superseded tetap di riwayat tetapi tidak menghasilkan popup peringatan aktif dari snapshot lama. Tidak ada pemangkasan log otomatis pada MVP.
+Delivery at-least-once; Flutter memakai ID log untuk deduplikasi dan ID notifikasi lokal stabil. Startup/login membaca high-water mark **lebih dahulu**, lalu riwayat, lalu SSE `since_sequence` bersama `cursor_user_id` dari mark tersebut: commit yang terjadi setelah mark akan direplay; data riwayat yang overlap dideduplikasi. Resume dalam sesi menggunakan cursor terakhir tanpa membuang notifikasi yang terlewat. History `read_at` berbeda dari cursor diterima. Replay juga mengambil lifecycle event terkini: CAP expired/cancelled/superseded tetap di riwayat tetapi tidak menghasilkan popup peringatan aktif dari snapshot lama. Tidak ada pemangkasan log otomatis pada MVP.
 
 ## 5. Sequence upload dan moderasi transaksional
 
@@ -316,7 +316,7 @@ sequenceDiagram
     end
 ```
 
-Validasi auth/role/self-review dilakukan sebelum aksi update; kondisi SQL mengulang syarat status/version/reviewer untuk mengatasi race. Diagram tidak memperlihatkan semua cabang `401/403/413/415/422`, yang harus dicakup API Hari 3. Untuk retry key yang sudah ada, backend tetap memvalidasi dan menghitung hash konten untuk mendeteksi penggunaan key dengan payload berbeda, bukan mempercayai hash dari client.
+Validasi auth/role/self-review dilakukan sebelum aksi update; kondisi SQL mengulang syarat status/version/reviewer untuk mengatasi race. Diagram tidak memperlihatkan semua cabang `401/403/413/415/422`, yang dicakup API_CONTRACT.md. Untuk retry key yang sudah ada, backend tetap memvalidasi dan menghitung hash konten untuk mendeteksi penggunaan key dengan payload berbeda, bukan mempercayai hash dari client.
 
 Kompresi client bukan kontrol keamanan. File JPEG <=2 MiB di-decode ulang, batas sisi input 4096 px/16 MP, lalu disimpan sebagai JPEG maksimum 1024 px tanpa metadata. Hash idempotensi memakai field kanonik serta digest hasil foto sanitasi yang deterministik; implementasi harus menetapkan pengaturan encoder dan versi algoritma agar retry pada versi aplikasi yang sama konsisten. Tidak ada foto → tidak ada panggilan Storage.
 
@@ -376,17 +376,17 @@ Services memegang aturan dan batas transaksi; router tidak berisi query bisnis t
 
 Auth memakai password hash Argon2, JWT 60 menit dengan algoritma allowlist, issuer/audience/expiry, user aktif serta role server. Tidak ada Supabase Auth client bypass. Upload masuk FastAPI; URL foto diberikan sesudah pengecekan report visibility. Rate limit, request limit, timeout, CORS bila digunakan, dan trust proxy diatur di satu tempat. API production TLS; HTTP lokal hanya development.
 
-Error envelope Hari 3 minimal memuat code, message, field errors bila ada, request_id; tidak memuat traceback/DSN. Kode semantik: `401` sesi invalid, `403` role/self-review, `404` resource tidak ada/tidak boleh diketahui, `409` konflik versi/idempoten, `413` ukuran, `415` tipe, `422` validasi, `429` throttle dan `503` dependency tidak tersedia. GET feed dari cache saat BMKG gagal tetap `200` dengan freshness/degraded metadata, bukan `503` selama API+DB sehat.
+Error envelope final memuat code, message, details (object/null, termasuk fields bila ada), request_id; tidak memuat traceback/DSN. Kode semantik: `401` sesi invalid, `403` role/self-review, `404` resource tidak ada/tidak boleh diketahui, `409` konflik versi/idempoten, `413` ukuran, `415` tipe, `422` validasi, `429` throttle dan `503` dependency tidak tersedia. GET feed dari cache saat BMKG gagal tetap `200` dengan freshness/degraded metadata, bukan `503` selama API+DB sehat.
 
-## 8. Relasi data dan rancangan constraint Hari 3
+## 8. Relasi data dan constraint final
 
-Tidak ada DDL yang dibuat di Hari 2. Tabel berikut merupakan input konkret untuk `docs/ERD.sql`; SQL Hari 3 wajib menjabarkan tipe, PK/FK, CHECK, unique, indexes, nullability dan kebijakan penghapusan.
+DDL final di [ERD.sql](ERD.sql) memakai schema `siaga` (tidak diekspos PostgREST), UUID seluruh PK, timestamptz dan CHECK/UNIQUE/FK RESTRICT. Tabel berikut memetakan tanggung jawab; nama kolom persis mengikuti DDL. Trigger menjaga transisi dan audit atomik, service menjaga otorisasi requester, eligibility, geometri dan fence worker.
 
 | Tabel | Relasi dan invariant yang wajib diwujudkan |
 |---|---|
 | users | PK; email normalized unique; role citizen/admin CHECK; password_hash; active; counter last_notification_sequence. Tidak ada hard delete akun MVP. |
-| alert_zones | FK users UNIQUE; lat/lon valid, radius preset; dua boolean preferensi, version, alert_eligible_since. Satu zona per akun. |
-| disaster_events | PK; source/source_key UNIQUE; jenis gempa/cuaca; waktu UTC, optional atribut TEWS/CAP bertipe, source URL/provenance, content version, first/last_seen, is_simulation. Missing != nol. Koordinat nullable untuk CAP geometri invalid. |
+| alert_zones | FK users UNIQUE; latitude/longitude valid, radius_km preset; notify_earthquake/notify_weather, zone_version, alert_eligible_since. Satu zona per akun. |
+| disaster_events | PK; source/source_key UNIQUE; jenis gempa/cuaca; waktu UTC, optional atribut TEWS/CAP bertipe, source URL/provenance, content version, first/last_seen, is_simulated. Missing != nol. Koordinat nullable untuk CAP geometri invalid. |
 | event_areas | FK event; urutan area, areaDesc; satu event dapat banyak area CAP. |
 | area_polygons | FK area; urutan polygon; centroid/bbox/crosses_antimeridian/geometry_valid. |
 | polygon_vertices | FK polygon; sequence; lat/lon CHECK; UNIQUE polygon dan urutan. Geometri tetap relasional, bukan database dokumen. |
@@ -401,7 +401,7 @@ Atribut CAP seperti severity/urgency/certainty/effective/expires dapat berupa ko
 
 Index minimum: event `(occurred_at, id)` dan source key; kandidat lat/lon/bbox dengan query antimeridian teruji; report `(status, created_at, id)`, `(reporter_id, created_at, id)`, event_id; audit `(report_id, created_at, id)`; log `(user_id, sequence)` dan `(user_id, created_at, id)`; FK area/polygon/vertices; lease/cleanup yang sedang aktif. Index lat/lon biasa bukan jaminan query spasial cepat, gunakan EXPLAIN pada dataset target.
 
-FK inti RESTRICT untuk menjaga audit/riwayat; tidak ada endpoint delete MVP. Reset SIMULASI adalah operasi operator pada database demo terpisah, bukan DELETE produksi lewat aplikasi. Hari 3 harus membedakan aturan yang bisa CHECK dan yang memerlukan transaksi/locking, terutama role/self-review/validasi aktor dan transisi status; jangan menulis CHECK yang mencoba membaca tabel lain.
+FK inti RESTRICT untuk menjaga audit/riwayat; tidak ada endpoint delete MVP. Reset SIMULASI adalah operasi operator pada database demo terpisah, bukan DELETE produksi lewat aplikasi. DDL membedakan aturan CHECK dan aturan transaksi/locking, terutama role/self-review/validasi aktor dan transisi status; jangan menulis CHECK yang mencoba membaca tabel lain.
 
 ## 9. Storage adapter dan batas keamanan
 
@@ -454,7 +454,7 @@ Tidak ada panah otomatis dari production ke SIMULASI. Jika Railway gagal, operat
 | SIMULATION_CLOCK | Jam fixture eksplisit untuk expiry/replay demo, tidak menimpa waktu asli sumber |
 | API_BASE_URL | Konfigurasi Flutter menuju Railway, host emulator atau IP LAN |
 
-Nama env di atas rancangan, Hari 3 menyelaraskannya ke kontrak metadata mode; implementasi membuat `.env.example` tanpa rahasia pada fase build. Jangan membuat/menjalankan `.env` dalam sesi dokumentasi ini. Railway memakai koneksi PostgreSQL TLS dan pooler Supabase bila konektivitas IPv4 membutuhkannya; size pool konservatif, satu worker, lease SQL yang tidak bergantung session affinity. Uji proxy SSE, lifecycle reconnect, pooler dan restart di Railway masih merupakan pekerjaan implementasi.
+Nama env di atas terkunci sesuai metadata mode API_CONTRACT.md; implementasi membuat `.env.example` tanpa rahasia pada fase build. Jangan membuat/menjalankan `.env` dalam sesi dokumentasi ini. Railway memakai koneksi PostgreSQL TLS dan pooler Supabase bila konektivitas IPv4 membutuhkannya; size pool konservatif, satu worker, lease SQL yang tidak bergantung session affinity. Uji proxy SSE, lifecycle reconnect, pooler dan restart di Railway masih merupakan pekerjaan implementasi.
 
 ### Runbook yang harus diwujudkan Antigravity
 
@@ -478,4 +478,14 @@ Target start lokal <=10 menit setelah dependency tersedia. Dokumentasi Hari 2 be
 | Stream/lifecycle | AC-12/19/20/23; cursor terurut commit, duplicate delivery, token habis, paused tanpa timer. |
 | Client/fallback | UI-01..06, AC-02/03/13/22, NFR-01..10; profile perangkat, payload dan demo tanpa cloud. |
 
-Hari 3 menghasilkan `docs/ERD.sql`, `docs/API_CONTRACT.md`, dan `docs/UI_SPEC.md` mengikuti [HANDOFF.md](HANDOFF.md). Kontrak harus mengunci DTO sumber publik/privat, pagination, match_method, freshness, lifecycle CAP, error, idempotency key, expected_version, cursor per-user, signed URL dan mode SIMULASI. Tidak membuat endpoint bisnis langsung ke Supabase, rute layar ketujuh, atau fitur baru di luar PRD.
+Lock Planning 16 Nov menghasilkan [ERD.sql](ERD.sql), [API_CONTRACT.md](API_CONTRACT.md), dan [UI_SPEC.md](UI_SPEC.md); implementasi Slice 1 mulai 17 Nov mengikuti [HANDOFF.md](HANDOFF.md). Kontrak mengunci DTO sumber publik/privat, pagination, match_method, freshness, lifecycle CAP, error, idempotency key, expected_version, cursor per-user, signed URL dan mode SIMULASI. Tidak membuat endpoint bisnis langsung ke Supabase, rute layar ketujuh, atau fitur baru di luar PRD.
+
+### Detail implementasi yang dikunci pada 16 Nov
+
+- `users` lalu `alert_zones` dilock dalam urutan UUID user pada seluruh writer; counter+log tetap satu transaksi sampai commit. `zone_version` adalah nama kolom zona, `content_version` versi event, `version` versi laporan. SSE id `user_uuid:sequence`; REST `since_sequence` + `cursor_user_id`; tidak ada cursor lintas akun.
+- `priority_score` mentah dihitung per zona pada response event, `priority_display` adalah format response saja; skor personal tidak disimpan pada event global. Snapshot log menyimpan priority_algo/priority_score/priority_label/priority_reasons/priority_components, evaluated_at dan zone_version. Flag semua DTO/data demo `is_simulated`.
+- Status CAP dan msg_type menyimpan enum sumber; lifecycle_status derived dari waktu/references/cancelled_at/superseded_at. Semua area/vertices relasional, invalid geometry tidak membuat marker. Parent-source/references/topologi diperiksa service; tidak ada CHECK subquery lintas tabel.
+- Trigger report membatasi pending1 → in_review2 → verified/rejected3, aktor admin/non-self, audit append-only; deferred constraint menolak commit transisi tanpa audit. Requester/expected_version tetap dicek service.
+- SQL runtime role non-owner tidak punya DELETE/TRUNCATE/audit UPDATE. Ingestion role terpisah boleh menghapus anak geometri/reference yang diganti secara eksplisit dalam transaksi, tanpa menghapus event inti. Schema tidak diberikan ke anon/authenticated Supabase. Migration owner terpisah.
+- photo-url Bearer → signed URL300detik; route lokal `/api/v1/media/reports/{report_id}/photo` hanya capability signature, bukan JWT query. `payload_hash` dibuat server `report-payload-v1` dengan sanitizer dipin; client retry mempertahankan key+byte asli.
+- Lease/checkpoint/bootstrap/last_success dibawa dari run committed terbaru; bootstrap source selesai hanya setelah traversal awal lengkap. Partial menyimpan checkpoint tanpa mengaku last_success baru. Jam fixture tidak mengubah expiry JWT/URL atau lease.
