@@ -9,3 +9,4 @@ Folder ini menyimpan seluruh artefak perencanaan yang disusun oleh **Codex (`gpt
 5. `API_CONTRACT.md` — Daftar endpoint REST API FastAPI + format request/response JSON.
 6. `UI_SPEC.md` — Ringkasan desain layar & referensi Figma.
 7. `HANDOFF.md` — Catatan keputusan terakhir & instruksi lanjut untuk sesi berikutnya.
+8. `SCHEDULE.md` — Jadwal harian revisi (target rilis `v1.0.0` pada 30 November 2026).
