@@ -30,3 +30,36 @@
 | **Hari 12** | Kam, 26 Nov | Security Audit, Deploy & Fallback | Audit (`security-audit`, `supabase` `get_advisors`, `postgresql-code-review`, `coderabbit`), bugfix, deploy Railway + verifikasi `localhost` & **SIMULASI** | Antigravity (`use-railway`) | Aturan 30 menit mentok; wajib jalan lokal |
 | **Hari 13** | Jum, 27 Nov | **Finalisasi Rilis `v1.0.0`** | Smoke test final (Railway & `localhost`), rapikan [README.md](../README.md), tag rilis **`v1.0.0`** | Antigravity (`verification-before-completion`) | **Target rilis `v1.0.0` pada 27 Nov; belum dilaksanakan** |
 | **Pasca-rilis** | **28 Nov – UAS** | Deliverables UAS (Minggu 16) | Pembuatan video demo minimal **10 menit** (YouTube) & artikel laporan maksimal **11–12 halaman** | User | Waktu lega setelah `v1.0.0` rilis |
+
+---
+
+## Panduan Hemat Token: Plugin, MCP & Reasoning per Fase
+
+Agar baseline prompt tetap ringan dan kuota awet, buka **chat baru di tiap slice** (atau gunakan `/compact` bila thread mulai panjang), muat dokumen seperlunya saja dari [HANDOFF.md](HANDOFF.md), dan atur plugin/MCP sesuai fase berikut.
+
+### 1. Klasifikasi Plugin & MCP Proyek
+
+* **Aktif rutin saat coding (`Slice 1–5`):** Plugin `flutter`, `context7`, `superpowers` *(opsional)*; MCP `codegraph` *(opsional bila codebase sudah membesar)*.
+* **Skill lokal (dibaca eksplisit lewat `SKILL.md` hanya saat perlu, tanpa membebani MCP):** `fastapi`, `postgresql-optimization`, `postgresql-code-review`, `ui-ux-pro-max`.
+* **Matikan permanen untuk proyek ini (tidak terpakai / dilarang `AGENTS.md`):**
+  * Plugin: `auth0`, `base44`, `browse`, `canva`, `chrome-devtools-plugin`, `data-agent-kit-plugin`, `databricks`, `datadog`, `figma` *(diganti `figcraft`)*, `firebase` *(dilarang)*, `gcalendar`, `gdocs`, `gdrive`, `gemini-api`, `google-antigravity-sdk`, `google-cloud-developer`, `google-developer-knowledge`, `google_maps_platform` *(pakai OSM)*, `gsheets`, `gslides`, `keenable`, `keenable-select`, `modern-web-guidance-plugin`, `mongodb-atlas` *(NoSQL dilarang)*, `netlify`, `qodo`, `taste-skill`, `vercel-plugin`, `virustotal`.
+  * MCP standalone: `lottiefiles`, `lottiefiles-creator`.
+
+### 2. Nyalakan On-Demand & Target Effort per Hari / Sesi
+
+| Sesi / Hari | Plugin & MCP yang Dinyalakan (sisanya matikan) | Skill Lokal Dibaca Saat Perlu | Saran Effort (`Claude Opus 5.5`) |
+|---|---|---|---|
+| **Wireframe FigCraft (Live)** | Hanya MCP `figcraft` *(matikan setelah selesai menggambar)* | — | `Medium` / ringan *(hanya menjalankan skrip)* |
+| **Hari 3 — Slice 1** | `flutter`, `context7`, `supabase`, `superpowers` *(opsional)* | `fastapi` | `Medium` |
+| **Hari 4 — Slice 2** | `flutter`, `context7`, `superpowers` *(opsional; matikan `supabase`)* | `fastapi` | `Medium` |
+| **Hari 5 — Slice 3A** | `context7`, `codegraph` *(opsional)* | `fastapi`, `postgresql-optimization` | `High` *(geometri CAP, antimeridian, Haversine)* |
+| **Hari 6 — Slice 3B** | `flutter`, `context7`; opsional `generative-icons`, `impeccable` | `ui-ux-pro-max` | `Medium` |
+| **Hari 7 — Slice 3C** | `flutter`, `context7`, `codegraph` *(opsional)* | — | `Medium` *(`High` jika debug tepi polygon/antimeridian)* |
+| **Hari 8 — Slice 4A** | `context7`, `supabase` *(Storage)* | `fastapi` | `Medium` *(`High` untuk race idempotensi upload)* |
+| **Hari 9 — Slice 4B** | `flutter`, `context7` *(matikan `supabase`)* | — | `Medium` *(`High` untuk konflik `409` moderasi)* |
+| **Hari 10 — Slice 5 + Freeze** | `flutter`, `context7`, `android-cli-plugin` | — | `High` *(SSE, cursor per-user, lifecycle & fallback)* |
+| **Hari 11 — QA & Testing** | `postman` *(nyalakan HARI INI saja)*, `flutter`, `android-cli-plugin`, `coderabbit` | — | `Medium` *(`High` jika debug temuan QA)* |
+| **Hari 12 — Security & Deploy** | Matikan `postman`; nyalakan `supabase` *(`get_advisors`)*, `security-audit`, `coderabbit`, `railway` | `postgresql-code-review` | `High` |
+| **Hari 13 — Rilis `v1.0.0`** | Minimal (`flutter`/`context7` + `superpowers`); matikan `railway`, `security-audit`, `coderabbit` | — | `Medium` |
+
+> **Catatan `postman`:** Plugin `postman` membawa jumlah tool MCP paling besar beserta rule pemicu `api-engineer`, jadi pastikan **dimatikan di luar Hari 11** agar token tidak bocor di Slice 1–5.
