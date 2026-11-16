@@ -2,7 +2,7 @@
 
 **Author:** Jiddan Ibnu Ali — **NIM:** 24051214203  
 **Peran:** Codex Planner & Architect  
-**Status:** **LOCKED — siap Slice 1: Foundation, Auth, & DB Migration, Selasa 17 November 2026.**  
+**Status:** **Slice 1 SELESAI (17 Nov 2026) — siap Slice 2: Auth & Zona (`GET/PUT /api/v1/me/zone`, `UI-01c` GPS/manual & 2 toggle), Rabu 18 November 2026.**  
 **Target:** feature freeze24Nov; rilis `v1.0.0`27Nov2026. Rilis belum dilaksanakan.
 
 ## 1. Hasil sesi dan acuan
@@ -117,7 +117,7 @@ Seluruh path final berprefix `/api/v1`. DTO/contoh/error ada di [kontrak](API_CO
 
 | Tanggal | Slice dan gate |
 |---|---|
-| 17 Nov | Foundation, Auth, & DB Migration + mobile skeleton; migration/auth/health smoke. |
+| 17 Nov | **SELESAI:** Foundation, Auth, & DB Migration + mobile skeleton; 87 pytest + 12 widget + 1 live HTTP smoke lulus ([SLICE1_VERIFICATION.md](SLICE1_VERIFICATION.md)). |
 | 18 Nov | Akun/zona UI+API, satu titik/preset/toggle/zone_version/cutoff dan GPS/manual. |
 | 19–21 Nov | TEWS+Nowcast/radar/feed/peta/detail; event+notification+checkpoint dan lease dirancang sejak slice sumber. |
 | 22–23 Nov | Laporan/foto/idempotensi/privasi, moderasi/audit/concurrency, UI Tinjau. |
