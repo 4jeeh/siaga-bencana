@@ -125,7 +125,7 @@ Seluruh path final berprefix `/api/v1`. DTO/contoh/error ada di [kontrak](API_CO
 | 25–27 Nov | QA25, security+deploy/fallback26, smoke final+target tag v1.0.0 pada27Nov. |
 | Mulai28Nov | Video>=10menit; artikel<=11–12halaman. |
 
-Tiap slice Database→FastAPI→Flutter→Test→Commit oleh Antigravity. Visual FigCraft nanti menerjemahkan UI_SPEC tanpa menambah fitur/layar atau menunda Slice1. Maritim tetap pasca-UAS.
+Tiap slice berjalan secara **micro-batch terpisah** (`Backend` dan `Mobile` tidak digabung): **Codex** (`medium` default, `high` hanya di titik kritis `3A-1`/`4A`/`5`) menulis modul kode tanpa menjalankan `flutter.bat`/`.tooling/`/`git`; **Antigravity (`Hydrogen`)** menangani `context7`/`pub add`, seluruh pengujian berat (`pytest`, `flutter analyze/test`, `smoke_live`, HP Android), perbaikan minor, serta commit/push; **`Opus 5.5 (Medium)`** opsional untuk poles UI/mentok >30m. Maritim tetap pasca-UAS.
 
 ## 9. Pemeriksaan kualitas sesi Lock Planning
 

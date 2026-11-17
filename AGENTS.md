@@ -44,30 +44,30 @@ Dokumen ini adalah acuan bersama untuk **Codex (`gpt-6-astra`)** dan **Antigravi
 
 ## 3. Pembagian Tugas AI & Aturan Kolaborasi
 
-### A. Codex (`gpt-6-astra`) — Planning, Brainstorming, PRD & Arsitektur (`docs/`)
+### A. Codex (`gpt-6-astra`) — Planning (`docs/`) & Coding Micro-Batch Terisolasi
 * **Tugas Codex:**
-  1. Brainstorming konsep & fitur pembeda unik -> tulis ke `docs/IDEA.md`
-  2. Menyusun Product Requirements Document (PRD) -> `docs/PRD.md`
-  3. Menggambar User Flowchart & System Architecture Diagram (Mermaid) -> `docs/ARCHITECTURE.md`
-  4. Merancang skema DDL SQL Relasional lengkap -> `docs/ERD.sql`
-  5. Mengunci kontrak REST API JSON (endpoint, request/response, status error) -> `docs/API_CONTRACT.md`
-  6. Menulis ringkasan keputusan & tugas berikutnya setiap akhir sesi -> `docs/HANDOFF.md`
-* **Aturan Keras untuk Codex:**
-  * **JANGAN jalankan `git init`, `git commit`, `git push`, atau mengubah remote GitHub.** Seluruh urusan Git & GitHub ditangani oleh Antigravity.
-  * Tulis seluruh keputusan langsung ke folder `docs/` agar bisa dibaca Antigravity tanpa copy-paste chat.
-  * Gunakan reasoning effort secukupnya (`medium` atau `high` untuk efisiensi kuota; hindari `ultra`).
+  1. **Planning & Kontrak (`docs/`, SELESAI):** `IDEA.md`, `PRD.md`, `ARCHITECTURE.md`, `ERD.sql`, `API_CONTRACT.md`, `UI_SPEC.md`, `HANDOFF.md`, serta wireframe FigCraft.
+  2. **Implementasi Kode (`Slice 1–5`, per micro-batch terpisah):** menulis modul kode backend (`backend/app/`, `backend/tests/`) atau file Dart frontend (`mobile/lib/`, `mobile/test/`) sesuai kontrak terkunci.
+* **Aturan Keras & Hemat Kuota untuk Codex:**
+  * **DILARANG jalankan `git init`, `git commit`, `git push`, atau mengubah remote GitHub.** Seluruh urusan Git & GitHub ditangani oleh Antigravity.
+  * **Pecah per sub-batch kecil:** Backend & Mobile **tidak boleh** digabung dalam satu eksekusi Codex; slice backend berat (`Slice 3A`, `4A`, `5`) dipecah `2–3` micro-batch terpisah.
+  * **DILARANG menyalin SDK `.tooling/` atau menjalankan `flutter` CLI (`flutter.bat`) di sandbox Windows:** untuk Mobile, Codex cukup menulis/mengubah file `.dart` lalu berhenti agar Antigravity yang menjalankan `flutter pub/analyze/test` di sistem normal.
+  * **Effort:** gunakan **`medium` sebagai default** (`Slice 2`, `3B`, `3C`, `4B`, endpoint CRUD); gunakan **`high` hanya pada 3 titik kritis** (`Slice 3A-1` geometri CAP/antimeridian/Haversine/skor, `Slice 4A` sanitasi/idempotensi/race moderasi, `Slice 5` counter lock + SSE cursor); hindari `ultra`/`max`.
+  * Baca hanya section dokumen `docs/` yang relevan dengan micro-batch yang sedang dikerjakan.
 
-### B. Antigravity — GitHub, Coding, QA, Security Audit & Deploy
-* **Tugas Antigravity:**
-  1. Mengelola repo GitHub (`4jeeh/siaga-bencana` via `gh` CLI), review perubahan dari Codex, membuat branch/commit bertahap (1–3 commit terfokus per hari), dan `git push`.
-  2. Membangun aplikasi secara **Vertical Slice** (*Database -> FastAPI -> Flutter -> Test -> Commit*), bukan membangun semua layar lalu menggabungkannya di akhir.
-  3. Melakukan QA Testing, Code Review, Security Audit, dan Deploy ke Railway.
+### B. Antigravity — Orkestrasi, Pengujian Berat (`Gemini 4 Hydrogen`), Spesialis UI Opsional (`Claude Opus 5.5`), QA & Git
+* **Tugas Antigravity (`Gemini 4 Hydrogen` sebagai orkestrator & penguji harian):**
+  1. **Persiapan & Riset:** menjaga plugin/MCP tetap minimal per hari (lihat `docs/SCHEDULE.md`), serta mengecek API library baru via `context7` / `flutter pub` sebelum mendelegasikan penulisan kode ke Codex.
+  2. **Pengujian Berat, Perbaikan Cepat & Verifikasi Nyata:** menjalankan `local_pg.py`, migrasi PostgreSQL, full `pytest`, `smoke_live.py`, `flutter pub get/analyze/test`, dan uji emulator/HP Android; error minor/lint langsung diperbaiki **Hydrogen** sendiri tanpa membebani kuota Codex.
+  3. **Git, QA, Audit & Deploy:** mengelola repo GitHub (`4jeeh/siaga-bencana` via `gh` CLI), commit bertahap (**1–3 commit terfokus per hari**), `git push`, sinkronisasi `HANDOFF.md`/`SCHEDULE.md`, QA Testing, Security Audit, dan Deploy ke Railway.
+* **Peran Spesialis `Claude Opus 5.5` (`Medium`, opsional & hemat kuota):**
+  * Dipanggil selektif hanya untuk **poles visual UI Flutter** menjelang demo (`Slice 3B`/`4B`) bila dirasa masih kaku, **cadangan saat bug lintas-lapisan mentok >30 menit**, atau **review bahasa artikel pasca-rilis** — **bukan** untuk CRUD/backend atau suite test rutin.
 * **Daftar Skills & MCP Antigravity yang Digunakan Proyek Ini:**
-  * *Planning & GitHub Workflow:* `superpowers` (`brainstorming`, `writing-plans`, `test-driven-development`, `systematic-debugging`, `verification-before-completion`, `finishing-a-development-branch`), `coderabbit` (`code-review`, `autofix`), `codegraph` (MCP), `context7` (MCP), `keenable` (`keenable-web` MCP).
-  * *Design & UI/UX Flutter:* `ui-ux-pro-max` (stack `flutter`), `impeccable`, `logo-design`, `generative-icons` (MCP), `figma` (`figma-spec`, `figma-generate-diagram`, `figma-generate-design`, `figma-design-to-code`), `google_maps_platform` *(opsional jika kelak beralih ke Google Maps SDK)*.
+  * *Planning & GitHub Workflow:* `superpowers` *(opsional)*, `coderabbit`, `codegraph` (MCP), `context7` (MCP), `keenable` *(nonaktif saat coding)*.
+  * *Design & UI/UX Flutter:* `ui-ux-pro-max` (stack `flutter`), `impeccable`, `logo-design`, `generative-icons` (MCP), `figcraft` (MCP, menggantikan Figma untuk wireframe), `google_maps_platform` *(opsional jika kelak beralih ke Google Maps SDK)*.
   * *Flutter Build, Bugfix & Testing:* Plugin `flutter` (`dart-mcp-server`, `flutter-apply-architecture-best-practices`, `flutter-setup-declarative-routing`, `flutter-build-responsive-layout`, `flutter-use-http-package`, `flutter-implement-json-serialization`, `flutter-fix-layout-issues`, `dart-fix-runtime-errors`, `dart-run-static-analysis`, `dart-add-unit-test`, `flutter-add-widget-test`, `flutter-add-integration-test`, `flutter_a11y_agent`), `android-cli-plugin` (`device-hub`), `e2e`.
-  * *Backend FastAPI, PostgreSQL & Deploy:* `fastapi`, `supabase` (`supabase_mcp`), `supabase-postgres-best-practices`, `postgresql-code-review`, `postgresql-optimization`, `postman` (`api-engineer`, `api-testing`, `api-mocking`, `api-documentation`), `use-railway` (`railway_mcp`), `security-audit`, `humanizer`.
-  * *(Catatan Antigravity: karena sebagian skill berada di luar budget auto-load prompt saat banyak plugin menyala, baca file `SKILL.md` yang relevan secara eksplisit sebelum memulai setiap slice.)*
+  * *Backend FastAPI, PostgreSQL & Deploy:* `fastapi`, `python-testing-patterns`, `supabase` (`supabase_mcp`), `supabase-postgres-best-practices`, `postgresql-code-review`, `postgresql-optimization`, `postman` (`Hari 11 QA` saja), `use-railway` (`railway_mcp`), `security-audit`, `humanizer`.
+  * *(Catatan Antigravity: aktifkan **hanya** plugin/MCP yang dipakai hari itu sesuai `docs/SCHEDULE.md` dan baca hanya `2–3` file `SKILL.md` yang relevan agar baseline prompt selalu ringan.)*
 
 ---
 
