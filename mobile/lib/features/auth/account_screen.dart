@@ -4,9 +4,11 @@ import 'package:provider/provider.dart';
 import '../../core/session/session_coordinator.dart';
 import '../../core/theme/app_theme.dart';
 import 'auth_view_model.dart';
+import '../zone/zone_form.dart';
 
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key});
+  const AccountScreen({super.key, this.editZone = false});
+  final bool editZone;
   @override
   State<AccountScreen> createState() => _AccountScreenState();
 }
@@ -146,38 +148,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   if (session.isValid && session.verified) ...[
                     Text('Selamat datang, ${session.user!.displayName}.'),
                     const SizedBox(height: 16),
-                    const Card(
-                      child: Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              color: AppColors.primary,
-                            ),
-                            SizedBox(height: 12),
-                            Text('UI-01c • Atur Zona Pantau'),
-                            SizedBox(height: 8),
-                            Text('Dalam pengembangan Slice berikutnya'),
-                            SizedBox(height: 8),
-                            Text(
-                              'Pemilihan titik pantau dan radius tersedia pada Slice 2. '
-                              'Akun Anda sudah berhasil masuk.',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        vm.clearError();
-                        session.clear();
-                      },
-                      icon: const Icon(Icons.logout),
-                      label: const Text('Keluar'),
-                    ),
+                    ZoneForm(editZone: widget.editZone),
                   ] else ...[
                     Wrap(
                       spacing: 8,

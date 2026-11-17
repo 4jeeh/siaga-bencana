@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/account_screen.dart';
@@ -21,11 +22,15 @@ const mainRoutes = [
 GoRouter createRouter(
   SessionCoordinator session, {
   String initialLocation = '/account',
+  TileProvider? tileProvider,
 }) => GoRouter(
   initialLocation: initialLocation,
   refreshListenable: session,
   redirect: (context, state) {
     final location = state.uri.path;
+    final picking = location == '/map' &&
+        state.uri.queryParameters['mode'] == 'pick_zone';
+    if (picking && session.isValid && session.verified) return null;
     if (!session.canNavigate) {
       if (location != '/account') {
         if (location.startsWith('/events/')) {
@@ -35,7 +40,7 @@ GoRouter createRouter(
       }
       return null;
     }
-    if (location == '/account') {
+    if (location == '/account' && state.uri.queryParameters['edit'] != 'zone') {
       final target = session.pendingDestination ?? '/home';
       session.pendingDestination = null;
       return target;
@@ -43,13 +48,26 @@ GoRouter createRouter(
     return null;
   },
   routes: [
-    GoRoute(path: '/account', builder: (_, _) => const AccountScreen()),
+    GoRoute(
+      path: '/account',
+      builder: (_, state) => AccountScreen(
+        editZone: state.uri.queryParameters['edit'] == 'zone',
+      ),
+    ),
     ShellRoute(
       builder: (context, state, child) =>
-          NavigationShell(location: state.uri.path, child: child),
+          state.uri.queryParameters['mode'] == 'pick_zone' && state.uri.path == '/map'
+              ? child
+              : NavigationShell(location: state.uri.path, child: child),
       routes: [
         GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
-        GoRoute(path: '/map', builder: (_, _) => const MapScreen()),
+        GoRoute(
+          path: '/map',
+          builder: (_, state) => MapScreen(
+            mode: state.uri.queryParameters['mode'] ?? 'browse',
+            tileProvider: tileProvider,
+          ),
+        ),
         GoRoute(path: '/reports', builder: (_, _) => const ReportsScreen()),
         GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
       ],

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -14,6 +16,10 @@ import 'package:siaga_bencana/core/session/session_coordinator.dart';
 import 'package:siaga_bencana/core/theme/app_theme.dart';
 import 'package:siaga_bencana/features/auth/account_screen.dart';
 import 'package:siaga_bencana/features/auth/auth_dto.dart';
+import 'package:siaga_bencana/features/zone/location_service.dart';
+import 'package:siaga_bencana/features/zone/zone_dto.dart';
+import 'package:siaga_bencana/features/zone/zone_repository.dart';
+import 'package:siaga_bencana/features/zone/zone_view_model.dart';
 
 const userJson = <String, dynamic>{
   'id': '10000000-0000-4000-8000-000000000001',
@@ -38,7 +44,7 @@ Map<String, dynamic> authJson({bool hasZone = false}) => {
       .toIso8601String(),
   'user': {...userJson, 'has_zone': hasZone},
 };
-http.Response ok(Object data, {int status = 200}) => http.Response(
+http.Response ok(Object? data, {int status = 200}) => http.Response(
   jsonEncode({'data': data, 'meta': meta}),
   status,
   headers: {'content-type': 'application/json'},
@@ -51,7 +57,331 @@ SessionCoordinator signedIn({bool zone = true}) {
   return session;
 }
 
+const zoneJson = <String, dynamic>{
+  'id': '20000000-0000-4000-8000-000000000001',
+  'latitude': -7.25, 'longitude': 112.75, 'radius_km': 50,
+  'notify_earthquake': true, 'notify_weather': true, 'zone_version': 1,
+  'alert_eligible_since': '2026-11-18T00:00:00Z',
+  'updated_at': '2026-11-18T00:00:00Z',
+};
+
+class FakeLocationService implements LocationService {
+  FakeLocationService({this.failure, this.pending});
+  final LocationFailure? failure;
+  final Future<ZoneLocation>? pending;
+  int calls = 0;
+  int settingsCalls = 0;
+  @override
+  Future<ZoneLocation> locateOnce() async {
+    calls++;
+    if (failure != null) throw failure!;
+    if (pending != null) return pending!;
+    return const ZoneLocation(-7.25, 112.75);
+  }
+  @override
+  Future<bool> openAppSettings() async { settingsCalls++; return true; }
+}
+
+class TestTileProvider extends TileProvider {
+  TestTileProvider({this.broken = false});
+  final bool broken;
+  @override
+  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) =>
+      MemoryImage(base64Decode(broken ? '' :
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg=='));
+}
+
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
+}
+
 void main() {
+  test('nullable envelope and exact canonical zone DTO contract', () {
+    expect(ApiEnvelope.fromJson({'data': null, 'meta': meta}).data, isNull);
+    expect(() => ApiEnvelope.fromJson({'data': null, 'meta': meta}).requiredData,
+      throwsA(isA<ApiErrorEnvelope>()));
+    final zone = ZoneDto.fromJson(zoneJson);
+    expect(zone.id, zoneJson['id']);
+    expect(zone.zoneVersion, 1);
+    expect(zone.radiusKm, 50);
+    expect(zone.notifyEarthquake && zone.notifyWeather, isTrue);
+    expect(zone.alertEligibleSince.isUtc && zone.updatedAt.isUtc, isTrue);
+    const request = ZoneUpdateRequest(latitude: -0.0, longitude: 180);
+    final json = request.toJson();
+    expect(json, {'latitude': 0.0, 'longitude': -180.0, 'radius_km': 50,
+      'notify_earthquake': true, 'notify_weather': true});
+    expect((json['latitude'] as double).isNegative, false);
+    expect((const ZoneUpdateRequest(latitude: 0, longitude: -0.0)
+        .toJson()['longitude'] as double).isNegative, false);
+    for (final lat in [double.nan, double.infinity, -91.0, 91.0]) {
+      expect(() => ZoneUpdateRequest(latitude: lat, longitude: 0).toJson(),
+        throwsFormatException);
+    }
+    for (final lon in [double.nan, double.infinity, -181.0, 181.0]) {
+      expect(() => ZoneUpdateRequest(latitude: 0, longitude: lon).toJson(),
+        throwsFormatException);
+    }
+    expect(() => ZoneDto.fromJson({...zoneJson, 'zone_version': 0}), throwsFormatException);
+    expect(() => ZoneDto.fromJson({...zoneJson, 'longitude': 180}), throwsFormatException);
+  });
+
+  for (final operation in ['fetch', 'save', 'gps']) {
+    test('late $operation cannot restore drafts or zone after session changes', () async {
+      final session = signedIn(zone: false);
+      final httpResult = Completer<http.Response>();
+      final gpsResult = Completer<ZoneLocation>();
+      final api = ApiClient(baseUrl: base, session: session,
+        client: MockClient((_) => httpResult.future));
+      final vm = ZoneViewModel(ZoneRepository(api), session,
+        FakeLocationService(pending: gpsResult.future));
+      addTearDown(() { vm.dispose(); api.close(); session.dispose(); });
+      vm.selectPoint(-7, 112);
+      final generation = session.generation;
+      final Future<void> pending;
+      if (operation == 'fetch') {
+        pending = vm.load();
+      } else if (operation == 'save') {
+        pending = vm.save().then<void>((_) {});
+      } else {
+        pending = vm.locateOnce();
+      }
+      await Future<void>.delayed(Duration.zero);
+      session.clear();
+      session.establish(AuthData.fromJson(authJson()));
+      // Remain unverified so the new session has not fetched its own zone yet.
+      expect(session.markZoneSaved(generation), false);
+      httpResult.complete(ok(zoneJson));
+      gpsResult.complete(const ZoneLocation(10, 20));
+      await pending;
+      expect(vm.savedZone, isNull);
+      expect(vm.latitude, isNull);
+      expect(vm.longitude, isNull);
+      expect(vm.radiusKm, 50);
+      expect(vm.loading || vm.saving || vm.locating, false);
+      expect(session.user!.hasZone, false);
+      expect(vm.error, isNull);
+    });
+  }
+
+  test('zone network errors retain draft, duplicate save is ignored, retry uses server snapshot', () async {
+    final session = signedIn(zone: false);
+    final response = Completer<http.Response>();
+    var putCount = 0;
+    var fail = true;
+    final api = ApiClient(baseUrl: base, session: session,
+      client: MockClient((request) async {
+        if (request.method == 'GET') return ok(null);
+        putCount++;
+        if (fail) return response.future;
+        return ok({...zoneJson, 'longitude': -180.0});
+      }));
+    final vm = ZoneViewModel(ZoneRepository(api), session, FakeLocationService());
+    addTearDown(() { vm.dispose(); api.close(); session.dispose(); });
+    await vm.load();
+    vm.selectPoint(-7.25, 180);
+    final pending = vm.save();
+    expect(await vm.save(), false);
+    response.complete(http.Response(jsonEncode({
+      'code': 'SERVICE_UNAVAILABLE', 'message': 'Coba lagi.',
+      'details': null, 'request_id': 'test',
+    }), 503));
+    expect(await pending, false);
+    expect(putCount, 1);
+    expect(vm.longitude, -180);
+    expect(vm.savedZone, isNull);
+    expect(session.user!.hasZone, false);
+    expect(vm.error, 'Coba lagi.');
+    fail = false;
+    expect(await vm.save(), true);
+    expect(vm.savedZone!.longitude, -180);
+    expect(session.user!.hasZone, true);
+    expect(vm.error, isNull);
+  });
+
+  test('GPS timeout preserves manual selection and enables retry', () async {
+    final session = signedIn(zone: false);
+    final result = Completer<ZoneLocation>();
+    final api = ApiClient(baseUrl: base, session: session,
+      client: MockClient((_) async => ok(null)));
+    final vm = ZoneViewModel(ZoneRepository(api), session,
+      FakeLocationService(pending: result.future));
+    addTearDown(() { vm.dispose(); api.close(); session.dispose(); });
+    vm.selectPoint(0, 0);
+    final pending = vm.locateOnce();
+    result.completeError(TimeoutException('GPS timeout'));
+    await pending;
+    expect(vm.gpsMessage, contains('10 detik'));
+    expect(vm.locating, false);
+    expect(vm.canSave, true);
+    expect(vm.latitude, 0);
+  });
+
+  testWidgets('GPS once -> authenticated PUT -> home at 360px / 200%', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final session = signedIn(zone: false);
+    addTearDown(session.dispose);
+    final location = FakeLocationService();
+    final requests = <String>[];
+    await tester.pumpWidget(SiagaApp(
+      session: session, baseUrl: base, locationService: location,
+      textScaler: const TextScaler.linear(2),
+      client: MockClient((request) async {
+        requests.add('${request.method} ${request.url.path}');
+        if (request.url.path.endsWith('/health')) return ok({'status': 'ok'});
+        expect(request.url.path, '/api/v1/me/zone');
+        expect(request.headers['Authorization'], 'Bearer memory-token');
+        if (request.method == 'GET') return ok(null);
+        expect(jsonDecode(request.body), const ZoneUpdateRequest(
+          latitude: -7.25, longitude: 112.75).toJson());
+        return ok(zoneJson);
+      }),
+    ));
+    await tester.pumpAndSettle();
+    expect(location.calls, 0);
+    expect(tester.widget<FilledButton>(find.byKey(const Key('save-zone'))).onPressed, isNull);
+    await tapVisible(tester, find.text('Gunakan lokasi saya sekali'));
+    expect(location.calls, 1);
+    expect(find.textContaining('Lintang: -7.25'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tapVisible(tester, find.byKey(const Key('save-zone')));
+    expect(session.canNavigate, true);
+    expect(GoRouter.of(tester.element(find.byType(NavigationBar)))
+        .routeInformationProvider.value.uri.path, '/home');
+    expect(requests.where((value) => value.startsWith('PUT')), hasLength(1));
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    session.clear();
+  });
+
+  for (final permanentlyDenied in [false, true]) {
+    testWidgets('GPS denied (permanent=$permanentlyDenied) -> manual picker, no PUT', (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final session = signedIn(zone: false);
+      addTearDown(session.dispose);
+      final location = FakeLocationService(failure: LocationFailure(
+        'Izin lokasi ditolak. Pilih titik manual.', canOpenSettings: permanentlyDenied));
+      final requests = <String>[];
+      await tester.pumpWidget(SiagaApp(
+        session: session, baseUrl: base, locationService: location,
+        tileProvider: TestTileProvider(), textScaler: const TextScaler.linear(2),
+        client: MockClient((request) async {
+          requests.add('${request.method} ${request.url.path}');
+          return request.url.path.endsWith('/health') ? ok({'status': 'ok'}) : ok(null);
+        }),
+      ));
+      await tester.pumpAndSettle();
+      final vm = tester.element(find.byType(AccountScreen)).read<ZoneViewModel>();
+      await tapVisible(tester, find.text('Gunakan lokasi saya sekali'));
+      expect(find.text('Izin lokasi ditolak. Pilih titik manual.'), findsOneWidget);
+      if (permanentlyDenied) {
+        await tapVisible(tester, find.text('Buka Pengaturan'));
+        expect(location.settingsCalls, 1);
+      }
+      await tapVisible(tester, find.text('Pilih titik di peta / manual'));
+      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.text('\u00a9 OpenStreetMap contributors'), findsOneWidget);
+      final map = find.byKey(const Key('zone-map'));
+      await tester.ensureVisible(map);
+      await tester.tapAt(tester.getCenter(map));
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle();
+      expect(tester.widget<TextField>(find.byKey(const Key('zone-latitude')))
+          .controller!.text, isNotEmpty);
+      expect(vm.latitude, isNull, reason: 'Picker is transactional until confirmation');
+      for (final invalid in ['NaN', 'Infinity', '91', '-91']) {
+        await tester.enterText(find.byKey(const Key('zone-latitude')), invalid);
+        await tester.enterText(find.byKey(const Key('zone-longitude')), '112');
+        await tester.pumpAndSettle();
+        expect(tester.widget<FilledButton>(find.byKey(const Key('confirm-point'))).onPressed, isNull);
+      }
+      await tester.enterText(find.byKey(const Key('zone-latitude')), '-7.25');
+      for (final invalid in ['NaN', 'Infinity', '181', '-181']) {
+        await tester.enterText(find.byKey(const Key('zone-longitude')), invalid);
+        await tester.pumpAndSettle();
+        expect(tester.widget<FilledButton>(find.byKey(const Key('confirm-point'))).onPressed, isNull);
+      }
+      await tester.enterText(find.byKey(const Key('zone-longitude')), '180');
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tapVisible(tester, find.byKey(const Key('confirm-point')));
+      expect(vm.latitude, -7.25);
+      expect(vm.longitude, -180);
+      expect(session.user!.hasZone, false);
+      expect(requests.any((value) => value.startsWith('PUT') || value.contains('/map/')), false);
+      await tapVisible(tester, find.text('Pilih titik di peta / manual'));
+      await tester.enterText(find.byKey(const Key('zone-latitude')), '12');
+      await tapVisible(tester, find.text('Batal'));
+      expect(vm.latitude, -7.25);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      session.clear();
+    });
+  }
+
+  testWidgets('profile edit preloads saved zone and returns to profile after save', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final session = signedIn();
+    addTearDown(session.dispose);
+    Map<String, dynamic>? body;
+    await tester.pumpWidget(SiagaApp(
+      session: session, baseUrl: base, initialLocation: '/profile',
+      textScaler: const TextScaler.linear(2),
+      client: MockClient((request) async {
+        if (request.url.path.endsWith('/health')) return ok({'status': 'ok'});
+        if (request.method == 'PUT') {
+          body = jsonDecode(request.body) as Map<String, dynamic>;
+          return ok({...zoneJson, ...body!, 'zone_version': 2});
+        }
+        return ok(zoneJson);
+      }),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('warga@example.test'), findsOneWidget);
+    expect(find.text('Radius: 50 km'), findsOneWidget);
+    await tapVisible(tester, find.text('Ubah Zona Pantau'));
+    expect(find.byType(AccountScreen), findsOneWidget);
+    expect(find.text('Kembali'), findsOneWidget);
+    await tapVisible(tester, find.text('25 km'));
+    await tapVisible(tester, find.text('Cuaca Ekstrem'));
+    await tapVisible(tester, find.byKey(const Key('save-zone')));
+    expect(body!['radius_km'], 25);
+    expect(body!['notify_weather'], false);
+    expect(find.text('Radius: 25 km'), findsOneWidget);
+    expect(find.text('Cuaca Ekstrem: Nonaktif'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    session.clear();
+  });
+
+  testWidgets('tile failure keeps manual coordinates usable', (tester) async {
+    final session = signedIn(zone: false);
+    addTearDown(session.dispose);
+    await tester.pumpWidget(SiagaApp(
+      session: session, baseUrl: base, initialLocation: '/map?mode=pick_zone',
+      tileProvider: TestTileProvider(broken: true),
+      client: MockClient((request) async => request.url.path.endsWith('/health')
+          ? ok({'status': 'ok'}) : ok(null)),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Peta dasar tidak tersedia. Daftar dan koordinat tetap dapat digunakan.'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('zone-latitude')), '0');
+    await tester.enterText(find.byKey(const Key('zone-longitude')), '0');
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('confirm-point')));
+    expect(find.textContaining('Lintang: 0.0'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    session.clear();
+  });
+
   test('manual DTOs preserve password, normalize identity, and reject invalid roles', () {
     final user = UserDto.fromJson(userJson);
     expect(user.toJson(), userJson);
@@ -276,7 +606,7 @@ void main() {
 
   for (final register in [false, true]) {
     testWidgets(
-      '${register ? 'register' : 'login'} -> me -> zone placeholder, no zone API',
+      '${register ? 'register' : 'login'} -> me -> GET zone -> UI-01c',
       (tester) async {
         tester.view.physicalSize = const Size(360, 800);
         tester.view.devicePixelRatio = 1;
@@ -285,6 +615,7 @@ void main() {
         final mock = MockClient((request) async {
           paths.add(request.url.path);
           if (request.url.path.endsWith('/health')) return ok({'status': 'ok'});
+          if (request.url.path.endsWith('/me/zone')) return ok(null);
           if (request.url.path.endsWith('/me')) {
             expect(request.headers['Authorization'], 'Bearer memory-token');
             return ok(userJson);
@@ -330,6 +661,7 @@ void main() {
           '/api/v1/health',
           '/api/v1/auth/${register ? 'register' : 'login'}',
           '/api/v1/me',
+          '/api/v1/me/zone',
         ]);
         expect(tester.takeException(), isNull);
         await tester.ensureVisible(find.text('Keluar'));
@@ -358,7 +690,8 @@ void main() {
       addTearDown(session.dispose);
       await tester.pumpWidget(
         SiagaApp(
-          client: MockClient((_) async => ok({'status': 'ok'})),
+          client: MockClient((request) async => request.url.path.endsWith('/me/zone')
+              ? ok(null) : ok({'status': 'ok'})),
           baseUrl: base,
           session: session,
           initialLocation: '/events/demo-id',
@@ -376,6 +709,9 @@ void main() {
             ],
           )
           .toList();
+      expect(mainRoutes, [
+        '/account', '/home', '/map', '/reports', '/profile', '/events/:eventId',
+      ]);
       expect(
         routePaths(router.configuration.routes),
         unorderedEquals(mainRoutes),
@@ -404,10 +740,9 @@ void main() {
         router.go(path);
         await tester.pumpAndSettle();
         expect(router.routeInformationProvider.value.uri.path, path);
-        expect(
-          find.text('Dalam pengembangan Slice berikutnya'),
-          findsOneWidget,
-        );
+        if (path != '/profile') {
+          expect(find.text('Dalam pengembangan Slice berikutnya'), findsOneWidget);
+        }
         if (!path.startsWith('/events/')) {
           expect(find.byType(NavigationBar), findsOneWidget);
         }

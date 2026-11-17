@@ -19,6 +19,11 @@ class ApiClient {
       _request('GET', path, authenticated: authenticated);
   Future<ApiEnvelope> post(String path, Map<String, dynamic> data) =>
       _request('POST', path, data: data);
+  Future<ApiEnvelope> put(
+    String path,
+    Map<String, dynamic> data, {
+    bool authenticated = true,
+  }) => _request('PUT', path, data: data, authenticated: authenticated);
   Future<ApiEnvelope> _request(
     String method,
     String path, {

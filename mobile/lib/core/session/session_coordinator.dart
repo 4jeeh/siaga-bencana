@@ -48,6 +48,15 @@ class SessionCoordinator extends ChangeNotifier {
     if (_token != null && !isValid) clear(expired: true);
   }
 
+  bool markZoneSaved(int expectedGeneration) {
+    if (generation != expectedGeneration || !isValid || !verified || user == null) {
+      return false;
+    }
+    user = UserDto.fromJson({...user!.toJson(), 'has_zone': true});
+    notifyListeners();
+    return true;
+  }
+
   void clear({bool expired = false}) {
     generation++;
     _expiryTimer?.cancel();

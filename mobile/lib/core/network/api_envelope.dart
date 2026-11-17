@@ -61,10 +61,15 @@ class ApiErrorEnvelope implements Exception {
 
 class ApiEnvelope {
   const ApiEnvelope(this.data, this.meta);
-  final Map<String, dynamic> data;
+  final Map<String, dynamic>? data;
+  Map<String, dynamic> get requiredData => data ??
+      (throw const ApiErrorEnvelope(
+        code: 'INVALID_RESPONSE',
+        message: 'Respons API tidak valid.',
+      ));
   final ApiMeta meta;
   factory ApiEnvelope.fromJson(Map<String, dynamic> json) => ApiEnvelope(
-    json['data'] as Map<String, dynamic>,
+    json['data'] as Map<String, dynamic>?,
     ApiMeta.fromJson(json['meta'] as Map<String, dynamic>),
   );
 }
