@@ -52,7 +52,7 @@ def create_app(settings: Settings | None = None):
         app.add_middleware(
             CORSMiddleware,
             allow_origins=settings.cors_origins,
-            allow_methods=["GET", "POST"],
+            allow_methods=["GET", "POST", "PUT"],
             allow_headers=["Authorization", "Content-Type", "Accept"],
             expose_headers=["X-Request-ID", "Retry-After"],
         )
@@ -76,6 +76,10 @@ def create_app(settings: Settings | None = None):
                 if path in AUTH_PATHS and request.method == "POST":
                     peer = request.client.host if request.client else "unknown"
                     app.state.limiter.check(f"{path}:{peer}", AUTH_PATHS[path])
+                json_request = (path in AUTH_PATHS and request.method == "POST") or (
+                    path == "/api/v1/me/zone" and request.method == "PUT"
+                )
+                if json_request:
                     content_type = request.headers.get("content-type", "").split(";")[0].strip()
                     if content_type.lower() != "application/json":
                         raise ApiError(415, "UNSUPPORTED_MEDIA_TYPE", "Gunakan application/json.")
@@ -93,7 +97,7 @@ def create_app(settings: Settings | None = None):
                 request._body = bytes(chunks)
                 if request.method == "GET" and chunks:
                     raise ApiError(400, "MALFORMED_REQUEST", "GET tidak menerima body.")
-                if path in AUTH_PATHS and request.method == "POST":
+                if json_request:
                     try:
                         json.loads(
                             chunks,

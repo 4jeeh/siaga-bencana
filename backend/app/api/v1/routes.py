@@ -10,7 +10,8 @@ from app.models.user import User
 from app.repositories.users import user_dto
 from app.schemas.auth import AuthData, LoginRequest, RegisterRequest, UserDTO
 from app.schemas.common import Envelope, StatusData, envelope
-from app.services import auth
+from app.schemas.zone import ZoneDTO, ZoneRequest
+from app.services import auth, zones
 from app.services.readiness import database_ready
 
 router = APIRouter(prefix="/api/v1")
@@ -63,3 +64,15 @@ def login(request: Request, body: LoginRequest, session: SessionDep):
 @router.get("/me", response_model=Envelope[UserDTO])
 def me(request: Request, session: SessionDep, user: UserDep):
     return envelope(request, user_dto(session, user))
+
+
+@router.get("/me/zone", response_model=Envelope[ZoneDTO | None])
+def get_zone(request: Request, session: SessionDep, user: UserDep):
+    return envelope(request, zones.get_zone(session, user.id))
+
+
+@router.put("/me/zone", response_model=Envelope[ZoneDTO])
+def put_zone(request: Request, body: ZoneRequest, session: SessionDep, user: UserDep):
+    return envelope(
+        request, zones.replace_zone(session, user.id, body, request.app.state.settings)
+    )
