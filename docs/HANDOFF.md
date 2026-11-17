@@ -2,7 +2,7 @@
 
 **Author:** Jiddan Ibnu Ali — **NIM:** 24051214203  
 **Peran:** Codex Planner & Architect  
-**Status:** **Slice 1 SELESAI (17 Nov 2026) — siap Slice 2: Auth & Zona (`GET/PUT /api/v1/me/zone`, `UI-01c` GPS/manual & 2 toggle), Rabu 18 November 2026.**  
+**Status:** **Slice 2 SELESAI (18 Nov 2026) — siap Slice 3A: Backend BMKG & Radar (3 micro-batch), Kamis 19 November 2026.**  
 **Target:** feature freeze24Nov; rilis `v1.0.0`27Nov2026. Rilis belum dilaksanakan.
 
 ## 1. Hasil sesi dan acuan
@@ -118,7 +118,7 @@ Seluruh path final berprefix `/api/v1`. DTO/contoh/error ada di [kontrak](API_CO
 | Tanggal | Slice dan gate |
 |---|---|
 | 17 Nov | **SELESAI:** Foundation, Auth, & DB Migration + mobile skeleton; 87 pytest + 12 widget + 1 live HTTP smoke lulus ([SLICE1_VERIFICATION.md](SLICE1_VERIFICATION.md)). |
-| 18 Nov | Akun/zona UI+API, satu titik/preset/toggle/zone_version/cutoff dan GPS/manual. |
+| 18 Nov | **SELESAI:** Akun/zona UI+API (`GET/PUT /api/v1/me/zone`, `UI-01c`, `UI-03` `pick_zone`, `UI-05` edit zona); 159 pytest + 23 widget + 1 live HTTP smoke lulus. |
 | 19–21 Nov | TEWS+Nowcast/radar/feed/peta/detail; event+notification+checkpoint dan lease dirancang sejak slice sumber. |
 | 22–23 Nov | Laporan/foto/idempotensi/privasi, moderasi/audit/concurrency, UI Tinjau. |
 | 24 Nov | SSE/poll/catch-up/OS notification/uji perangkat/SIMULASI; **feature freeze malam24Nov**. |
