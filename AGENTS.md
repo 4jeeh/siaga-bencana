@@ -1,6 +1,6 @@
 # AGENTS.md — Siaga Bencana (Project Rules & Dual-Agent Guide)
 
-Dokumen ini adalah acuan bersama untuk **Codex (`gpt-6-astra`)** dan **Antigravity** di repository proyek UAS mata kuliah **Pemrograman Aplikasi Bergerak** (Semester 5).
+Dokumen ini adalah acuan bersama untuk **Codex (`gpt-6.2-astra`)** dan **Antigravity** di repository proyek UAS mata kuliah **Pemrograman Aplikasi Bergerak** (Semester 5).
 
 ---
 
@@ -44,7 +44,7 @@ Dokumen ini adalah acuan bersama untuk **Codex (`gpt-6-astra`)** dan **Antigravi
 
 ## 3. Pembagian Tugas AI & Aturan Kolaborasi
 
-### A. Codex (`gpt-6-astra`) — Planning (`docs/`) & Coding Micro-Batch Terisolasi
+### A. Codex (`gpt-6.2-astra`) — Planning (`docs/`) & Coding Micro-Batch Terisolasi
 * **Tugas Codex:**
   1. **Planning & Kontrak (`docs/`, SELESAI):** `IDEA.md`, `PRD.md`, `ARCHITECTURE.md`, `ERD.sql`, `API_CONTRACT.md`, `UI_SPEC.md`, `HANDOFF.md`, serta wireframe FigCraft.
   2. **Implementasi Kode (`Slice 1–5`, per micro-batch terpisah):** menulis modul kode backend (`backend/app/`, `backend/tests/`) atau file Dart frontend (`mobile/lib/`, `mobile/test/`) sesuai kontrak terkunci.
@@ -52,7 +52,7 @@ Dokumen ini adalah acuan bersama untuk **Codex (`gpt-6-astra`)** dan **Antigravi
   * **DILARANG jalankan `git init`, `git commit`, `git push`, atau mengubah remote GitHub.** Seluruh urusan Git & GitHub ditangani oleh Antigravity.
   * **Pecah per sub-batch kecil:** Backend & Mobile **tidak boleh** digabung dalam satu eksekusi Codex; slice backend berat (`Slice 3A`, `4A`, `5`) dipecah `2–3` micro-batch terpisah.
   * **DILARANG menyalin SDK `.tooling/` atau menjalankan `flutter` CLI (`flutter.bat`) di sandbox Windows:** untuk Mobile, Codex cukup menulis/mengubah file `.dart` lalu berhenti agar Antigravity yang menjalankan `flutter pub/analyze/test` di sistem normal.
-  * **Effort:** gunakan **`medium` sebagai default** (`Slice 2`, `3B`, `3C`, `4B`, endpoint CRUD); gunakan **`high` hanya pada 3 titik kritis** (`Slice 3A-1` geometri CAP/antimeridian/Haversine/skor, `Slice 4A` sanitasi/idempotensi/race moderasi, `Slice 5` counter lock + SSE cursor); hindari `ultra`/`max`.
+  * **Effort (`gpt-6.2-astra`):** gunakan **`medium` sebagai default** (`3A-2/3` worker & endpoint, `3B`, `3C`, `4A-1` upload/Pillow, `4B`, `5-3` mobile UI, fix QA, draf pasca-rilis); gunakan **`high` secara selektif** hanya pada titik kritis logika/konkurensi/streaming (`3A-1` geometri CAP/antimeridian/Haversine/skor, `4A-2` idempotensi & transaksi moderasi `409`, `5-1`/`5-2` counter lock, cursor & SSE stream); hindari `low` maupun `xhigh`/`ultra`/`max`.
   * Baca hanya section dokumen `docs/` yang relevan dengan micro-batch yang sedang dikerjakan.
 
 ### B. Antigravity — Orkestrasi, Pengujian Berat (`Gemini 4 Hydrogen`), Spesialis UI Opsional (`Claude Opus 5.5`), QA & Git
