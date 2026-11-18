@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from contextlib import asynccontextmanager
@@ -11,6 +12,7 @@ from app.core.config import Settings
 from app.core.errors import ApiError, error_response, install_handlers
 from app.core.rate_limit import RateLimiter
 from app.db.session import make_engine
+from app.services.bmkg_sync import scheduler
 from app.services.readiness import StorageProbe, start_storage, stop_storage
 
 logger = logging.getLogger("siaga")
@@ -37,9 +39,18 @@ def create_app(settings: Settings | None = None):
     @asynccontextmanager
     async def lifespan(app):
         task = await start_storage(app.state.storage_probe)
+        stop = asyncio.Event()
+        worker = (
+            asyncio.create_task(scheduler(app.state.engine, settings, stop))
+            if settings.bmkg_sync_enabled
+            else None
+        )
         try:
             yield
         finally:
+            stop.set()
+            if worker is not None:
+                await worker
             await stop_storage(task)
             app.state.engine.dispose()
 
