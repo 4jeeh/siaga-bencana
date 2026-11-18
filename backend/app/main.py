@@ -12,12 +12,17 @@ from app.core.config import Settings
 from app.core.errors import ApiError, error_response, install_handlers
 from app.core.rate_limit import RateLimiter
 from app.db.session import make_engine
+from app.schemas.events import FeedQuery, MapQuery
 from app.services.bmkg_sync import scheduler
 from app.services.readiness import StorageProbe, start_storage, stop_storage
 
 logger = logging.getLogger("siaga")
 AUTH_PATHS = {"/api/v1/auth/login": 5, "/api/v1/auth/register": 3}
 MAX_BODY_BYTES = 3145728
+QUERY_FIELDS = {
+    ("GET", "/api/v1/events"): FeedQuery.model_fields,
+    ("GET", "/api/v1/map/markers"): MapQuery.model_fields,
+}
 
 
 def reject_json_constant(value):
@@ -77,7 +82,7 @@ def create_app(settings: Settings | None = None):
                 keys = list(request.query_params.keys())
                 if any(len(request.query_params.getlist(key)) > 1 for key in keys):
                     raise ApiError(400, "MALFORMED_REQUEST", "Parameter query berulang.")
-                if keys:
+                if set(keys).difference(QUERY_FIELDS.get((request.method, path), ())):
                     raise ApiError(
                         422,
                         "VALIDATION_ERROR",

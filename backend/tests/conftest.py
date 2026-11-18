@@ -1,4 +1,5 @@
 import secrets
+from contextlib import contextmanager
 from uuid import uuid4
 
 import psycopg
@@ -13,10 +14,10 @@ from app.main import create_app
 ADMIN_DSN = "postgresql://postgres@127.0.0.1:54329/postgres?connect_timeout=3"
 
 
-@pytest.fixture(scope="session")
-def database():
+@contextmanager
+def isolated_database(*, simulation=False):
     # Fixed loopback host, unpredictable test-only name. Never accepts a production DSN.
-    name = f"siaga_test_{uuid4().hex}"
+    name = f"siaga_test_{uuid4().hex}" + ("_simulation" if simulation else "")
     with psycopg.connect(ADMIN_DSN, autocommit=True) as admin:
         for role in ("siaga_owner", "siaga_runtime"):
             if not admin.execute("SELECT 1 FROM pg_roles WHERE rolname=%s", (role,)).fetchone():
@@ -30,9 +31,16 @@ def database():
         apply_migrations(owner)  # idempotent tracking, no duplicate DDL
         yield {"name": name, "owner": owner, "runtime": runtime}
     finally:
-        assert name.startswith("siaga_test_") and len(name) == len("siaga_test_") + 32
+        assert name.removesuffix("_simulation").startswith("siaga_test_")
+        assert len(name.removesuffix("_simulation")) == len("siaga_test_") + 32
         with psycopg.connect(ADMIN_DSN, autocommit=True) as admin:
             admin.execute(sql.SQL("DROP DATABASE {} WITH (FORCE)").format(sql.Identifier(name)))
+
+
+@pytest.fixture(scope="session")
+def database():
+    with isolated_database() as db:
+        yield db
 
 
 @pytest.fixture

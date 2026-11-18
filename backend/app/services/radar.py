@@ -167,6 +167,18 @@ class PolygonAnalysis:
     centroid_latitude: float | None = None
     centroid_longitude: float | None = None
 
+    @classmethod
+    def from_stored_ring(cls, vertices, centroid_latitude, centroid_longitude):
+        """Rehydrate a validated, ordered ring without repeating ingestion checks."""
+        vertices = tuple(vertices)
+        return cls(
+            geometry_valid=True,
+            vertices=vertices,
+            unwrapped_ring=_unwrap([(v.latitude, v.longitude) for v in vertices]),
+            centroid_latitude=centroid_latitude,
+            centroid_longitude=centroid_longitude,
+        )
+
 
 def _unwrap(points: list[Point]) -> tuple[Point, ...]:
     offset = 0

@@ -1,6 +1,7 @@
 from typing import Annotated
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from sqlmodel import Session
 
 from app.core.errors import ApiError
@@ -10,8 +11,9 @@ from app.models.user import User
 from app.repositories.users import user_dto
 from app.schemas.auth import AuthData, LoginRequest, RegisterRequest, UserDTO
 from app.schemas.common import Envelope, StatusData, envelope
+from app.schemas.events import Detail, Feed, FeedQuery, MapQuery, MarkerFeed
 from app.schemas.zone import ZoneDTO, ZoneRequest
-from app.services import auth, zones
+from app.services import auth, events, zones
 from app.services.readiness import database_ready
 
 router = APIRouter(prefix="/api/v1")
@@ -34,6 +36,32 @@ def current_user(request: Request, session: SessionDep):
 
 
 UserDep = Annotated[User, Depends(current_user)]
+
+
+def event_evaluation(request: Request, session: SessionDep, user: UserDep):
+    return events.evaluation(session, user.id, request.app.state.settings)
+
+
+EvaluationDep = Annotated[events.Evaluation, Depends(event_evaluation)]
+
+
+@router.get("/events")
+def list_events(
+    session: SessionDep, ctx: EvaluationDep, query: Annotated[FeedQuery, Query()]
+) -> Feed:
+    return events.feed(session, ctx, query)
+
+
+@router.get("/events/{event_id}")
+def event_detail(event_id: UUID, session: SessionDep, ctx: EvaluationDep) -> Detail:
+    return events.detail(session, ctx, event_id)
+
+
+@router.get("/map/markers")
+def map_markers(
+    session: SessionDep, ctx: EvaluationDep, query: Annotated[MapQuery, Query()]
+) -> MarkerFeed:
+    return events.markers(session, ctx, query)
 
 
 @router.get("/health", response_model=Envelope[StatusData])
@@ -73,6 +101,4 @@ def get_zone(request: Request, session: SessionDep, user: UserDep):
 
 @router.put("/me/zone", response_model=Envelope[ZoneDTO])
 def put_zone(request: Request, body: ZoneRequest, session: SessionDep, user: UserDep):
-    return envelope(
-        request, zones.replace_zone(session, user.id, body, request.app.state.settings)
-    )
+    return envelope(request, zones.replace_zone(session, user.id, body, request.app.state.settings))
