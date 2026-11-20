@@ -5,6 +5,8 @@ import 'package:siaga_bencana/core/network/api_client.dart';
 import 'package:siaga_bencana/core/session/session_coordinator.dart';
 import 'package:siaga_bencana/features/auth/auth_dto.dart';
 import 'package:siaga_bencana/features/auth/auth_repository.dart';
+import 'package:siaga_bencana/features/events/event_repository.dart';
+import 'package:siaga_bencana/features/map/map_repository.dart';
 import 'package:siaga_bencana/features/zone/zone_dto.dart';
 import 'package:siaga_bencana/features/zone/zone_repository.dart';
 
@@ -64,5 +66,18 @@ void main() {
     );
     expect(loggedIn.user.id, auth.user.id);
     expect(loggedIn.expiresAt.isAfter(DateTime.now().toUtc()), true);
+    session.establish(loggedIn);
+    session.confirm(await repository.me(), session.generation);
+    final feed = await EventRepository(api).fetchEvents(radiusOnly: true);
+    expect(feed.meta.zoneVersion, 2);
+    expect(feed.meta.sources.map((source) => source.source),
+        unorderedEquals(['BMKG_TEWS', 'BMKG_NOWCAST']));
+    expect(feed.page.limit, 20);
+    final markers = await MapRepository(api).fetchMarkers(
+      bbox: '179,-1,-179,1', radiusOnly: true, includeReports: true,
+    );
+    expect(markers.meta.zoneVersion, 2);
+    expect(markers.cap, 100);
+    expect(markers.truncated, isFalse);
   });
 }

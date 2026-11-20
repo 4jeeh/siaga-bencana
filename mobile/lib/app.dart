@@ -12,6 +12,8 @@ import 'features/auth/auth_repository.dart';
 import 'features/auth/auth_view_model.dart';
 import 'features/events/event_feed_view_model.dart';
 import 'features/events/event_repository.dart';
+import 'features/map/map_repository.dart';
+import 'features/map/map_view_model.dart';
 import 'features/zone/location_service.dart';
 import 'features/zone/zone_repository.dart';
 import 'features/zone/zone_view_model.dart';
@@ -45,6 +47,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
   late final GoRouter router;
   late final ZoneViewModel zone;
   late final EventFeedViewModel feed;
+  late final MapViewModel map;
   @override
   void initState() {
     super.initState();
@@ -61,6 +64,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
     );
     auth = AuthViewModel(AuthRepository(api), session);
     feed = EventFeedViewModel(EventRepository(api), session, zone);
+    map = MapViewModel(MapRepository(api), session, zone);
     router = createRouter(
       session, initialLocation: widget.initialLocation,
       tileProvider: widget.tileProvider,
@@ -81,6 +85,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
     router.dispose();
     auth.dispose();
     feed.dispose();
+    map.dispose();
     zone.dispose();
     api.close();
     if (widget.session == null) session.dispose();
@@ -94,6 +99,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
       ChangeNotifierProvider.value(value: auth),
       ChangeNotifierProvider.value(value: zone),
       ChangeNotifierProvider.value(value: feed),
+      ChangeNotifierProvider.value(value: map),
     ],
     child: MaterialApp.router(
       title: 'Siaga Bencana',

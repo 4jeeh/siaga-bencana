@@ -102,6 +102,7 @@ class TestTileProvider extends TileProvider {
 
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
@@ -698,15 +699,27 @@ void main() {
       addTearDown(tester.view.reset);
       final session = SessionCoordinator();
       addTearDown(session.dispose);
+      var markerRequests = 0;
       await tester.pumpWidget(
         SiagaApp(
           client: MockClient((request) async {
             if (request.url.path.endsWith('/events')) return emptyFeed();
+            if (request.url.path.endsWith('/map/markers')) {
+              markerRequests++;
+              return http.Response(jsonEncode({
+                'items': <Object>[], 'cap': 100, 'truncated': false,
+                'meta': {...meta, 'zone_version': 1, 'sources': [
+                  for (final source in ['BMKG_TEWS', 'BMKG_NOWCAST'])
+                    {'source': source, 'state': 'healthy', 'last_success_at': null, 'last_attempt_at': null},
+                ]},
+              }), 200);
+            }
             return request.url.path.endsWith('/me/zone') ? ok(null) : ok({'status': 'ok'});
           }),
           baseUrl: base,
           session: session,
           initialLocation: '/events/demo-id',
+          tileProvider: TestTileProvider(),
           textScaler: const TextScaler.linear(2),
         ),
       );
@@ -752,7 +765,9 @@ void main() {
         router.go(path);
         await tester.pumpAndSettle();
         expect(router.routeInformationProvider.value.uri.path, path);
-        if (path != '/profile' && path != '/home') {
+        if (path == '/home') expect(markerRequests, 0);
+        if (path == '/map') expect(markerRequests, greaterThan(0));
+        if (path != '/profile' && path != '/home' && path != '/map') {
           expect(find.text('Dalam pengembangan Slice berikutnya'), findsOneWidget);
         }
         if (!path.startsWith('/events/')) {
