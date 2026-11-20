@@ -49,6 +49,15 @@ http.Response ok(Object? data, {int status = 200}) => http.Response(
   status,
   headers: {'content-type': 'application/json'},
 );
+http.Response emptyFeed() => http.Response(jsonEncode({
+  'items': <Object>[],
+  'page': {'limit': 20, 'offset': 0, 'next_offset': null, 'has_more': false},
+  'meta': {...meta, 'zone_version': 1, 'sources': [
+    for (final source in ['BMKG_TEWS', 'BMKG_NOWCAST'])
+      {'source': source, 'state': 'unavailable', 'last_success_at': null, 'last_attempt_at': null},
+  ]},
+}), 200);
+
 SessionCoordinator signedIn({bool zone = true}) {
   final session = SessionCoordinator();
   final auth = AuthData.fromJson(authJson(hasZone: zone));
@@ -232,6 +241,7 @@ void main() {
       client: MockClient((request) async {
         requests.add('${request.method} ${request.url.path}');
         if (request.url.path.endsWith('/health')) return ok({'status': 'ok'});
+        if (request.method == 'GET' && request.url.path == '/api/v1/events') return emptyFeed();
         expect(request.url.path, '/api/v1/me/zone');
         expect(request.headers['Authorization'], 'Bearer memory-token');
         if (request.method == 'GET') return ok(null);
@@ -690,8 +700,10 @@ void main() {
       addTearDown(session.dispose);
       await tester.pumpWidget(
         SiagaApp(
-          client: MockClient((request) async => request.url.path.endsWith('/me/zone')
-              ? ok(null) : ok({'status': 'ok'})),
+          client: MockClient((request) async {
+            if (request.url.path.endsWith('/events')) return emptyFeed();
+            return request.url.path.endsWith('/me/zone') ? ok(null) : ok({'status': 'ok'});
+          }),
           baseUrl: base,
           session: session,
           initialLocation: '/events/demo-id',
@@ -740,7 +752,7 @@ void main() {
         router.go(path);
         await tester.pumpAndSettle();
         expect(router.routeInformationProvider.value.uri.path, path);
-        if (path != '/profile') {
+        if (path != '/profile' && path != '/home') {
           expect(find.text('Dalam pengembangan Slice berikutnya'), findsOneWidget);
         }
         if (!path.startsWith('/events/')) {

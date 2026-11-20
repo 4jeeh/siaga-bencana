@@ -10,6 +10,8 @@ import 'core/session/session_coordinator.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/auth_repository.dart';
 import 'features/auth/auth_view_model.dart';
+import 'features/events/event_feed_view_model.dart';
+import 'features/events/event_repository.dart';
 import 'features/zone/location_service.dart';
 import 'features/zone/zone_repository.dart';
 import 'features/zone/zone_view_model.dart';
@@ -42,6 +44,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
   late final AuthViewModel auth;
   late final GoRouter router;
   late final ZoneViewModel zone;
+  late final EventFeedViewModel feed;
   @override
   void initState() {
     super.initState();
@@ -57,10 +60,12 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
       widget.locationService ?? const GeolocatorLocationService(),
     );
     auth = AuthViewModel(AuthRepository(api), session);
+    feed = EventFeedViewModel(EventRepository(api), session, zone);
     router = createRouter(
       session, initialLocation: widget.initialLocation,
       tileProvider: widget.tileProvider,
     );
+    if (session.canNavigate) feed.refresh();
     if (session.isValid && session.verified) zone.load();
     auth.checkHealth();
   }
@@ -75,6 +80,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     router.dispose();
     auth.dispose();
+    feed.dispose();
     zone.dispose();
     api.close();
     if (widget.session == null) session.dispose();
@@ -87,6 +93,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
       ChangeNotifierProvider.value(value: session),
       ChangeNotifierProvider.value(value: auth),
       ChangeNotifierProvider.value(value: zone),
+      ChangeNotifierProvider.value(value: feed),
     ],
     child: MaterialApp.router(
       title: 'Siaga Bencana',

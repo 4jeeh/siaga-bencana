@@ -30,7 +30,30 @@ class ApiClient {
     Map<String, dynamic>? data,
     bool authenticated = false,
   }) async {
-    if (!path.startsWith('/') || path.contains('://') || path.contains('?')) {
+    final json = await _sendJson(method, path, data: data, authenticated: authenticated);
+    try {
+      return ApiEnvelope.fromJson(json);
+    } on FormatException {
+      throw const ApiErrorEnvelope(code: 'INVALID_RESPONSE', message: 'Respons API tidak valid.');
+    } on TypeError {
+      throw const ApiErrorEnvelope(code: 'INVALID_RESPONSE', message: 'Respons API tidak valid.');
+    }
+  }
+
+  Future<Map<String, dynamic>> getJson(
+    String path, {
+    Map<String, String>? queryParameters,
+    bool authenticated = false,
+  }) => _sendJson('GET', path, queryParameters: queryParameters, authenticated: authenticated);
+
+  Future<Map<String, dynamic>> _sendJson(
+    String method,
+    String path, {
+    Map<String, String>? queryParameters,
+    Map<String, dynamic>? data,
+    bool authenticated = false,
+  }) async {
+    if (!path.startsWith('/') || path.contains('://') || path.contains('?') || path.contains('#')) {
       throw ArgumentError('Only relative API paths are allowed');
     }
     session.checkExpiry();
@@ -47,9 +70,10 @@ class ApiClient {
       if (data != null) 'Content-Type': 'application/json; charset=utf-8',
       if (authenticated) 'Authorization': 'Bearer $token',
     };
-    final uri = Uri.parse(
+    final endpoint = Uri.parse(
       '${baseUrl.toString().replaceFirst(RegExp(r'/$'), '')}$path',
     );
+    final uri = endpoint.replace(queryParameters: queryParameters);
     try {
       final request = http.Request(method, uri)
         ..headers.addAll(headers)
@@ -77,7 +101,7 @@ class ApiClient {
           retryAfter: int.tryParse(response.headers['retry-after'] ?? ''),
         );
       }
-      return ApiEnvelope.fromJson(json);
+      return json;
     } on ApiErrorEnvelope {
       rethrow;
     } on TimeoutException {
