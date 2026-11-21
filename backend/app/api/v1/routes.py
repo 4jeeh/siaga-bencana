@@ -1,8 +1,13 @@
+import re
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Path, Query, Request, Response
+from python_multipart.multipart import parse_options_header
 from sqlmodel import Session
+from starlette.datastructures import UploadFile
+from starlette.exceptions import HTTPException
+from starlette.formparsers import MultiPartException
 
 from app.core.errors import ApiError
 from app.core.security import decode_token
@@ -10,11 +15,25 @@ from app.db.session import get_session
 from app.models.user import User
 from app.repositories.users import user_dto
 from app.schemas.auth import AuthData, LoginRequest, RegisterRequest, UserDTO
-from app.schemas.common import Envelope, StatusData, envelope
+from app.schemas.common import Envelope, StatusData, envelope, response_meta
 from app.schemas.events import Detail, Feed, FeedQuery, MapQuery, MarkerFeed
+from app.schemas.reports import (
+    ClaimRequest,
+    DecisionRequest,
+    ModerationResult,
+    PhotoUrlData,
+    ReportFeed,
+    ReportListQuery,
+    ReportPrivate,
+    ReportPublic,
+    SignedPhotoQuery,
+    VerificationFeed,
+    VerificationQuery,
+)
 from app.schemas.zone import ZoneDTO, ZoneRequest
-from app.services import auth, events, zones
+from app.services import auth, events, reports, zones
 from app.services.readiness import database_ready
+from app.services.report_payload import CATEGORIES
 
 router = APIRouter(prefix="/api/v1")
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -36,6 +55,74 @@ def current_user(request: Request, session: SessionDep):
 
 
 UserDep = Annotated[User, Depends(current_user)]
+ReportId = Annotated[UUID, Path()]
+MAX_BODY_BYTES = 3_145_728
+REPORT_FORM_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["client_request_id", "category", "description", "latitude", "longitude"],
+    "properties": {
+        "client_request_id": {"type": "string", "format": "uuid"},
+        "category": {"type": "string", "enum": sorted(CATEGORIES)},
+        "description": {"type": "string"},
+        "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+        "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+        "event_id": {"type": "string", "format": "uuid"},
+        "photo": {"type": "string", "format": "binary"},
+    },
+}
+
+
+def report_writer(request: Request, user: UserDep):
+    request.app.state.limiter.check(f"write:{user.id}", 30)
+    return user
+
+
+WriterDep = Annotated[User, Depends(report_writer)]
+
+
+def moderator(user: WriterDep):
+    if user.role != "admin":
+        raise ApiError(403, "FORBIDDEN", "Hanya admin dapat meninjau laporan.")
+    return user
+
+
+ModeratorDep = Annotated[User, Depends(moderator)]
+
+
+async def report_parts(request: Request, user: WriterDep):
+    request.app.state.limiter.check(f"submit:{user.id}", 5)
+    # python-multipart's finalize() accepts a truncated final part. Without this
+    # check, a truncated optional photo could silently become a valid text-only report.
+    _, params = parse_options_header(request.headers["content-type"])
+    boundary = params.get(b"boundary")
+    if not boundary or not re.search(
+        rb"(?:^|\r\n)--" + re.escape(boundary) + rb"--[ \t]*(?:\r\n|$)", await request.body()
+    ):
+        raise ApiError(400, "MALFORMED_REQUEST", "Batas akhir multipart tidak valid.")
+    try:
+        form = await request.form(max_part_size=MAX_BODY_BYTES)
+    except (MultiPartException, HTTPException):
+        raise ApiError(400, "MALFORMED_REQUEST", "Data multipart tidak valid.") from None
+
+    try:
+        if len(form.multi_items()) != len(form):
+            raise ApiError(400, "MALFORMED_REQUEST", "Bagian multipart berulang.")
+        missing = set(REPORT_FORM_SCHEMA["required"]) - form.keys()
+        unknown = form.keys() - REPORT_FORM_SCHEMA["properties"].keys()
+        if missing or unknown:
+            raise ApiError(422, "VALIDATION_ERROR", "Kolom laporan tidak sesuai.")
+        fields = {key: value for key, value in form.multi_items() if key != "photo"}
+        if any(not isinstance(value, str) for value in fields.values()):
+            raise ApiError(422, "VALIDATION_ERROR", "Kolom laporan harus berupa teks.")
+        photo = form.get("photo")
+        if photo is None:
+            return fields, None
+        if not isinstance(photo, UploadFile):
+            raise ApiError(422, "VALIDATION_ERROR", "Foto harus berupa berkas.")
+        return fields, (await photo.read(), photo.content_type or "")
+    finally:
+        await form.close()
 
 
 def event_evaluation(request: Request, session: SessionDep, user: UserDep):
@@ -102,3 +189,88 @@ def get_zone(request: Request, session: SessionDep, user: UserDep):
 @router.put("/me/zone", response_model=Envelope[ZoneDTO])
 def put_zone(request: Request, body: ZoneRequest, session: SessionDep, user: UserDep):
     return envelope(request, zones.replace_zone(session, user.id, body, request.app.state.settings))
+
+
+@router.post(
+    "/reports", status_code=201, response_model=Envelope[ReportPrivate],
+    responses={200: {"model": Envelope[ReportPrivate], "description": "Idempotent replay"}},
+    openapi_extra={
+        "requestBody": {
+            "required": True,
+            "content": {"multipart/form-data": {"schema": REPORT_FORM_SCHEMA}},
+        }
+    },
+)
+def submit_report(
+    request: Request, response: Response, session: SessionDep, user: WriterDep,
+    parts: Annotated[tuple, Depends(report_parts)],
+):
+    data, replay = reports.submit(request.app.state, session, user, *parts)
+    response.status_code = 200 if replay else 201
+    response.headers["Idempotent-Replay"] = "true" if replay else "false"
+    if not replay:
+        response.headers["Location"] = f"/api/v1/reports/{data.id}"
+    return envelope(request, data)
+
+
+@router.get("/reports")
+def list_reports(
+    request: Request, session: SessionDep, user: UserDep, query: Annotated[ReportListQuery, Query()]
+) -> ReportFeed:
+    return reports.feed(session, user, query, response_meta(request))
+
+
+@router.get("/reports/{report_id}", response_model=Envelope[ReportPrivate | ReportPublic])
+def report_detail(request: Request, report_id: ReportId, session: SessionDep, user: UserDep):
+    return envelope(request, reports.detail(session, user, report_id))
+
+
+@router.get("/reports/{report_id}/photo-url", response_model=Envelope[PhotoUrlData])
+def report_photo_url(request: Request, report_id: ReportId, session: SessionDep, user: UserDep):
+    return envelope(request, reports.signed_url(request, session, user, report_id))
+
+
+@router.get(
+    "/media/reports/{report_id}/photo",
+    response_class=Response,
+    responses={
+        200: {"content": {"image/jpeg": {"schema": {"type": "string", "format": "binary"}}}}
+    },
+)
+def report_photo(
+    request: Request, report_id: ReportId, session: SessionDep,
+    query: Annotated[SignedPhotoQuery, Query()],
+):
+    data = reports.local_photo(
+        request.app.state, session, report_id, query.expires, query.signature
+    )
+    return Response(content=data, media_type="image/jpeg", headers={
+        "Content-Disposition": "inline", "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "no-store",
+    })
+
+
+@router.post("/reports/{report_id}/claim", response_model=Envelope[ModerationResult])
+def claim_report(
+    request: Request, report_id: ReportId, session: SessionDep, user: ModeratorDep,
+    body: ClaimRequest,
+):
+    result = reports.moderate(session, user, report_id, body, request.app.state.settings)
+    return envelope(request, result)
+
+
+@router.post("/reports/{report_id}/decision", response_model=Envelope[ModerationResult])
+def decide_report(
+    request: Request, report_id: ReportId, session: SessionDep, user: ModeratorDep,
+    body: DecisionRequest,
+):
+    result = reports.moderate(session, user, report_id, body, request.app.state.settings)
+    return envelope(request, result)
+
+
+@router.get("/reports/{report_id}/verifications")
+def report_verifications(
+    request: Request, report_id: ReportId, session: SessionDep, user: UserDep,
+    query: Annotated[VerificationQuery, Query()],
+) -> VerificationFeed:
+    return reports.verifications(session, user, report_id, query, response_meta(request))

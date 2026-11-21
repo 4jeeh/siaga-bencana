@@ -21,13 +21,14 @@ class StatusData(BaseModel):
     status: Literal["ok", "ready"]
 
 
-def envelope(request, data):
+def response_meta(request):
     settings = request.app.state.settings
     return {
-        "data": data,
-        "meta": {
-            "server_time": settings.domain_now(),
-            "mode": settings.app_mode,
-            "is_simulated": settings.app_mode == "simulation",
-        },
+        "server_time": settings.domain_now(),
+        "mode": settings.app_mode,
+        "is_simulated": settings.app_mode == "simulation",
     }
+
+
+def envelope(request, data):
+    return {"data": data, "meta": response_meta(request)}
