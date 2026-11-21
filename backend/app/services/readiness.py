@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import BACKEND_ROOT
 from app.db.migrations import REVISION, TABLES, migration_checksum
+from app.services.storage import SupabaseStorageAdapter
 
 
 class StorageProbe:
@@ -21,6 +22,9 @@ class StorageProbe:
     def check(self):
         self.ok = False
         try:
+            if self.settings.storage_backend == "supabase":
+                self.ok = SupabaseStorageAdapter(self.settings).check_ready()
+                return
             path = self.settings.storage_root
             # No symlink/junction traversal, public/static source folder or shared root.
             resolved = path.resolve()
@@ -32,8 +36,6 @@ class StorageProbe:
                 or any(p in {"static", "public", "app", "docs", "mobile"} for p in path.parts)
             ):
                 return
-            if self.settings.storage_backend != "local":
-                return  # Supabase adapter belongs to the upload slice; never claim readiness.
             path.mkdir(parents=True, exist_ok=True)
             with tempfile.TemporaryFile(dir=path) as probe:
                 probe.write(b"siaga storage probe")
