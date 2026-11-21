@@ -55,13 +55,13 @@ Dokumen ini adalah acuan bersama untuk **Codex (`gpt-6.2-astra`)** dan **Antigra
   * **Effort (`gpt-6.2-astra`):** gunakan **`medium` sebagai default** (`3A-2/3` worker & endpoint, `3B`, `3C`, `4A-1` upload/Pillow, `4B`, `5-3` mobile UI, fix QA, draf pasca-rilis); gunakan **`high` secara selektif** hanya pada titik kritis logika/konkurensi/streaming (`3A-1` geometri CAP/antimeridian/Haversine/skor, `4A-2` idempotensi & transaksi moderasi `409`, `5-1`/`5-2` counter lock, cursor & SSE stream); hindari `low` maupun `xhigh`/`ultra`/`max`.
   * Baca hanya section dokumen `docs/` yang relevan dengan micro-batch yang sedang dikerjakan.
 
-### B. Antigravity — Orkestrasi, Pengujian Berat (`Orchestrator (Neon)`), Spesialis UI Opsional (`Claude Opus 5.5`), QA & Git
-* **Tugas Antigravity (`Orchestrator (Neon)` sebagai orkestrator & penguji harian — menggantikan full `Gemini 4 Hydrogen`):**
-  1. **Persiapan & Riset:** menjaga plugin/MCP tetap minimal per hari (lihat `docs/SCHEDULE.md`), serta mengecek API library baru via `context7` / `flutter pub` sebelum mendelegasikan penulisan kode ke Codex.
-  2. **Pengujian Berat, Perbaikan Cepat & Verifikasi Nyata:** menjalankan `local_pg.py`, migrasi PostgreSQL, full `pytest`, `smoke_live.py`, `flutter pub get/analyze/test`, dan uji emulator/HP Android; error minor/lint langsung diperbaiki **Orchestrator (Neon)** sendiri tanpa membebani kuota Codex.
+### B. Antigravity — Orkestrasi, Pengujian Berat (`Orchestrator (Neon)` / fallback `Gemini 4 Argon`), Spesialis UI Opsional (`Orchestrator (Opus 5.5)`), QA & Git
+* **Tugas Antigravity (`Orchestrator (Neon)` sebagai orkestrator & penguji harian, otomatis beralih ke `Gemini 4 Argon` bila terkena limit — menggantikan full `Gemini 4 Hydrogen`):**
+  1. **Persiapan & Riset:** menjaga plugin/MCP tetap minimal per hari (lihat `docs/SCHEDULE.md`), mengecek API library baru via `context7` / `flutter pub`, serta selalu menyertakan ringkasan konteks skill yang relevan ke dalam prompt sebelum mendelegasikan penulisan kode ke Codex.
+  2. **Pengujian Berat, Perbaikan Cepat & Verifikasi Nyata:** menjalankan `local_pg.py`, migrasi PostgreSQL, full `pytest`, `smoke_live.py`, `flutter pub get/analyze/test`, dan uji emulator/HP Android; error minor/lint langsung diperbaiki **Orchestrator (Neon)** (atau **`Gemini 4 Argon`** saat fallback limit) sendiri tanpa membebani kuota Codex.
   3. **Git, QA, Audit & Deploy:** mengelola repo GitHub (`4jeeh/siaga-bencana` via `gh` CLI), commit bertahap (**1–3 commit terfokus per hari**), `git push`, sinkronisasi `HANDOFF.md`/`SCHEDULE.md`, QA Testing, Security Audit, dan Deploy ke Railway.
-* **Peran Spesialis `Claude Opus 5.5` (`Medium`, opsional & hemat kuota):**
-  * Dipanggil selektif hanya untuk **poles visual UI Flutter** menjelang demo (`Slice 3B`/`4B`) bila dirasa masih kaku, **cadangan saat bug lintas-lapisan mentok >30 menit**, atau **review bahasa artikel pasca-rilis** — **bukan** untuk CRUD/backend atau suite test rutin.
+* **Peran Spesialis `Orchestrator (Opus 5.5)` (opsional & hemat kuota):**
+  * Dipanggil selektif untuk **poles visual UI Flutter secara menyeluruh setelah seluruh fitur selesai** menjelang demo, **cadangan saat bug lintas-lapisan mentok >30 menit**, atau **review bahasa artikel pasca-rilis** — **bukan** untuk CRUD/backend atau suite test rutin.
 * **Daftar Skills & MCP Antigravity yang Digunakan Proyek Ini:**
   * *Planning & GitHub Workflow:* `superpowers` *(opsional)*, `coderabbit`, `codegraph` (MCP), `context7` (MCP), `keenable` *(nonaktif saat coding)*.
   * *Design & UI/UX Flutter:* `ui-ux-pro-max` (stack `flutter`), `impeccable`, `logo-design`, `generative-icons` (MCP), `figcraft` (MCP, menggantikan Figma untuk wireframe), `google_maps_platform` *(opsional jika kelak beralih ke Google Maps SDK)*.
