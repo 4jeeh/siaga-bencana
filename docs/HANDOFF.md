@@ -2,7 +2,7 @@
 
 **Author:** Jiddan Ibnu Ali — **NIM:** 24051214203  
 **Peran:** Codex Planner & Architect  
-**Status:** **Slice 3B SELESAI (20 Nov 2026) — siap Slice 3C: Detail Bencana (`UI-06`) & Uji Radar batas radius/antimeridian, Sabtu 21 November 2026.**  
+**Status:** **Slice 3C SELESAI (21 Nov 2026) — seluruh Slice 3 (`3A` Backend BMKG & Radar, `3B` `UI-02`/`UI-03` Feed & Peta, `3C` `UI-06` Detail Bencana & Uji Radar) tuntas; siap Slice 4A: Backend Lapor Warga, Minggu 22 November 2026.**  
 **Target:** feature freeze24Nov; rilis `v1.0.0`27Nov2026. Rilis belum dilaksanakan.
 
 ## 1. Hasil sesi dan acuan
@@ -119,7 +119,7 @@ Seluruh path final berprefix `/api/v1`. DTO/contoh/error ada di [kontrak](API_CO
 |---|---|
 | 17 Nov | **SELESAI:** Foundation, Auth, & DB Migration + mobile skeleton; 87 pytest + 12 widget + 1 live HTTP smoke lulus ([SLICE1_VERIFICATION.md](SLICE1_VERIFICATION.md)). |
 | 18 Nov | **SELESAI:** Akun/zona UI+API (`GET/PUT /api/v1/me/zone`, `UI-01c`, `UI-03` `pick_zone`, `UI-05` edit zona); 159 pytest + 23 widget + 1 live HTTP smoke lulus. |
-| 19–21 Nov | **19 Nov (Slice 3A SELESAI):** TEWS+Nowcast/radar/lease/notification-log worker + `/events`, `/events/{id}`, `/map/markers` (`406 pytest` + `EXPLAIN` + `1 live smoke` lulus); **20 Nov (Slice 3B SELESAI):** `UI-02` Beranda Feed + `UI-03` Peta Browse (`flutter analyze` bersih + `42` unit/widget test + `1 live smoke` lulus); lanjut **21 Nov** `UI-06` Detail Bencana & uji radar. |
+| 19–21 Nov | **SELESAI:** **19 Nov (`3A`):** TEWS+Nowcast/radar/lease/worker + `/events`, `/events/{id}`, `/map/markers` (`406 pytest` + `EXPLAIN` + `1 live smoke`); **20 Nov (`3B`):** `UI-02` Feed + `UI-03` Peta Browse (`42` test + `1 live smoke`); **21 Nov (`3C`):** `UI-06` Detail Bencana + MiniMap poligon + uji radar (`406 pytest` + `flutter analyze` bersih + `56` unit/widget test + `1 live smoke` lulus). |
 | 22–23 Nov | Laporan/foto/idempotensi/privasi, moderasi/audit/concurrency, UI Tinjau. |
 | 24 Nov | SSE/poll/catch-up/OS notification/uji perangkat/SIMULASI; **feature freeze malam24Nov**. |
 | 25–27 Nov | QA25, security+deploy/fallback26, smoke final+target tag v1.0.0 pada27Nov. |
