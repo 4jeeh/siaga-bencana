@@ -68,14 +68,15 @@ GoRouter createRouter(
             tileProvider: tileProvider,
           ),
         ),
-        GoRoute(path: '/reports', builder: (_, _) => const ReportsScreen()),
+        GoRoute(path: '/reports', builder: (_, state) =>
+            ReportsScreen(eventId: state.uri.queryParameters['event_id'])),
         GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
       ],
     ),
     GoRoute(
       path: '/events/:eventId',
       builder: (_, state) =>
-          EventDetailScreen(eventId: state.pathParameters['eventId']!),
+          EventDetailScreen(eventId: state.pathParameters['eventId']!, tileProvider: tileProvider),
     ),
   ],
 );

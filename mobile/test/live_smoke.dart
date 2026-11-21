@@ -2,6 +2,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:siaga_bencana/core/network/api_client.dart';
+import 'package:siaga_bencana/core/network/api_envelope.dart';
 import 'package:siaga_bencana/core/session/session_coordinator.dart';
 import 'package:siaga_bencana/features/auth/auth_dto.dart';
 import 'package:siaga_bencana/features/auth/auth_repository.dart';
@@ -68,16 +69,45 @@ void main() {
     expect(loggedIn.expiresAt.isAfter(DateTime.now().toUtc()), true);
     session.establish(loggedIn);
     session.confirm(await repository.me(), session.generation);
-    final feed = await EventRepository(api).fetchEvents(radiusOnly: true);
+    final events = EventRepository(api);
+    final feed = await events.fetchEvents(radiusOnly: true);
     expect(feed.meta.zoneVersion, 2);
     expect(feed.meta.sources.map((source) => source.source),
         unorderedEquals(['BMKG_TEWS', 'BMKG_NOWCAST']));
     expect(feed.page.limit, 20);
+    expect(
+      feed.items.map((item) => item.id),
+      containsAll([
+        '30000000-0000-4000-8000-000000000001',
+        '30000000-0000-4000-8000-000000000002',
+      ]),
+    );
+    final quakeDetail = await events.fetchEventDetail('30000000-0000-4000-8000-000000000001');
+    expect(quakeDetail.meta.zoneVersion, 2);
+    expect(quakeDetail.data.earthquake?.potential, 'Tidak berpotensi tsunami');
+    expect(quakeDetail.data.priority.withinRadius, isTrue);
+    final capDetail = await events.fetchEventDetail('30000000-0000-4000-8000-000000000002');
+    expect(capDetail.meta.zoneVersion, 2);
+    expect(capDetail.data.priority.matchMethod, 'inside_polygon');
+    expect(capDetail.data.areas.single.polygons.single.crossesAntimeridian, isTrue);
+    expect(
+      capDetail.data.references.single.referencedEventId,
+      '30000000-0000-4000-8000-000000000003',
+    );
+    await expectLater(
+      events.fetchEventDetail('30000000-0000-4000-8000-000000000999'),
+      throwsA(
+        isA<ApiErrorEnvelope>()
+            .having((e) => e.statusCode, 'statusCode', 404)
+            .having((e) => e.code, 'code', 'RESOURCE_NOT_FOUND'),
+      ),
+    );
     final markers = await MapRepository(api).fetchMarkers(
-      bbox: '179,-1,-179,1', radiusOnly: true, includeReports: true,
+      bbox: '179,-9,-179,-5', radiusOnly: true, includeReports: true,
     );
     expect(markers.meta.zoneVersion, 2);
     expect(markers.cap, 100);
     expect(markers.truncated, isFalse);
+    expect(markers.items, isNotEmpty);
   });
 }

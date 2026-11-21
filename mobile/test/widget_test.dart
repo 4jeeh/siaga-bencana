@@ -21,6 +21,8 @@ import 'package:siaga_bencana/features/zone/zone_dto.dart';
 import 'package:siaga_bencana/features/zone/zone_repository.dart';
 import 'package:siaga_bencana/features/zone/zone_view_model.dart';
 
+import 'event_detail_fixtures.dart';
+
 const userJson = <String, dynamic>{
   'id': '10000000-0000-4000-8000-000000000001',
   'email': 'warga@example.test',
@@ -703,6 +705,11 @@ void main() {
       await tester.pumpWidget(
         SiagaApp(
           client: MockClient((request) async {
+            if (request.url.path.startsWith('/api/v1/events/')) {
+              final detail = quakeDetail(id: request.url.pathSegments.last);
+              detail['data']['earthquake']['shakemap_url'] = null;
+              return http.Response.bytes(utf8.encode(jsonEncode(detail)), 200);
+            }
             if (request.url.path.endsWith('/events')) return emptyFeed();
             if (request.url.path.endsWith('/map/markers')) {
               markerRequests++;
@@ -767,7 +774,7 @@ void main() {
         expect(router.routeInformationProvider.value.uri.path, path);
         if (path == '/home') expect(markerRequests, 0);
         if (path == '/map') expect(markerRequests, greaterThan(0));
-        if (path != '/profile' && path != '/home' && path != '/map') {
+        if (path == '/reports') {
           expect(find.text('Dalam pengembangan Slice berikutnya'), findsOneWidget);
         }
         if (!path.startsWith('/events/')) {

@@ -5,6 +5,15 @@ class EventRepository {
   EventRepository(this.api);
   final ApiClient api;
 
+  Future<EventDetailEnvelopeDto> fetchEventDetail(String eventId) async {
+    if (eventId.trim().isEmpty || eventId == '.' || eventId == '..' ||
+        eventId.contains(RegExp(r'[/#?]'))) {
+      throw ArgumentError.value(eventId, 'eventId');
+    }
+    final json = await api.getJson('/events/${Uri.encodeComponent(eventId)}', authenticated: true);
+    return EventDetailEnvelopeDto.fromJson(json);
+  }
+
   Future<EventFeedDto> fetchEvents({
     String? category,
     bool radiusOnly = true,

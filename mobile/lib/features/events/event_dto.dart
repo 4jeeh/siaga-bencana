@@ -20,11 +20,14 @@ int _version(Map<String, dynamic> json, String key) {
   throw FormatException('Invalid $key');
 }
 
-DateTime _date(dynamic value) => DateTime.parse(value as String).toUtc();
+DateTime _date(dynamic value) => value is String
+    ? DateTime.parse(value).toUtc() : throw const FormatException('Invalid date');
 DateTime? _optionalDate(dynamic value) => value == null ? null : _date(value);
 
 List<T> _objects<T>(dynamic value, T Function(Map<String, dynamic>) decode) =>
-    (value as List<dynamic>).cast<Map<String, dynamic>>().map(decode).toList(growable: false);
+    value is List<dynamic> ? [for (final item in value)
+      if (item is Map<String, dynamic>) decode(item) else throw const FormatException('Invalid object'),
+    ] : throw const FormatException('Invalid list');
 
 class SourceFreshnessDto {
   const SourceFreshnessDto({
@@ -204,8 +207,8 @@ class EventSummaryDto {
       category: _choice(json, 'category', _categoryValues),
       title: json['title'] as String,
       occurredAt: _date(json['occurred_at']),
-      latitude: (json['latitude'] as num?)?.toDouble(),
-      longitude: (json['longitude'] as num?)?.toDouble(),
+      latitude: _coordinate(json, 'latitude', 90),
+      longitude: _coordinate(json, 'longitude', 180),
       isSimulated: json['is_simulated'] as bool,
       contentVersion: _version(json, 'content_version'),
       lifecycleStatus: _choice(json, 'lifecycle_status', _lifecycleValues),
@@ -255,5 +258,275 @@ class EventFeedDto {
       page: PageDto.fromJson(json['page'] as Map<String, dynamic>),
       meta: EventMetaDto.fromJson(json['meta'] as Map<String, dynamic>),
     );
+  }
+}
+
+T _field<T>(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value is T) return value;
+  throw FormatException('Invalid $key');
+}
+
+double? _coordinate(Map<String, dynamic> json, String key, double limit) {
+  final value = _field<num?>(json, key)?.toDouble();
+  if (value != null && (!value.isFinite || value.abs() > limit)) {
+    throw FormatException('Invalid $key');
+  }
+  return value;
+}
+
+class EarthquakeDetailDto {
+  const EarthquakeDetailDto({
+    required this.magnitude,
+    required this.depthKm,
+    required this.region,
+    required this.latitudeText,
+    required this.longitudeText,
+    required this.potential,
+    required this.felt,
+    required this.shakemapUrl,
+  });
+
+  final double? magnitude;
+  final double? depthKm;
+  final String? region;
+  final String? latitudeText;
+  final String? longitudeText;
+  final String? potential;
+  final String? felt;
+  final String? shakemapUrl;
+
+  factory EarthquakeDetailDto.fromJson(Map<String, dynamic> json) {
+    return EarthquakeDetailDto(
+      magnitude: _field<num?>(json, 'magnitude')?.toDouble(),
+      depthKm: _field<num?>(json, 'depth_km')?.toDouble(),
+      region: _field<String?>(json, 'region'),
+      latitudeText: _field<String?>(json, 'latitude_text'),
+      longitudeText: _field<String?>(json, 'longitude_text'),
+      potential: _field<String?>(json, 'potential'),
+      felt: _field<String?>(json, 'felt'),
+      shakemapUrl: _field<String?>(json, 'shakemap_url'),
+    );
+  }
+}
+
+class WeatherDetailDto {
+  const WeatherDetailDto({
+    required this.sender,
+    required this.sent,
+    required this.status,
+    required this.msgType,
+    required this.language,
+    required this.capEvent,
+    required this.eventCode,
+    required this.headline,
+    required this.description,
+    required this.webUrl,
+    required this.lifecycleComplete,
+  });
+
+  final String sender;
+  final DateTime sent;
+  final String status;
+  final String msgType;
+  final String? language;
+  final String? capEvent;
+  final String? eventCode;
+  final String? headline;
+  final String? description;
+  final String? webUrl;
+  final bool lifecycleComplete;
+
+  factory WeatherDetailDto.fromJson(Map<String, dynamic> json) {
+    return WeatherDetailDto(
+      sender: _field<String>(json, 'sender'),
+      sent: _date(json['sent']),
+      status: _field<String>(json, 'status'),
+      msgType: _field<String>(json, 'msg_type'),
+      language: _field<String?>(json, 'language'),
+      capEvent: _field<String?>(json, 'cap_event'),
+      eventCode: _field<String?>(json, 'event_code'),
+      headline: _field<String?>(json, 'headline'),
+      description: _field<String?>(json, 'description'),
+      webUrl: _field<String?>(json, 'web_url'),
+      lifecycleComplete: _field<bool>(json, 'lifecycle_complete'),
+    );
+  }
+}
+
+class PolygonVertexDto {
+  const PolygonVertexDto({
+    required this.sequence,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  final int sequence;
+  final double latitude;
+  final double longitude;
+
+  factory PolygonVertexDto.fromJson(Map<String, dynamic> json) {
+    return PolygonVertexDto(
+      sequence: _field<int>(json, 'sequence'),
+      latitude: _coordinate(json, 'latitude', 90) ?? (throw const FormatException('Missing latitude')),
+      longitude: _coordinate(json, 'longitude', 180) ?? (throw const FormatException('Missing longitude')),
+    );
+  }
+}
+
+class AreaPolygonDto {
+  const AreaPolygonDto({
+    required this.id,
+    required this.position,
+    required this.geometryValid,
+    required this.centroidLatitude,
+    required this.centroidLongitude,
+    required this.south,
+    required this.north,
+    required this.west,
+    required this.east,
+    required this.crossesAntimeridian,
+    required this.vertices,
+  });
+
+  final String id;
+  final int position;
+  final bool geometryValid;
+  final double? centroidLatitude;
+  final double? centroidLongitude;
+  final double? south;
+  final double? north;
+  final double? west;
+  final double? east;
+  final bool? crossesAntimeridian;
+  final List<PolygonVertexDto> vertices;
+
+  factory AreaPolygonDto.fromJson(Map<String, dynamic> json) {
+    final result = AreaPolygonDto(
+      id: _field<String>(json, 'id'),
+      position: _field<int>(json, 'position'),
+      geometryValid: _field<bool>(json, 'geometry_valid'),
+      centroidLatitude: _coordinate(json, 'centroid_latitude', 90),
+      centroidLongitude: _coordinate(json, 'centroid_longitude', 180),
+      south: _coordinate(json, 'south', 90),
+      north: _coordinate(json, 'north', 90),
+      west: _coordinate(json, 'west', 180),
+      east: _coordinate(json, 'east', 180),
+      crossesAntimeridian: _field<bool?>(json, 'crosses_antimeridian'),
+      vertices: _objects(json['vertices'], PolygonVertexDto.fromJson)
+          ..sort((a, b) => a.sequence.compareTo(b.sequence)),
+    );
+    final bounds = [result.centroidLatitude, result.centroidLongitude, result.south,
+      result.north, result.west, result.east, result.crossesAntimeridian];
+    if (result.geometryValid
+        ? bounds.contains(null) || result.vertices.length < 3 || result.south! > result.north!
+        : bounds.any((value) => value != null)) {
+      throw const FormatException('Invalid polygon geometry');
+    }
+    return result;
+  }
+}
+
+class EventAreaDto {
+  const EventAreaDto({
+    required this.id,
+    required this.position,
+    required this.areaDescription,
+    required this.polygons,
+  });
+
+  final String id;
+  final int position;
+  final String areaDescription;
+  final List<AreaPolygonDto> polygons;
+
+  factory EventAreaDto.fromJson(Map<String, dynamic> json) {
+    return EventAreaDto(
+      id: _field<String>(json, 'id'),
+      position: _field<int>(json, 'position'),
+      areaDescription: _field<String>(json, 'area_description'),
+      polygons: _objects(json['polygons'], AreaPolygonDto.fromJson)
+          ..sort((a, b) => a.position.compareTo(b.position)),
+    );
+  }
+}
+
+class EventReferenceDto {
+  const EventReferenceDto({
+    required this.relationType,
+    required this.referencedSourceKey,
+    required this.referencedEventId,
+  });
+
+  final String relationType;
+  final String referencedSourceKey;
+  final String? referencedEventId;
+
+  factory EventReferenceDto.fromJson(Map<String, dynamic> json) {
+    return EventReferenceDto(
+      relationType: _field<String>(json, 'relation_type'),
+      referencedSourceKey: _field<String>(json, 'referenced_source_key'),
+      referencedEventId: _field<String?>(json, 'referenced_event_id'),
+    );
+  }
+}
+
+class EventDetailDto extends EventSummaryDto {
+  EventDetailDto._(EventSummaryDto summary, {
+    required this.sourceUrl, required this.firstSeenAt, required this.lastSeenAt,
+    required this.earthquake, required this.weather, required this.areas, required this.references,
+  }) : super(id: summary.id, source: summary.source, category: summary.category,
+          title: summary.title, occurredAt: summary.occurredAt, latitude: summary.latitude,
+          longitude: summary.longitude, isSimulated: summary.isSimulated,
+          contentVersion: summary.contentVersion, lifecycleStatus: summary.lifecycleStatus,
+          priority: summary.priority, cap: summary.cap);
+
+  final String sourceUrl;
+  final DateTime firstSeenAt;
+  final DateTime lastSeenAt;
+  final EarthquakeDetailDto? earthquake;
+  final WeatherDetailDto? weather;
+  final List<EventAreaDto> areas;
+  final List<EventReferenceDto> references;
+
+  factory EventDetailDto.fromJson(Map<String, dynamic> json) {
+    try {
+      final summary = EventSummaryDto.fromJson(json);
+      final quake = _field<Map<String, dynamic>?>(json, 'earthquake');
+      final weather = _field<Map<String, dynamic>?>(json, 'weather');
+      final isQuake = summary.category == 'earthquake';
+      if (isQuake != (quake != null) || isQuake == (weather != null)) {
+        throw const FormatException('Invalid event category details');
+      }
+      return EventDetailDto._(summary,
+        sourceUrl: _field<String>(json, 'source_url'),
+        firstSeenAt: _date(json['first_seen_at']),
+        lastSeenAt: _date(json['last_seen_at']),
+        earthquake: quake == null ? null : EarthquakeDetailDto.fromJson(quake),
+        weather: weather == null ? null : WeatherDetailDto.fromJson(weather),
+        areas: _objects(json['areas'], EventAreaDto.fromJson)
+            ..sort((a, b) => a.position.compareTo(b.position)),
+        references: _objects(json['references'], EventReferenceDto.fromJson),
+      );
+    } on TypeError {
+      throw const FormatException('Invalid event detail');
+    }
+  }
+}
+
+class EventDetailEnvelopeDto {
+  const EventDetailEnvelopeDto(this.data, this.meta);
+  final EventDetailDto data;
+  final EventMetaDto meta;
+
+  factory EventDetailEnvelopeDto.fromJson(Map<String, dynamic> json) {
+    try {
+      return EventDetailEnvelopeDto(
+        EventDetailDto.fromJson(_field<Map<String, dynamic>>(json, 'data')),
+        EventMetaDto.fromJson(_field<Map<String, dynamic>>(json, 'meta')),
+      );
+    } on TypeError {
+      throw const FormatException('Invalid event metadata');
+    }
   }
 }

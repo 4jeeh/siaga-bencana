@@ -10,6 +10,7 @@ import 'core/session/session_coordinator.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/auth_repository.dart';
 import 'features/auth/auth_view_model.dart';
+import 'features/event_detail/event_detail_view_model.dart';
 import 'features/events/event_feed_view_model.dart';
 import 'features/events/event_repository.dart';
 import 'features/map/map_repository.dart';
@@ -48,6 +49,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
   late final ZoneViewModel zone;
   late final EventFeedViewModel feed;
   late final MapViewModel map;
+  late final EventDetailViewModel detail;
   @override
   void initState() {
     super.initState();
@@ -63,7 +65,9 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
       widget.locationService ?? const GeolocatorLocationService(),
     );
     auth = AuthViewModel(AuthRepository(api), session);
-    feed = EventFeedViewModel(EventRepository(api), session, zone);
+    final events = EventRepository(api);
+    feed = EventFeedViewModel(events, session, zone);
+    detail = EventDetailViewModel(events, session, zone);
     map = MapViewModel(MapRepository(api), session, zone);
     router = createRouter(
       session, initialLocation: widget.initialLocation,
@@ -84,6 +88,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     router.dispose();
     auth.dispose();
+    detail.dispose();
     feed.dispose();
     map.dispose();
     zone.dispose();
@@ -99,6 +104,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
       ChangeNotifierProvider.value(value: auth),
       ChangeNotifierProvider.value(value: zone),
       ChangeNotifierProvider.value(value: feed),
+      ChangeNotifierProvider.value(value: detail),
       ChangeNotifierProvider.value(value: map),
     ],
     child: MaterialApp.router(

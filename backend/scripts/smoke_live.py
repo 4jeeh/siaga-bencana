@@ -8,19 +8,120 @@ import sys
 import tempfile
 import threading
 import time
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import httpx
 import psycopg
 import uvicorn
 from psycopg import sql
+from sqlmodel import Session
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 from app.core.config import Settings  # noqa: E402
 from app.db.migrations import apply_migrations  # noqa: E402
 from app.main import create_app  # noqa: E402
+from app.models.disaster_event import DisasterEvent, EventReference  # noqa: E402
+from app.services import radar  # noqa: E402
+from app.services.bmkg_events import save_areas  # noqa: E402
+
+
+def seed_smoke_events(engine, now: datetime) -> None:
+    hour = timedelta(hours=1)
+    quake_id = UUID("30000000-0000-4000-8000-000000000001")
+    cap_id = UUID("30000000-0000-4000-8000-000000000002")
+    prior_id = UUID("30000000-0000-4000-8000-000000000003")
+    ring = radar.analyze_polygon([(-8, 179), (-8, -179), (-6, -179), (-6, 179)])
+    with Session(engine) as session:
+        session.add(
+            DisasterEvent(
+                id=quake_id,
+                source="BMKG_TEWS",
+                source_key="a" * 64,
+                category="earthquake",
+                title="Gempa Antimeridian Smoke",
+                occurred_at=now - hour,
+                latitude=-7.25,
+                longitude=179.9,
+                magnitude=5.2,
+                depth_km=12.0,
+                region="Pasifik Antimeridian",
+                latitude_text="7.25 LS",
+                longitude_text="179.90 BT",
+                potential="Tidak berpotensi tsunami",
+                source_url="https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json",
+                content_hash="1" * 64,
+                first_seen_at=now - hour,
+                last_seen_at=now,
+                is_simulated=False,
+            )
+        )
+        prior = DisasterEvent(
+            id=prior_id,
+            source="BMKG_NOWCAST",
+            source_key="CAP-SMOKE-0",
+            category="extreme_weather",
+            title="Cuaca Sebelumnya Smoke",
+            occurred_at=now - 2 * hour,
+            source_url="https://www.bmkg.go.id/alerts/nowcast/id",
+            sender="smoke@bmkg.go.id",
+            sent=now - 2 * hour,
+            status="Actual",
+            msg_type="Alert",
+            cap_event="Cuaca Ekstrem",
+            severity="Moderate",
+            urgency="Expected",
+            certainty="Likely",
+            effective=now - 2 * hour,
+            expires=now + hour,
+            superseded_at=now - hour,
+            content_hash="2" * 64,
+            first_seen_at=now - 2 * hour,
+            last_seen_at=now - hour,
+            is_simulated=False,
+        )
+        active = DisasterEvent(
+            id=cap_id,
+            source="BMKG_NOWCAST",
+            source_key="CAP-SMOKE-1",
+            category="extreme_weather",
+            title="Cuaca Antimeridian Smoke",
+            occurred_at=now - hour,
+            latitude=ring.centroid_latitude,
+            longitude=ring.centroid_longitude,
+            source_url="https://www.bmkg.go.id/alerts/nowcast/id",
+            sender="smoke@bmkg.go.id",
+            sent=now - hour,
+            status="Actual",
+            msg_type="Update",
+            cap_event="Cuaca Ekstrem",
+            severity="Severe",
+            urgency="Immediate",
+            certainty="Observed",
+            effective=now - hour,
+            expires=now + 2 * hour,
+            content_hash="3" * 64,
+            first_seen_at=now - hour,
+            last_seen_at=now,
+            is_simulated=False,
+        )
+        session.add(prior)
+        session.add(active)
+        session.flush()
+        save_areas(session, active, [("Pasifik Lintas Antimeridian", [ring])])
+        session.add(
+            EventReference(
+                event_id=cap_id,
+                relation_type="Update",
+                referenced_source_key=prior.source_key,
+                referenced_sender="smoke@bmkg.go.id",
+                referenced_sent=now - 2 * hour,
+                referenced_event_id=prior_id,
+            )
+        )
+        session.commit()
 
 
 def main():
@@ -42,9 +143,11 @@ def main():
                 media_signing_secret=secrets.token_urlsafe(48),
                 storage_root=temp,
             )
+            app = create_app(settings)
+            seed_smoke_events(app.state.engine, datetime.now(UTC))
             server = uvicorn.Server(
                 uvicorn.Config(
-                    create_app(settings),
+                    app,
                     host="127.0.0.1",
                     port=port,
                     proxy_headers=False,
