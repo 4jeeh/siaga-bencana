@@ -11,7 +11,7 @@ Dokumen ini adalah acuan bersama untuk **Codex (`gpt-6.2-astra`)** dan **Antigra
 3. **Database Wajib Relasional (SQL):** Menggunakan **PostgreSQL (Supabase)**. **DILARANG keras memakai NoSQL** (seperti Firestore atau MongoDB) sebagai database aplikasi. Wajib ada struktur tabel relasional (`Primary Key`, `Foreign Key`, `Index`).
 4. **Backend REST API Terpisah:** Dibangun dengan **Python FastAPI (`0.163.0` / Python `3.15`)** di folder `backend/`. Flutter **tidak boleh** mengakses tabel Supabase langsung untuk logika bisnis utama—semua alur data, sinkronisasi BMKG, kalkulasi radius lokasi, upload/validasi laporan warga, dan trigger notifikasi harus melewati Backend REST API FastAPI.
 5. **Karya Sendiri & Unik:** Tidak boleh copy-paste proyek orang lain; harus memiliki pembeda/fitur unggulan yang jelas.
-6. **Perkembangan Repo GitHub dari Awal:** Commit harus berjalan bertahap sejak Minggu 13 (mulai 15 Nov 2026) hingga rampung pada **27 Nov 2026** (freeze **24 Nov**), jauh sebelum UAS Minggu 16.
+6. **Perkembangan Repo GitHub dari Awal:** Commit harus berjalan bertahap sejak Minggu 13 (mulai 15 Nov 2026) hingga rampung pada **26 Nov 2026** (freeze **23 Nov**), jauh sebelum UAS Minggu 16.
 
 ---
 
@@ -66,7 +66,7 @@ Dokumen ini adalah acuan bersama untuk **Codex (`gpt-6.2-astra`)** dan **Antigra
   * *Planning & GitHub Workflow:* `superpowers` *(opsional)*, `coderabbit`, `codegraph` (MCP), `context7` (MCP), `keenable` *(nonaktif saat coding)*.
   * *Design & UI/UX Flutter:* `ui-ux-pro-max` (stack `flutter`), `impeccable`, `logo-design`, `generative-icons` (MCP), `figcraft` (MCP, menggantikan Figma untuk wireframe), `google_maps_platform` *(opsional jika kelak beralih ke Google Maps SDK)*.
   * *Flutter Build, Bugfix & Testing:* Plugin `flutter` (`dart-mcp-server`, `flutter-apply-architecture-best-practices`, `flutter-setup-declarative-routing`, `flutter-build-responsive-layout`, `flutter-use-http-package`, `flutter-implement-json-serialization`, `flutter-fix-layout-issues`, `dart-fix-runtime-errors`, `dart-run-static-analysis`, `dart-add-unit-test`, `flutter-add-widget-test`, `flutter-add-integration-test`, `flutter_a11y_agent`), `android-cli-plugin` (`device-hub`), `e2e`.
-  * *Backend FastAPI, PostgreSQL & Deploy:* `fastapi`, `python-testing-patterns`, `supabase` (`supabase_mcp`), `supabase-postgres-best-practices`, `postgresql-code-review`, `postgresql-optimization`, `postman` (`Hari 11 QA` saja), `use-railway` (`railway_mcp`), `security-audit`, `humanizer`.
+  * *Backend FastAPI, PostgreSQL & Deploy:* `fastapi`, `python-testing-patterns`, `supabase` (`supabase_mcp`), `supabase-postgres-best-practices`, `postgresql-code-review`, `postgresql-optimization`, `postman` (`Hari 10 QA` saja), `use-railway` (`railway_mcp`), `security-audit`, `humanizer`.
   * *(Catatan Antigravity: aktifkan **hanya** plugin/MCP yang dipakai hari itu sesuai `docs/SCHEDULE.md` dan baca hanya `2–3` file `SKILL.md` yang relevan agar baseline prompt selalu ringan.)*
 
 ---
@@ -81,7 +81,7 @@ Dokumen ini adalah acuan bersama untuk **Codex (`gpt-6.2-astra`)** dan **Antigra
 4. **Tanpa Web Admin Terpisah / Live Chat:** Jika butuh moderasi laporan, gunakan role/tab Admin di aplikasi Flutter yang sama atau Swagger `/docs` FastAPI.
 5. **Milestone Deadline (Internal Guardrail):**
    * **Hari 1–2 (15–16 Nov 2026):** Planning & Dokumen (`docs/`) — **Lock Planning di akhir 16 Nov**.
-   * **Hari 3–10 (17–24 Nov 2026):** Coding iteratif per slice — **Feature Freeze mutlak di 24 Nov**.
-   * **Hari 11–13 (25–27 Nov 2026):** QA/Testing, `security-audit`, Deploy Railway & fallback lokal, tag rilis `v1.0.0` pada **27 Nov 2026**.
-   * **28 Nov – UAS (Minggu 16):** Video demo min. 10 menit (YouTube) + Artikel maks. 11–12 halaman.
+   * **Hari 3–9 (17–23 Nov 2026):** Coding iteratif per slice (termasuk Double Slice `4A`+`4B` pada `22 Nov`) — **Feature Freeze mutlak di 23 Nov**.
+   * **Hari 10–12 (24–26 Nov 2026):** QA/Testing, `security-audit`, Deploy Railway & fallback lokal, tag rilis `v1.0.0` pada **26 Nov 2026**.
+   * **27 Nov – UAS (Minggu 16):** Video demo min. 10 menit (YouTube) + Artikel maks. 11–12 halaman.
 6. **Keamanan Repo:** DILARANG keras commit `.env`, API key, token, atau password database ke GitHub.

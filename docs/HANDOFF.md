@@ -2,8 +2,8 @@
 
 **Author:** Jiddan Ibnu Ali — **NIM:** 24051214203  
 **Peran:** Codex Planner & Architect  
-**Status:** **Slice 4A SELESAI (22 Nov 2026) — seluruh Backend Lapor Warga (`4A-1` JPEG Pillow/payload hash/storage/cleanup [`831df70`], `4A-2` endpoint `POST/GET /reports`, photo-url, claim/decision & concurrency `pytest` [`e37562d`]) tuntas (`ruff` bersih + `473 pytest` + `1 live smoke`); siap Hari 9 — Slice 4B (`UI-04` Flutter Lapor & Moderasi), Senin 23 November 2026.**  
-**Target:** feature freeze24Nov; rilis `v1.0.0`27Nov2026. Rilis belum dilaksanakan.
+**Status:** **Slice 4A SELESAI (22 Nov 2026) — seluruh Backend Lapor Warga (`4A-1` JPEG Pillow/payload hash/storage/cleanup [`831df70`], `4A-2` endpoint `POST/GET /reports`, photo-url, claim/decision & concurrency `pytest` [`e37562d`]) tuntas (`ruff` bersih + `473 pytest` + `1 live smoke`); jadwal dimajukan 1 hari (Double 22 Nov) -> siap Slice 4B (`UI-04` Flutter Lapor & Moderasi) hari ini, Minggu 22 November 2026.**  
+**Target:** feature freeze 23 Nov; rilis `v1.0.0` 26 Nov 2026. Rilis belum dilaksanakan.
 
 ## 1. Hasil sesi dan acuan
 
@@ -120,10 +120,10 @@ Seluruh path final berprefix `/api/v1`. DTO/contoh/error ada di [kontrak](API_CO
 | 17 Nov | **SELESAI:** Foundation, Auth, & DB Migration + mobile skeleton; 87 pytest + 12 widget + 1 live HTTP smoke lulus ([SLICE1_VERIFICATION.md](SLICE1_VERIFICATION.md)). |
 | 18 Nov | **SELESAI:** Akun/zona UI+API (`GET/PUT /api/v1/me/zone`, `UI-01c`, `UI-03` `pick_zone`, `UI-05` edit zona); 159 pytest + 23 widget + 1 live HTTP smoke lulus. |
 | 19–21 Nov | **SELESAI:** **19 Nov (`3A`):** TEWS+Nowcast/radar/lease/worker + `/events`, `/events/{id}`, `/map/markers` (`406 pytest` + `EXPLAIN` + `1 live smoke`); **20 Nov (`3B`):** `UI-02` Feed + `UI-03` Peta Browse (`42` test + `1 live smoke`); **21 Nov (`3C`):** `UI-06` Detail Bencana + MiniMap poligon + uji radar (`406 pytest` + `flutter analyze` bersih + `56` unit/widget test + `1 live smoke` lulus). |
-| 22–23 Nov | **22 Nov (`4A`) SELESAI (`831df70`, `e37562d`):** Sanitasi JPEG Pillow + `report-payload-v1` + adapter lokal/Supabase Storage & cleanup job, `POST/GET /reports` + photo-url privat + claim/decision atomik (`ruff` bersih + `473 pytest` + `1 live smoke` lulus); **23 Nov (`4B`):** siap `UI-04` Flutter Lapor Warga & Moderasi. |
-| 24 Nov | SSE/poll/catch-up/OS notification/uji perangkat/SIMULASI; **feature freeze malam24Nov**. |
-| 25–27 Nov | QA25, security+deploy/fallback26, smoke final+target tag v1.0.0 pada27Nov. |
-| Mulai28Nov | Video>=10menit; artikel<=11–12halaman. |
+| 22 Nov *(Double)* | **4A SELESAI (`831df70`, `e37562d`):** Sanitasi JPEG Pillow + `report-payload-v1` + adapter lokal/Supabase Storage & cleanup job, `POST/GET /reports` + photo-url privat + claim/decision atomik (`ruff` bersih + `473 pytest` + `1 live smoke` lulus); **4B (SIAP HARI INI):** `UI-04` Flutter Lapor Warga & Moderasi. |
+| 23 Nov | SSE/poll/catch-up/OS notification/uji perangkat/SIMULASI; **feature freeze malam 23 Nov**. |
+| 24–26 Nov | QA 24 Nov (+ opsional poles UI `Opus 5.5`), security+deploy/fallback 25 Nov, smoke final+target tag `v1.0.0` pada 26 Nov. |
+| Mulai 27 Nov | Video >= 10 menit; artikel <= 11–12 halaman. |
 
 Tiap slice berjalan secara **micro-batch terpisah** (`Backend` dan `Mobile` tidak digabung): **Codex** (`medium` default, `high` hanya di titik kritis `3A-1`/`4A`/`5`) menulis modul kode tanpa menjalankan `flutter.bat`/`.tooling/`/`git` (dengan panduan skill relevan disertakan di prompt); **Antigravity (`Orchestrator (Neon)`, fallback `Gemini 4 Argon` saat limit)** menangani `context7`/`pub add`, seluruh pengujian berat (`pytest`, `flutter analyze/test`, `smoke_live`, HP Android), perbaikan minor, serta commit/push; **`Orchestrator (Opus 5.5)`** opsional untuk poles UI akhir setelah semua fitur selesai atau saat bug mentok >30m. Maritim tetap pasca-UAS.
 
