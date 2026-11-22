@@ -17,6 +17,14 @@ from app.repositories.users import user_dto
 from app.schemas.auth import AuthData, LoginRequest, RegisterRequest, UserDTO
 from app.schemas.common import Envelope, StatusData, envelope, response_meta
 from app.schemas.events import Detail, Feed, FeedQuery, MapQuery, MarkerFeed
+from app.schemas.notifications import (
+    NotificationHistoryFeed,
+    NotificationHistoryQuery,
+    NotificationReadData,
+    NotificationReadRequest,
+    NotificationSyncFeed,
+    NotificationSyncQuery,
+)
 from app.schemas.reports import (
     ClaimRequest,
     DecisionRequest,
@@ -31,7 +39,7 @@ from app.schemas.reports import (
     VerificationQuery,
 )
 from app.schemas.zone import ZoneDTO, ZoneRequest
-from app.services import auth, events, reports, zones
+from app.services import auth, events, notifications, reports, zones
 from app.services.readiness import database_ready
 from app.services.report_payload import CATEGORIES
 
@@ -189,6 +197,37 @@ def get_zone(request: Request, session: SessionDep, user: UserDep):
 @router.put("/me/zone", response_model=Envelope[ZoneDTO])
 def put_zone(request: Request, body: ZoneRequest, session: SessionDep, user: UserDep):
     return envelope(request, zones.replace_zone(session, user.id, body, request.app.state.settings))
+
+
+@router.get("/me/notifications")
+def notification_history(
+    request: Request, session: SessionDep, user: UserDep,
+    query: Annotated[NotificationHistoryQuery, Query()],
+) -> NotificationHistoryFeed:
+    return notifications.history(session, user, query, response_meta(request))
+
+
+@router.get("/me/notifications/sync")
+def notification_sync(
+    request: Request, session: SessionDep, user: UserDep,
+    query: Annotated[NotificationSyncQuery, Query()],
+) -> NotificationSyncFeed:
+    user_id = user.id
+    # Release the auth connection before checking out the dedicated snapshot connection.
+    session.close()
+    state = request.app.state
+    return notifications.sync(state.engine, user_id, query, state.settings, response_meta(request))
+
+
+@router.post(
+    "/me/notifications/{notification_id}/read", response_model=Envelope[NotificationReadData]
+)
+def read_notification(
+    request: Request, notification_id: UUID, session: SessionDep, user: WriterDep,
+    body: NotificationReadRequest,
+):
+    data = notifications.mark_read(session, user, notification_id, request.app.state.settings)
+    return envelope(request, data)
 
 
 @router.post(

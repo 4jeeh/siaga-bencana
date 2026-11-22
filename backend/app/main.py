@@ -14,6 +14,7 @@ from app.core.errors import ApiError, error_response, install_handlers
 from app.core.rate_limit import RateLimiter
 from app.db.session import make_engine
 from app.schemas.events import FeedQuery, MapQuery
+from app.schemas.notifications import NotificationHistoryQuery, NotificationSyncQuery
 from app.schemas.reports import ReportListQuery, SignedPhotoQuery, VerificationQuery
 from app.services.bmkg_sync import scheduler
 from app.services.readiness import StorageProbe, start_storage, stop_storage
@@ -23,9 +24,12 @@ logger = logging.getLogger("siaga")
 AUTH_PATHS = {"/api/v1/auth/login": 5, "/api/v1/auth/register": 3}
 REPORTS_PATH = "/api/v1/reports"
 MODERATION_PATH = re.compile(r"/api/v1/reports/[^/]+/(claim|decision)")
+NOTIFICATION_READ_PATH = re.compile(r"/api/v1/me/notifications/[^/]+/read")
 VERIFICATIONS_PATH = re.compile(r"/api/v1/reports/[^/]+/verifications")
 MEDIA_PATH = re.compile(r"/api/v1/media/reports/[^/]+/photo")
 QUERY_FIELDS = {
+    ("GET", "/api/v1/me/notifications"): NotificationHistoryQuery.model_fields,
+    ("GET", "/api/v1/me/notifications/sync"): NotificationSyncQuery.model_fields,
     ("GET", "/api/v1/events"): FeedQuery.model_fields,
     ("GET", "/api/v1/map/markers"): MapQuery.model_fields,
     ("GET", REPORTS_PATH): ReportListQuery.model_fields,
@@ -128,7 +132,9 @@ def create_app(settings: Settings | None = None):
                     peer = request.client.host if request.client else "unknown"
                     app.state.limiter.check(f"{path}:{peer}", AUTH_PATHS[path])
                 json_post = request.method == "POST" and (
-                    path in AUTH_PATHS or MODERATION_PATH.fullmatch(path)
+                    path in AUTH_PATHS
+                    or MODERATION_PATH.fullmatch(path)
+                    or NOTIFICATION_READ_PATH.fullmatch(path)
                 )
                 json_request = json_post or (path == "/api/v1/me/zone" and request.method == "PUT")
                 media_type = request.headers.get("content-type", "").partition(";")[0].strip()

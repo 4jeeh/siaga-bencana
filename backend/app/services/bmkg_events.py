@@ -171,10 +171,8 @@ def settle_lifecycle(session, pending, now):
 
 
 def eligible_priority(event, record, zone, now):
-    if (
-        event.first_seen_at <= zone.alert_eligible_since
-        or event.occurred_at < zone.alert_eligible_since
-    ):
+    source_time = event.sent if event.source == NOWCAST else event.occurred_at
+    if event.first_seen_at <= zone.alert_eligible_since or source_time < zone.alert_eligible_since:
         return None
     common = dict(evaluated_at=now, zone_version=zone.zone_version)
     if event.source == TEWS:
@@ -233,12 +231,14 @@ def eligible_priority(event, record, zone, now):
 def notify(session, new_events, now):
     if not new_events:
         return
+    new_events = sorted(new_events, key=lambda item: (item[0].occurred_at, item[0].id))
     users = session.exec(
         select(User)
         .join(AlertZone, AlertZone.user_id == User.id)
         .where(User.active.is_(True))
         .order_by(User.id)
         .with_for_update(of=User)
+        .execution_options(populate_existing=True)
     ).all()
     by_id = {user.id: user for user in users}
     zones = session.exec(
@@ -246,6 +246,7 @@ def notify(session, new_events, now):
         .where(AlertZone.user_id.in_(by_id))
         .order_by(AlertZone.user_id)
         .with_for_update()
+        .execution_options(populate_existing=True)
     ).all()
     for zone in zones:
         user = by_id[zone.user_id]

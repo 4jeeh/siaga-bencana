@@ -1,4 +1,7 @@
+from sqlmodel import select
+
 from app.models.alert_zone import AlertZone
+from app.models.user import User
 from app.repositories.zones import by_user, zone_dto
 
 
@@ -10,6 +13,8 @@ def get_zone(session, user_id):
 def replace_zone(session, user_id, body, settings):
     # Authentication has already started this session's transaction.
     try:
+        # Serialize even the first zone creation, in the same lock order as notify().
+        session.exec(select(User.id).where(User.id == user_id).with_for_update()).one()
         zone = by_user(session, user_id, for_update=True)
         values = body.model_dump()
         if zone is None:
