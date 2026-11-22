@@ -1,3 +1,6 @@
+import '../reports/report_dto.dart';
+import '../reports/report_repository.dart';
+import '../reports/report_list_state.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../core/network/api_envelope.dart';
@@ -7,7 +10,7 @@ import '../events/event_repository.dart';
 import '../zone/zone_view_model.dart';
 
 class EventDetailViewModel extends ChangeNotifier {
-  EventDetailViewModel(this.repository, this.session, this.zone)
+  EventDetailViewModel(this.repository, this.session, this.zone, [this.reportRepository])
     : _generation = session.generation,
       _zoneVersion = zone.savedZone?.zoneVersion {
     session.addListener(_onSession);
@@ -15,6 +18,10 @@ class EventDetailViewModel extends ChangeNotifier {
   }
 
   final EventRepository repository;
+  final ReportRepository? reportRepository;
+  List<ReportDto> relatedReports = [];
+  String? relatedReportsError;
+  bool relatedReportsLoading = false;
   final SessionCoordinator session;
   final ZoneViewModel zone;
   int _generation;
@@ -33,6 +40,7 @@ class EventDetailViewModel extends ChangeNotifier {
 
   void _clear() {
     detail = null;
+    relatedReports = []; relatedReportsError = null; relatedReportsLoading = false;
     meta = null;
     lastLoadedAt = null;
     error = null;
@@ -93,6 +101,16 @@ class EventDetailViewModel extends ChangeNotifier {
         detail = result.data;
         meta = result.meta;
         lastLoadedAt = DateTime.now().toUtc();
+        final reports = reportRepository;
+        if (reports != null) {
+          initialLoading = refreshing = false;
+          relatedReportsLoading = true; relatedReportsError = null; notifyListeners();
+          try {
+            final result = await reports.fetchReports(scope: 'verified', eventId: eventId);
+            if (current()) relatedReports = result.items.where((report) => report.eventId == eventId && report.status == 'verified').toList();
+          } catch (error) { if (current()) relatedReportsError = reportError(error); }
+          finally { if (current()) relatedReportsLoading = false; }
+        }
       }
     } on ApiErrorEnvelope catch (e) {
       if (!current()) return;

@@ -266,7 +266,7 @@ void main() {
     final sheet = find.byType(BottomSheet);
     expect(find.descendant(of: sheet, matching: find.text('Warga — ditinjau admin aplikasi')), findsOneWidget);
     expect(find.descendant(of: sheet, matching: find.text('Banjir')), findsOneWidget);
-    expect(find.textContaining('jejak verifikasi penuh tersedia di Slice 4B'), findsOneWidget);
+    expect(find.text('Lihat laporan penuh'), findsOneWidget);
     expect(find.text('Detail Bencana'), findsNothing);
     expect(requests.where((uri) => uri.path.contains('/reports/')), isEmpty);
     await closeApp(tester);

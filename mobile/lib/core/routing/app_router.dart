@@ -55,15 +55,28 @@ GoRouter createRouter(
       ),
     ),
     ShellRoute(
-      builder: (context, state, child) =>
-          state.uri.queryParameters['mode'] == 'pick_zone' && state.uri.path == '/map'
-              ? child
-              : NavigationShell(location: state.uri.path, child: child),
+      builder: (context, state, child) {
+        final router = GoRouter.of(context);
+        return ListenableBuilder(
+          listenable: router.routerDelegate,
+          builder: (context, _) {
+            final config = router.routerDelegate.currentConfiguration;
+            final last = config.lastOrNull;
+            final uri = last is ImperativeRouteMatch
+                ? last.matches.uri
+                : (config.isNotEmpty ? config.uri : state.uri);
+            final picking = const {'pick_zone', 'pick_report'}.contains(uri.queryParameters['mode']) &&
+                uri.path == '/map';
+            return picking ? child : NavigationShell(location: uri.path, child: child);
+          },
+        );
+      },
       routes: [
         GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
         GoRoute(
           path: '/map',
           builder: (_, state) => MapScreen(
+            key: ValueKey(state.uri.queryParameters['mode'] ?? 'browse'),
             mode: state.uri.queryParameters['mode'] ?? 'browse',
             tileProvider: tileProvider,
           ),

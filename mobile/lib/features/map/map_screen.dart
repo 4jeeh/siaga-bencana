@@ -1,3 +1,5 @@
+import '../reports/reports_view_model.dart';
+import '../reports/report_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
@@ -36,7 +38,17 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_initialized || widget.mode != 'pick_zone') return;
+    if (_initialized) return;
+    if (widget.mode == 'pick_report') {
+      _initialized = true;
+      final reports = context.read<ReportsViewModel>();
+      if (validCoordinates(reports.draftLatitude, reports.draftLongitude)) {
+        _point = LatLng(reports.draftLatitude!, reports.draftLongitude!);
+        _latitude.text = '${_point!.latitude}'; _longitude.text = '${_point!.longitude}';
+      }
+      return;
+    }
+    if (widget.mode != 'pick_zone') return;
     _initialized = true;
     final vm = context.read<ZoneViewModel>();
     if (validCoordinates(vm.latitude, vm.longitude)) {
@@ -88,6 +100,7 @@ class _MapScreenState extends State<MapScreen> {
     if (context.canPop()) {
       context.pop();
     } else {
+      if (widget.mode == 'pick_report') { context.go('/reports'); return; }
       context.go(context.read<ZoneViewModel>().savedZone == null
           ? '/account' : '/account?edit=zone');
     }
@@ -104,10 +117,11 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.mode == 'browse') return _BrowseMap(tileProvider: widget.tileProvider);
-    if (widget.mode != 'pick_zone') {
+    final pickingReport = widget.mode == 'pick_report';
+    if (!pickingReport && widget.mode != 'pick_zone') {
       return const PlaceholderPage(title: 'Peta', icon: Icons.map_outlined);
     }
-    final vm = context.watch<ZoneViewModel>();
+    final vm = pickingReport ? null : context.watch<ZoneViewModel>();
     final simulated = context.watch<AuthViewModel>().healthMeta?.isSimulated == true;
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
@@ -144,7 +158,7 @@ class _MapScreenState extends State<MapScreen> {
                     errorTileCallback: (_, _, _) => _tileError(),
                   ),
                   if (_point != null) ...[
-                    CircleLayer(circles: [CircleMarker(
+                    if (vm != null) CircleLayer(circles: [CircleMarker(
                       point: _point!, radius: vm.radiusKm * 1000.0,
                       useRadiusInMeter: true,
                       color: colors.primary.withValues(alpha: 0.12),
@@ -153,7 +167,7 @@ class _MapScreenState extends State<MapScreen> {
                     MarkerLayer(markers: [Marker(
                       point: _point!, width: 48, height: 48,
                       child: Icon(Icons.location_on, color: colors.primary,
-                        size: 40, semanticLabel: 'Titik pantau terpilih'),
+                        size: 40, semanticLabel: pickingReport ? 'Titik laporan terpilih' : 'Titik pantau terpilih'),
                     )]),
                   ],
                 ],
@@ -185,8 +199,10 @@ class _MapScreenState extends State<MapScreen> {
                 if (_point == null) const Text('Konfirmasi belum tersedia: masukkan kedua koordinat yang valid.'),
                 FilledButton(
                   key: const Key('confirm-point'),
-                  onPressed: _point == null || vm.busy ? null : () {
-                    vm.selectPoint(_point!.latitude, _point!.longitude);
+                  onPressed: _point == null || vm?.busy == true ? null : () {
+                    if (pickingReport) {
+                      context.read<ReportsViewModel>().selectDraftPoint(_point!.latitude, _point!.longitude);
+                    } else { vm!.selectPoint(_point!.latitude, _point!.longitude); }
                     _back();
                   },
                   child: const Text('Konfirmasi titik'),
@@ -266,11 +282,14 @@ class _BrowseMapState extends State<_BrowseMap> {
           if (marker.kind == 'event')
             FilledButton(onPressed: () => Navigator.pop(sheet, true), child: const Text('Detail Bencana'))
           else
-            const Text('Foto dan jejak verifikasi penuh tersedia di Slice 4B.'),
+            FilledButton(onPressed: () => Navigator.pop(sheet, true), child: const Text('Lihat laporan penuh')),
         ]),
       )),
     );
-    if (detail == true && mounted) context.push('/events/${marker.id}');
+    if (detail != true || !mounted) return;
+    if (marker.kind == 'report') {
+      await showReportById(context, marker.id);
+    } else { context.push('/events/${marker.id}'); }
   }
 
   Widget _map(MapViewModel vm, ZoneDto? zone) {

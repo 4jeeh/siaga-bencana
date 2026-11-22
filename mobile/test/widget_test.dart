@@ -775,7 +775,7 @@ void main() {
         if (path == '/home') expect(markerRequests, 0);
         if (path == '/map') expect(markerRequests, greaterThan(0));
         if (path == '/reports') {
-          expect(find.text('Dalam pengembangan Slice berikutnya'), findsOneWidget);
+          expect(find.text('Tulis Laporan'), findsOneWidget);
         }
         if (!path.startsWith('/events/')) {
           expect(find.byType(NavigationBar), findsOneWidget);

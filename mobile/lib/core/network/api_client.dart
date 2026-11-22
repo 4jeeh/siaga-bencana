@@ -1,10 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import '../session/session_coordinator.dart';
 import 'api_envelope.dart';
+
+class MultipartApiEnvelope {
+  const MultipartApiEnvelope(this.envelope, this.idempotentReplay);
+  final ApiEnvelope envelope;
+  final bool idempotentReplay;
+}
 
 class ApiClient {
   ApiClient({
@@ -17,8 +25,24 @@ class ApiClient {
   final SessionCoordinator session;
   Future<ApiEnvelope> get(String path, {bool authenticated = false}) =>
       _request('GET', path, authenticated: authenticated);
-  Future<ApiEnvelope> post(String path, Map<String, dynamic> data) =>
-      _request('POST', path, data: data);
+  Future<ApiEnvelope> post(String path, Map<String, dynamic> data, {bool authenticated = false}) =>
+      _request('POST', path, data: data, authenticated: authenticated);
+
+  Future<MultipartApiEnvelope> postMultipart(String path, {
+    required Map<String, String> fields, Uint8List? fileBytes, String fileField = 'photo',
+    String filename = 'report.jpg', MediaType? contentType, bool authenticated = true,
+  }) async {
+    var replay = false;
+    final json = await _sendJson('POST', path, authenticated: authenticated,
+      multipart: (uri) => http.MultipartRequest('POST', uri)
+        ..fields.addAll(fields)
+        ..files.addAll([if (fileBytes != null) http.MultipartFile.fromBytes(fileField, fileBytes,
+          filename: filename, contentType: contentType ?? MediaType('image', 'jpeg'))]),
+      onResponse: (response) => replay = response.headers.entries.any(
+        (header) => header.key.toLowerCase() == 'idempotent-replay' && header.value.trim() == 'true',
+      ));
+    return MultipartApiEnvelope(_envelope(json), replay);
+  }
   Future<ApiEnvelope> put(
     String path,
     Map<String, dynamic> data, {
@@ -31,6 +55,10 @@ class ApiClient {
     bool authenticated = false,
   }) async {
     final json = await _sendJson(method, path, data: data, authenticated: authenticated);
+    return _envelope(json);
+  }
+
+  ApiEnvelope _envelope(Map<String, dynamic> json) {
     try {
       return ApiEnvelope.fromJson(json);
     } on FormatException {
@@ -50,6 +78,8 @@ class ApiClient {
     String method,
     String path, {
     Map<String, String>? queryParameters,
+    http.MultipartRequest Function(Uri)? multipart,
+    void Function(http.Response)? onResponse,
     Map<String, dynamic>? data,
     bool authenticated = false,
   }) async {
@@ -74,15 +104,17 @@ class ApiClient {
       '${baseUrl.toString().replaceFirst(RegExp(r'/$'), '')}$path',
     );
     final uri = endpoint.replace(queryParameters: queryParameters);
+    var statusCode = 0;
     try {
-      final request = http.Request(method, uri)
+      final request = (multipart?.call(uri) ?? http.Request(method, uri))
         ..headers.addAll(headers)
         ..followRedirects = false;
-      if (data != null) request.body = jsonEncode(data);
+      if (data != null) (request as http.Request).body = jsonEncode(data);
       final response = await client
           .send(request)
           .then(http.Response.fromStream)
-          .timeout(const Duration(seconds: 15));
+          .timeout(Duration(seconds: multipart == null ? 15 : 25));
+      statusCode = response.statusCode;
       if (authenticated && generation != session.generation) {
         throw const ApiErrorEnvelope(
           code: 'SESSION_CHANGED',
@@ -101,6 +133,7 @@ class ApiClient {
           retryAfter: int.tryParse(response.headers['retry-after'] ?? ''),
         );
       }
+      onResponse?.call(response);
       return json;
     } on ApiErrorEnvelope {
       rethrow;
@@ -115,12 +148,14 @@ class ApiClient {
         message: 'API tidak terjangkau. Coba lagi.',
       );
     } on FormatException {
-      throw const ApiErrorEnvelope(
+      throw ApiErrorEnvelope(
+        statusCode: statusCode,
         code: 'INVALID_RESPONSE',
         message: 'Respons API tidak valid.',
       );
     } on TypeError {
-      throw const ApiErrorEnvelope(
+      throw ApiErrorEnvelope(
+        statusCode: statusCode,
         code: 'INVALID_RESPONSE',
         message: 'Respons API tidak valid.',
       );

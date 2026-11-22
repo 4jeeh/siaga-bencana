@@ -1,3 +1,4 @@
+import '../reports/report_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -250,9 +251,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      const _Section('Laporan warga terkait', [
-                        Text('Warga — ditinjau admin aplikasi'),
-                        Text('Belum ada laporan warga ditinjau yang terkait'),
+                      _Section('Laporan warga terkait', [
+                        const Text('Warga — ditinjau admin aplikasi'),
+                        if (vm.relatedReportsLoading) const LinearProgressIndicator()
+                        else if (vm.relatedReportsError != null) reportNotice(vm.relatedReportsError!)
+                        else if (vm.relatedReports.isEmpty) const Text('Belum ada laporan warga ditinjau yang terkait'),
+                        for (final report in vm.relatedReports) ...[Text(report.description),
+                          OutlinedButton(onPressed: () => showReportPanel(context, report), child: const Text('Lihat'))],
                       ]),
                     ],
                   ],

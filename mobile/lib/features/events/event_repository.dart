@@ -14,6 +14,12 @@ class EventRepository {
     return EventDetailEnvelopeDto.fromJson(json);
   }
 
+  Future<EventFeedDto> fetchReportEventChoices() async => EventFeedDto.fromJson(
+    await api.getJson('/events', authenticated: true, queryParameters: const {
+      'radius_only': 'false', 'limit': '20', 'offset': '0',
+    }),
+  );
+
   Future<EventFeedDto> fetchEvents({
     String? category,
     bool radiusOnly = true,

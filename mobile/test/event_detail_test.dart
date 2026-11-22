@@ -67,7 +67,7 @@ Future<List<Uri>> _open(
         if (path.endsWith('/me/zone')) {
           return ok({...zoneJson, 'latitude': 0, 'longitude': 179.9, 'radius_km': 25});
         }
-        if (path.endsWith('/events')) return emptyFeed();
+        if (path.endsWith('/events') || path.endsWith('/reports')) return emptyFeed();
         if (path.endsWith('/health')) return ok({'status': 'ok'});
         fail('Unexpected API path $path');
       }),
@@ -331,7 +331,8 @@ void main() {
     await _tap(tester, 'Laporkan kondisi terkait');
     expect(router.state.uri.toString(), '/reports?event_id=$quakeKey');
     expect(find.text('Terkait event: $quakeKey'), findsOneWidget);
-    expect(calls.where((uri) => uri.path.endsWith('/reports')), isEmpty);
+    expect(calls.where((uri) => uri.path.endsWith('/reports') && uri.queryParameters['scope'] == 'verified')
+        .map((uri) => uri.queryParameters['event_id']), contains(quakeKey));
     await _close(tester);
   });
 

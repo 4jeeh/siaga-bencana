@@ -1,3 +1,7 @@
+import 'features/reports/moderation_view_model.dart';
+import 'features/reports/report_repository.dart';
+import 'features/reports/report_photo_service.dart';
+import 'features/reports/reports_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
@@ -28,6 +32,7 @@ class SiagaApp extends StatefulWidget {
     this.initialLocation = '/account',
     this.textScaler,
     this.locationService,
+    this.photoService,
     this.tileProvider,
   });
   final http.Client client;
@@ -36,6 +41,7 @@ class SiagaApp extends StatefulWidget {
   final String initialLocation;
   final TextScaler? textScaler;
   final LocationService? locationService;
+  final ReportPhotoService? photoService;
   final TileProvider? tileProvider;
   @override
   State<SiagaApp> createState() => _SiagaAppState();
@@ -50,6 +56,8 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
   late final EventFeedViewModel feed;
   late final MapViewModel map;
   late final EventDetailViewModel detail;
+  late final ReportsViewModel reports;
+  late final ModerationViewModel moderation;
   @override
   void initState() {
     super.initState();
@@ -67,7 +75,11 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
     auth = AuthViewModel(AuthRepository(api), session);
     final events = EventRepository(api);
     feed = EventFeedViewModel(events, session, zone);
-    detail = EventDetailViewModel(events, session, zone);
+    final repository = ReportRepository(api);
+    reports = ReportsViewModel(repository, events, session, zone,
+      widget.locationService ?? const GeolocatorLocationService(), widget.photoService ?? ImagePickerReportPhotoService());
+    moderation = ModerationViewModel(repository, session, zone)..refreshReports = reports.refreshLists;
+    detail = EventDetailViewModel(events, session, zone, repository);
     map = MapViewModel(MapRepository(api), session, zone);
     router = createRouter(
       session, initialLocation: widget.initialLocation,
@@ -89,6 +101,8 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
     router.dispose();
     auth.dispose();
     detail.dispose();
+    moderation.dispose();
+    reports.dispose();
     feed.dispose();
     map.dispose();
     zone.dispose();
@@ -105,6 +119,8 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
       ChangeNotifierProvider.value(value: zone),
       ChangeNotifierProvider.value(value: feed),
       ChangeNotifierProvider.value(value: detail),
+      ChangeNotifierProvider.value(value: reports),
+      ChangeNotifierProvider.value(value: moderation),
       ChangeNotifierProvider.value(value: map),
     ],
     child: MaterialApp.router(
