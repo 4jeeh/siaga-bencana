@@ -76,13 +76,42 @@ def mark_read(session, user, notification_id, settings):
         raise ApiError(503, "SERVICE_UNAVAILABLE", "Waktu baca tidak dapat disimpan.") from None
 
 
-def sync(engine, user_id, query, settings, meta):
-    cursor = query.catch_up()
-    if cursor is not None and cursor[0] != user_id:
+def require_cursor_owner(owner, user_id):
+    if owner != user_id:
         raise ApiError(
             409, "CURSOR_USER_MISMATCH", "Cursor notifikasi tidak sesuai dengan akun aktif.",
             {"action": "fetch_baseline"},
         )
+
+
+def notification_gap(user_id, since, hwm):
+    logger.error("notification_gap user_id=%s since=%s hwm=%s", user_id, since, hwm)
+    return ApiError(
+        503, "SERVICE_UNAVAILABLE", "Integritas urutan notifikasi terganggu. Coba lagi nanti.",
+    )
+
+
+def read_batch(session, user_id, since, hwm, limit, now):
+    if since > hwm:
+        raise ApiError(
+            409, "CURSOR_OUT_OF_RANGE", "Cursor notifikasi melebihi batas terbaru.",
+            {"action": "fetch_baseline"},
+        )
+    expected = min(limit, hwm - since)
+    if not expected:
+        return []
+    rows = repo.catch_up_rows(session, user_id, since, hwm, limit)
+    if len(rows) != expected or any(
+        log.sequence != sequence for sequence, (log, _) in enumerate(rows, start=since + 1)
+    ):
+        raise notification_gap(user_id, since, hwm)
+    return [build_notification_dto(log, event, now) for log, event in rows]
+
+
+def sync(engine, user_id, query, settings, meta):
+    cursor = query.catch_up()
+    if cursor is not None:
+        require_cursor_owner(cursor[0], user_id)
     with engine.connect().execution_options(
         isolation_level="REPEATABLE READ", postgresql_readonly=True
     ) as conn, Session(bind=conn) as session:
@@ -91,24 +120,8 @@ def sync(engine, user_id, query, settings, meta):
         next_sequence = hwm
         if cursor is not None:
             _, since, limit = cursor
-            if since > hwm:
-                raise ApiError(
-                    409, "CURSOR_OUT_OF_RANGE", "Cursor notifikasi melebihi batas terbaru.",
-                    {"action": "fetch_baseline"},
-                )
-            rows = repo.catch_up_rows(session, user_id, since, hwm, limit)
-            expected = min(limit, hwm - since)
-            if len(rows) != expected or [log.sequence for log, _ in rows] != list(
-                range(since + 1, since + expected + 1)
-            ):
-                logger.error("notification_gap user_id=%s since=%s hwm=%s", user_id, since, hwm)
-                raise ApiError(
-                    503, "SERVICE_UNAVAILABLE",
-                    "Integritas urutan notifikasi terganggu. Coba lagi nanti.",
-                )
-            now = settings.domain_now()
-            items = [build_notification_dto(log, event, now) for log, event in rows]
-            next_sequence = rows[-1][0].sequence if rows else since
+            items = read_batch(session, user_id, since, hwm, limit, settings.domain_now())
+            next_sequence = items[-1].sequence if items else since
     return NotificationSyncFeed(
         items=items, cursor_user_id=user_id, high_water_mark=hwm, next_sequence=next_sequence,
         has_more=next_sequence < hwm, meta=meta,

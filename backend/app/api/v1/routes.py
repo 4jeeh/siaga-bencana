@@ -1,8 +1,11 @@
+import asyncio
 import re
+from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Path, Query, Request, Response
+from fastapi import APIRouter, Depends, Header, Path, Query, Request, Response
+from fastapi.responses import StreamingResponse
 from python_multipart.multipart import parse_options_header
 from sqlmodel import Session
 from starlette.datastructures import UploadFile
@@ -10,7 +13,7 @@ from starlette.exceptions import HTTPException
 from starlette.formparsers import MultiPartException
 
 from app.core.errors import ApiError
-from app.core.security import decode_token
+from app.core.security import decode_token_claims
 from app.db.session import get_session
 from app.models.user import User
 from app.repositories.users import user_dto
@@ -22,6 +25,7 @@ from app.schemas.notifications import (
     NotificationHistoryQuery,
     NotificationReadData,
     NotificationReadRequest,
+    NotificationStreamQuery,
     NotificationSyncFeed,
     NotificationSyncQuery,
 )
@@ -39,7 +43,7 @@ from app.schemas.reports import (
     VerificationQuery,
 )
 from app.schemas.zone import ZoneDTO, ZoneRequest
-from app.services import auth, events, notifications, reports, zones
+from app.services import auth, events, notification_stream, notifications, reports, zones
 from app.services.readiness import database_ready
 from app.services.report_payload import CATEGORIES
 
@@ -54,7 +58,7 @@ def current_user(request: Request, session: SessionDep):
     parts = header.split()
     if len(parts) != 2 or parts[0].lower() != "bearer":
         raise ApiError(401, "TOKEN_INVALID", "Sesi tidak valid, masuk kembali.")
-    user_id = decode_token(parts[1], request.app.state.settings)
+    user_id, request.state.token_expires = decode_token_claims(parts[1], request.app.state.settings)
     user = session.get(User, user_id)
     if not user or not user.active:
         raise ApiError(401, "TOKEN_INVALID", "Sesi tidak valid, masuk kembali.")
@@ -217,6 +221,46 @@ def notification_sync(
     session.close()
     state = request.app.state
     return notifications.sync(state.engine, user_id, query, state.settings, response_meta(request))
+
+
+def stream_cursor(
+    request: Request, session: SessionDep, user: UserDep,
+    query: Annotated[NotificationStreamQuery, Query()],
+    last_event_ids: Annotated[list[str] | None, Header(alias="Last-Event-ID")] = None,
+):
+    user_id = user.id
+    session.close()
+    owner, since = query.cursor(last_event_ids)
+    notifications.require_cursor_owner(owner, user_id)
+    # Request-scoped cleanup also covers disconnects before the first generator iteration.
+    with request.app.state.stream_registry.reserve(user_id):
+        yield user_id, since
+
+
+@router.get(
+    "/me/notifications/stream", response_class=StreamingResponse,
+    responses={200: {"content": {"text/event-stream": {"schema": {"type": "string"}}}}},
+)
+async def stream_notifications(
+    request: Request, cursor: Annotated[tuple[UUID, int], Depends(stream_cursor, scope="request")],
+):
+    state = request.app.state
+    user_id, since = cursor
+    first = await asyncio.to_thread(
+        notification_stream.snapshot, state, user_id, since, initial=True
+    )
+    expires = request.state.token_expires
+    if expires <= datetime.now(UTC):
+        raise ApiError(401, "TOKEN_EXPIRED", "Sesi berakhir, masuk kembali.")
+    if state.stop.is_set():
+        raise ApiError(503, "SERVICE_UNAVAILABLE", "Layanan notifikasi sedang berhenti.")
+    return StreamingResponse(
+        notification_stream.frames(state, user_id, since, expires, first),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-store", "Connection": "keep-alive", "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.post(

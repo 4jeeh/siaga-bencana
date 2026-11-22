@@ -15,9 +15,10 @@ LOWER_UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0
 
 
 def invalid_query(field: str) -> ApiError:
+    path = "header.Last-Event-ID" if field == "Last-Event-ID" else f"query.{field}"
     return ApiError(
         422, "VALIDATION_ERROR", "Parameter notifikasi tidak valid.",
-        {"fields": [{"field": f"query.{field}", "code": "invalid_value"}]},
+        {"fields": [{"field": path, "code": "invalid_value"}]},
     )
 
 
@@ -80,6 +81,29 @@ class NotificationSyncQuery(BaseModel):
         if not 1 <= limit <= 50:
             raise invalid_query("limit")
         return owner, since, limit
+
+
+class NotificationStreamQuery(BaseModel):
+    since_sequence: str | None = None
+    cursor_user_id: str | None = None
+
+    def cursor(self, last_event_ids: list[str] | None) -> tuple[UUID, int]:
+        if last_event_ids:
+            if len(last_event_ids) != 1:
+                raise invalid_query("Last-Event-ID")
+            owner, _, sequence = last_event_ids[0].partition(":")
+            return (
+                parse_cursor_user_id(owner, field="Last-Event-ID"),
+                parse_sequence(sequence, field="Last-Event-ID"),
+            )
+        if self.cursor_user_id is None:
+            raise invalid_query("cursor_user_id")
+        if self.since_sequence is None:
+            raise invalid_query("since_sequence")
+        return (
+            parse_cursor_user_id(self.cursor_user_id, field="cursor_user_id"),
+            parse_sequence(self.since_sequence, field="since_sequence"),
+        )
 
 
 class NotificationReadRequest(BaseModel):

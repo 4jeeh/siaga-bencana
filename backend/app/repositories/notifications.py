@@ -1,6 +1,7 @@
 from sqlalchemy import func, update
 from sqlmodel import select
 
+from app.core.errors import ApiError
 from app.models.disaster_event import DisasterEvent
 from app.models.notification_log import NotificationLog
 from app.models.user import User
@@ -46,7 +47,19 @@ def set_first_read(session, user_id, notification_id, now):
 
 
 def high_water_mark(session, user_id):
-    return session.exec(select(User.last_notification_sequence).where(User.id == user_id)).one()
+    hwm = session.exec(select(User.last_notification_sequence).where(
+        User.id == user_id, User.active.is_(True)
+    )).one_or_none()
+    if hwm is None:
+        raise ApiError(401, "TOKEN_INVALID", "Sesi tidak valid, masuk kembali.")
+    return hwm
+
+
+def retained_count(session, user_id, hwm):
+    # The unique (user_id, sequence) index makes this an exact check of 1..hwm.
+    return session.exec(select(func.count()).select_from(NotificationLog).where(
+        NotificationLog.user_id == user_id, NotificationLog.sequence.between(1, hwm)
+    )).one()
 
 
 def catch_up_rows(session, user_id, since, hwm, limit):

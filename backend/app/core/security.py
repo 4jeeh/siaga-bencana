@@ -24,7 +24,7 @@ def issue_token(user_id, settings):
     return jwt.encode(claims, settings.jwt_secret.get_secret_value(), algorithm="HS256"), expires
 
 
-def decode_token(token, settings):
+def decode_token_claims(token, settings) -> tuple[UUID, datetime]:
     try:
         claims = jwt.decode(
             token,
@@ -40,8 +40,12 @@ def decode_token(token, settings):
             or claims["exp"] <= claims["iat"]
         ):
             raise ValueError("Invalid token times")
-        return UUID(claims["sub"])
+        return UUID(claims["sub"]), datetime.fromtimestamp(claims["exp"], UTC)
     except jwt.ExpiredSignatureError:
         raise ApiError(401, "TOKEN_EXPIRED", "Sesi berakhir, masuk kembali.") from None
-    except jwt.InvalidTokenError, ValueError, TypeError, AttributeError:
+    except jwt.InvalidTokenError, ValueError, TypeError, AttributeError, OverflowError, OSError:
         raise ApiError(401, "TOKEN_INVALID", "Sesi tidak valid, masuk kembali.") from None
+
+
+def decode_token(token, settings):
+    return decode_token_claims(token, settings)[0]

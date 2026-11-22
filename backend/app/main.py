@@ -14,9 +14,14 @@ from app.core.errors import ApiError, error_response, install_handlers
 from app.core.rate_limit import RateLimiter
 from app.db.session import make_engine
 from app.schemas.events import FeedQuery, MapQuery
-from app.schemas.notifications import NotificationHistoryQuery, NotificationSyncQuery
+from app.schemas.notifications import (
+    NotificationHistoryQuery,
+    NotificationStreamQuery,
+    NotificationSyncQuery,
+)
 from app.schemas.reports import ReportListQuery, SignedPhotoQuery, VerificationQuery
 from app.services.bmkg_sync import scheduler
+from app.services.notification_stream import StreamRegistry
 from app.services.readiness import StorageProbe, start_storage, stop_storage
 from app.services.storage import build_storage_adapter
 
@@ -30,6 +35,7 @@ MEDIA_PATH = re.compile(r"/api/v1/media/reports/[^/]+/photo")
 QUERY_FIELDS = {
     ("GET", "/api/v1/me/notifications"): NotificationHistoryQuery.model_fields,
     ("GET", "/api/v1/me/notifications/sync"): NotificationSyncQuery.model_fields,
+    ("GET", "/api/v1/me/notifications/stream"): NotificationStreamQuery.model_fields,
     ("GET", "/api/v1/events"): FeedQuery.model_fields,
     ("GET", "/api/v1/map/markers"): MapQuery.model_fields,
     ("GET", REPORTS_PATH): ReportListQuery.model_fields,
@@ -75,7 +81,7 @@ def create_app(settings: Settings | None = None):
     @asynccontextmanager
     async def lifespan(app):
         task = await start_storage(app.state.storage_probe)
-        stop = asyncio.Event()
+        stop = app.state.stop = asyncio.Event()
         worker = (
             asyncio.create_task(scheduler(app.state.engine, settings, stop))
             if settings.bmkg_sync_enabled
@@ -94,6 +100,11 @@ def create_app(settings: Settings | None = None):
     app.state.settings = settings
     app.state.engine = make_engine(settings)
     app.state.limiter = RateLimiter()
+    app.state.stop = asyncio.Event()
+    app.state.stream_registry = StreamRegistry()
+    app.state.stream_poll_seconds = 2
+    app.state.stream_heartbeat_seconds = 20
+    app.state.stream_batch_size = 20
     app.state.storage_probe = StorageProbe(settings)
     app.state.storage = build_storage_adapter(settings)
     app.state.in_flight_uploads = set()
@@ -102,7 +113,7 @@ def create_app(settings: Settings | None = None):
             CORSMiddleware,
             allow_origins=settings.cors_origins,
             allow_methods=["GET", "POST", "PUT"],
-            allow_headers=["Authorization", "Content-Type", "Accept"],
+            allow_headers=["Authorization", "Content-Type", "Accept", "Last-Event-ID"],
             expose_headers=["X-Request-ID", "Retry-After", "Location", "Idempotent-Replay"],
         )
 
