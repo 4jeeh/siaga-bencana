@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:provider/provider.dart';
 import 'package:siaga_bencana/app.dart';
+import 'package:siaga_bencana/features/notifications/local_notification_service.dart';
 import 'package:siaga_bencana/core/session/session_coordinator.dart';
 import 'package:siaga_bencana/core/network/api_client.dart';
 import 'package:siaga_bencana/features/event_detail/event_detail_screen.dart';
@@ -52,6 +53,8 @@ Future<List<Uri>> _open(
   final calls = <Uri>[];
   await tester.pumpWidget(
     SiagaApp(
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
       initialLocation: '/events/$id',
       session: session,
       baseUrl: base,

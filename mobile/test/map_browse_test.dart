@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:provider/provider.dart';
 import 'package:siaga_bencana/app.dart';
+import 'package:siaga_bencana/features/notifications/local_notification_service.dart';
 import 'package:siaga_bencana/core/network/api_client.dart';
 import 'package:siaga_bencana/core/session/session_coordinator.dart';
 import 'package:siaga_bencana/features/event_detail/event_detail_screen.dart';
@@ -61,6 +62,8 @@ Future<List<Uri>> openBrowse(WidgetTester tester, Json data, {bool broken = fals
   final session = signedIn();
   addTearDown(session.dispose);
   await tester.pumpWidget(SiagaApp(
+    autoStartNotifications: false,
+    localNotificationService: const NoopLocalNotificationService(),
     session: session, baseUrl: base, initialLocation: '/map',
     tileProvider: TestTileProvider(broken: broken), textScaler: const TextScaler.linear(2),
     client: MockClient((request) async {

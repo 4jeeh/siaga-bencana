@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:siaga_bencana/app.dart';
+import 'package:siaga_bencana/features/notifications/local_notification_service.dart';
 import 'package:siaga_bencana/core/network/api_client.dart';
 import 'package:siaga_bencana/core/network/api_envelope.dart';
 import 'package:siaga_bencana/core/routing/app_router.dart';
@@ -239,6 +240,8 @@ void main() {
     final location = FakeLocationService();
     final requests = <String>[];
     await tester.pumpWidget(SiagaApp(
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
       session: session, baseUrl: base, locationService: location,
       textScaler: const TextScaler.linear(2),
       client: MockClient((request) async {
@@ -281,6 +284,8 @@ void main() {
         'Izin lokasi ditolak. Pilih titik manual.', canOpenSettings: permanentlyDenied));
       final requests = <String>[];
       await tester.pumpWidget(SiagaApp(
+        autoStartNotifications: false,
+        localNotificationService: const NoopLocalNotificationService(),
         session: session, baseUrl: base, locationService: location,
         tileProvider: TestTileProvider(), textScaler: const TextScaler.linear(2),
         client: MockClient((request) async {
@@ -345,6 +350,8 @@ void main() {
     addTearDown(session.dispose);
     Map<String, dynamic>? body;
     await tester.pumpWidget(SiagaApp(
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
       session: session, baseUrl: base, initialLocation: '/profile',
       textScaler: const TextScaler.linear(2),
       client: MockClient((request) async {
@@ -378,6 +385,8 @@ void main() {
     final session = signedIn(zone: false);
     addTearDown(session.dispose);
     await tester.pumpWidget(SiagaApp(
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
       session: session, baseUrl: base, initialLocation: '/map?mode=pick_zone',
       tileProvider: TestTileProvider(broken: true),
       client: MockClient((request) async => request.url.path.endsWith('/health')
@@ -596,6 +605,8 @@ void main() {
     final paths = <String>[];
     await tester.pumpWidget(
       SiagaApp(
+        autoStartNotifications: false,
+        localNotificationService: const NoopLocalNotificationService(),
         baseUrl: base,
         textScaler: const TextScaler.linear(2),
         client: MockClient((request) async {
@@ -646,6 +657,8 @@ void main() {
         });
         await tester.pumpWidget(
           SiagaApp(
+            autoStartNotifications: false,
+            localNotificationService: const NoopLocalNotificationService(),
             client: mock,
             baseUrl: base,
             textScaler: const TextScaler.linear(2),
@@ -704,6 +717,8 @@ void main() {
       var markerRequests = 0;
       await tester.pumpWidget(
         SiagaApp(
+          autoStartNotifications: false,
+          localNotificationService: const NoopLocalNotificationService(),
           client: MockClient((request) async {
             if (request.url.path.startsWith('/api/v1/events/')) {
               final detail = quakeDetail(id: request.url.pathSegments.last);
@@ -792,6 +807,8 @@ void main() {
   testWidgets('offline health never invents live mode', (tester) async {
     await tester.pumpWidget(
       SiagaApp(
+        autoStartNotifications: false,
+        localNotificationService: const NoopLocalNotificationService(),
         baseUrl: base,
         client: MockClient((_) async {
           throw http.ClientException('offline');

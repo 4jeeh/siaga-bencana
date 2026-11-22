@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:provider/provider.dart';
 import 'package:siaga_bencana/app.dart';
+import 'package:siaga_bencana/features/notifications/local_notification_service.dart';
 import 'package:siaga_bencana/core/network/api_client.dart';
 import 'package:siaga_bencana/core/session/session_coordinator.dart';
 import 'package:siaga_bencana/core/utils/time_format.dart';
@@ -95,6 +96,8 @@ Future<void> openHome(WidgetTester tester, Future<http.Response> Function(http.R
   final session = signedIn();
   addTearDown(session.dispose);
   await tester.pumpWidget(SiagaApp(
+    autoStartNotifications: false,
+    localNotificationService: const NoopLocalNotificationService(),
     baseUrl: base, session: session, initialLocation: '/home', textScaler: const TextScaler.linear(2),
     client: MockClient((request) async {
       if (request.url.path.endsWith('/events')) return events(request);

@@ -9,6 +9,7 @@ import 'package:http/testing.dart';
 import 'package:image/image.dart' as img;
 import 'package:provider/provider.dart';
 import 'package:siaga_bencana/app.dart';
+import 'package:siaga_bencana/features/notifications/local_notification_service.dart';
 import 'package:siaga_bencana/core/network/api_client.dart';
 import 'package:siaga_bencana/core/network/api_envelope.dart';
 import 'package:siaga_bencana/core/session/session_coordinator.dart';
@@ -87,7 +88,10 @@ Future<void> openApp(WidgetTester tester, SessionCoordinator session, Future<htt
   tester.view.physicalSize = const Size(360, 800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset); addTearDown(session.dispose);
-  await tester.pumpWidget(SiagaApp(session: session, baseUrl: base, initialLocation: route, textScaler: const TextScaler.linear(2),
+  await tester.pumpWidget(SiagaApp(
+    autoStartNotifications: false,
+    localNotificationService: const NoopLocalNotificationService(),
+    session: session, baseUrl: base, initialLocation: route, textScaler: const TextScaler.linear(2),
     locationService: FakeLocationService(), photoService: photos ?? FakeReportPhotoService(), tileProvider: TestTileProvider(), client: MockClient((request) async {
       if (request.url.path.endsWith('/health')) return ok({'status': 'ok'});
       if (request.url.path.endsWith('/events')) return emptyFeed();

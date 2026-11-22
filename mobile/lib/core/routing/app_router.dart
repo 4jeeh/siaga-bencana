@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import '../../features/notifications/notification_view_model.dart';
 import '../../features/auth/account_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/map/map_screen.dart';
@@ -104,26 +106,30 @@ class NavigationShell extends StatelessWidget {
   final Widget child;
   static const tabs = ['/home', '/map', '/reports', '/profile'];
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: child,
-    bottomNavigationBar: NavigationBar(
-      selectedIndex: tabs.indexOf(location).clamp(0, 3),
-      onDestinationSelected: (index) => context.go(tabs[index]),
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          label: 'Beranda',
-        ),
-        NavigationDestination(icon: Icon(Icons.map_outlined), label: 'Peta'),
-        NavigationDestination(
-          icon: Icon(Icons.campaign_outlined),
-          label: 'Lapor',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          label: 'Profil',
-        ),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final unread = context.select((NotificationViewModel vm) => vm.unreadCount);
+    return Scaffold(
+      body: child,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: tabs.indexOf(location).clamp(0, 3),
+        onDestinationSelected: (index) => context.go(tabs[index]),
+        destinations: [
+          const NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            label: 'Beranda',
+          ),
+          const NavigationDestination(icon: Icon(Icons.map_outlined), label: 'Peta'),
+          const NavigationDestination(
+            icon: Icon(Icons.campaign_outlined),
+            label: 'Lapor',
+          ),
+          NavigationDestination(
+            icon: Badge.count(count: unread, isLabelVisible: unread > 0,
+              child: const Icon(Icons.person_outline)),
+            label: 'Profil',
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/session/session_coordinator.dart';
+import '../notifications/notification_coordinator.dart';
 import 'zone_dto.dart';
 import 'zone_view_model.dart';
 
@@ -78,12 +79,14 @@ class ZoneForm extends StatelessWidget {
           key: const Key('save-zone'),
           onPressed: !vm.canSave ? null : () async {
             final router = GoRouter.of(context);
+            final channel = context.read<NotificationCoordinator>();
             final session = context.read<SessionCoordinator>();
             final generation = session.generation;
             final target = editZone ? '/profile' : session.pendingDestination ?? '/home';
             if (await vm.save() && session.generation == generation && session.canNavigate) {
               session.pendingDestination = null;
               router.go(target);
+              if (editZone) await channel.zoneUpdated();
             }
           },
           child: Text(vm.saving ? 'Menyimpan...' : 'Simpan Zona Pantau'),

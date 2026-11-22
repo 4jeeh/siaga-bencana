@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'features/reports/moderation_view_model.dart';
 import 'features/reports/report_repository.dart';
 import 'features/reports/report_photo_service.dart';
@@ -19,6 +21,11 @@ import 'features/events/event_feed_view_model.dart';
 import 'features/events/event_repository.dart';
 import 'features/map/map_repository.dart';
 import 'features/map/map_view_model.dart';
+import 'features/notifications/local_notification_service.dart';
+import 'features/notifications/notification_coordinator.dart';
+import 'features/notifications/notification_repository.dart';
+import 'features/notifications/notification_view_model.dart';
+import 'features/profile/profile_view_model.dart';
 import 'features/zone/location_service.dart';
 import 'features/zone/zone_repository.dart';
 import 'features/zone/zone_view_model.dart';
@@ -34,6 +41,9 @@ class SiagaApp extends StatefulWidget {
     this.locationService,
     this.photoService,
     this.tileProvider,
+    this.localNotificationService,
+    this.notificationTiming,
+    this.autoStartNotifications = true,
   });
   final http.Client client;
   final Uri baseUrl;
@@ -43,6 +53,9 @@ class SiagaApp extends StatefulWidget {
   final LocationService? locationService;
   final ReportPhotoService? photoService;
   final TileProvider? tileProvider;
+  final LocalNotificationService? localNotificationService;
+  final NotificationTimingConfig? notificationTiming;
+  final bool autoStartNotifications;
   @override
   State<SiagaApp> createState() => _SiagaAppState();
 }
@@ -56,6 +69,9 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
   late final EventFeedViewModel feed;
   late final MapViewModel map;
   late final EventDetailViewModel detail;
+  late final NotificationViewModel notifications;
+  late final NotificationCoordinator notificationCoordinator;
+  late final ProfileViewModel profile;
   late final ReportsViewModel reports;
   late final ModerationViewModel moderation;
   @override
@@ -85,19 +101,52 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
       session, initialLocation: widget.initialLocation,
       tileProvider: widget.tileProvider,
     );
+    final local = widget.localNotificationService ?? (widget.autoStartNotifications
+        ? FlutterLocalNotificationService() : const NoopLocalNotificationService());
+    final notificationRepository = NotificationRepository(api);
+    notifications = NotificationViewModel(notificationRepository, session);
+    profile = ProfileViewModel(AuthRepository(api), zone, notifications, local, session);
+    unawaited(_initializeNotifications(local));
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    notificationCoordinator = NotificationCoordinator(notificationRepository, notifications,
+      session, local, enabled: widget.autoStartNotifications,
+      resumed: lifecycle == null || lifecycle == AppLifecycleState.resumed,
+      timing: widget.notificationTiming ?? const NotificationTimingConfig());
     if (session.canNavigate) feed.refresh();
     if (session.isValid && session.verified) zone.load();
     auth.checkHealth();
   }
 
+  Future<void> _initializeNotifications(LocalNotificationService local) async {
+    try {
+      await local.initialize(onTapEvent: (eventId) {
+        if (!mounted) return;
+        final location = '/events/${Uri.encodeComponent(eventId)}';
+        if (session.canNavigate) {
+          router.push(location);
+        } else {
+          session.pendingDestination = location;
+        }
+      });
+    } catch (_) {
+      // The history and the network channel remain available without native alerts.
+    }
+    if (mounted) await profile.checkPermission();
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) session.checkExpiry();
+    session.checkExpiry();
+    notificationCoordinator.handleAppLifecycle(state);
+    if (state == AppLifecycleState.resumed) unawaited(profile.checkPermission());
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    notificationCoordinator.dispose();
+    profile.dispose();
+    notifications.dispose();
     router.dispose();
     auth.dispose();
     detail.dispose();
@@ -117,6 +166,9 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
       ChangeNotifierProvider.value(value: session),
       ChangeNotifierProvider.value(value: auth),
       ChangeNotifierProvider.value(value: zone),
+      ChangeNotifierProvider.value(value: profile),
+      ChangeNotifierProvider.value(value: notifications),
+      ChangeNotifierProvider.value(value: notificationCoordinator),
       ChangeNotifierProvider.value(value: feed),
       ChangeNotifierProvider.value(value: detail),
       ChangeNotifierProvider.value(value: reports),
