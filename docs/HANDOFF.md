@@ -2,8 +2,8 @@
 
 **Author:** Jiddan Ibnu Ali — **NIM:** 24051214203  
 **Peran:** Codex Planner & Architect  
-**Status:** **Double Slice 4 (`4A`+`4B`) & Full Slice 5 (`5-1`+`5-2`+`5-3`) SELESAI awal (22 Nov 2026) — Backend (`6967afa`, `6fb377f`: `ruff` bersih + `506 pytest`) & Mobile `UI-05` + `NotificationCoordinator` + `flutter_local_notifications` (`cac7dbd`: `flutter analyze` bersih + `93` Flutter test + `1 live smoke`) tuntas 100%; Feature Freeze kode tercapai lebih awal, 23 Nov fokus uji perangkat Android nyata (`android-cli-plugin`), E2E `SIMULASI`, & opsional poles UI (`Orchestrator (Opus 5.5)`).**  
-**Target:** feature freeze 23 Nov; rilis `v1.0.0` 26 Nov 2026. Rilis belum dilaksanakan.
+**Status:** **Double Slice 4 (`4A`+`4B`) & Full Slice 5 (`5-1`+`5-2`+`5-3`) SELESAI awal (22 Nov 2026) — Backend (`6967afa`, `6fb377f`: `ruff` bersih + `506 pytest`) & Mobile `UI-05` + `NotificationCoordinator` + `flutter_local_notifications` (`cac7dbd`: `flutter analyze` bersih + `93` Flutter test + `1 live smoke`, `app-debug.apk` terbangun) tuntas 100%; pasca-jeda (`23–25 Nov`), hari ini (`26 Nov`) fokus uji perangkat Android nyata (`android-cli-plugin`), E2E `SIMULASI`, & opsional poles UI (`Orchestrator (Opus 5.5)`).**  
+**Target:** feature freeze 26 Nov; rilis `v1.0.0` 29 Nov 2026. Rilis belum dilaksanakan.
 
 ## 1. Hasil sesi dan acuan
 
@@ -121,9 +121,9 @@ Seluruh path final berprefix `/api/v1`. DTO/contoh/error ada di [kontrak](API_CO
 | 18 Nov | **SELESAI:** Akun/zona UI+API (`GET/PUT /api/v1/me/zone`, `UI-01c`, `UI-03` `pick_zone`, `UI-05` edit zona); 159 pytest + 23 widget + 1 live HTTP smoke lulus. |
 | 19–21 Nov | **SELESAI:** **19 Nov (`3A`):** TEWS+Nowcast/radar/lease/worker + `/events`, `/events/{id}`, `/map/markers` (`406 pytest` + `EXPLAIN` + `1 live smoke`); **20 Nov (`3B`):** `UI-02` Feed + `UI-03` Peta Browse (`42` test + `1 live smoke`); **21 Nov (`3C`):** `UI-06` Detail Bencana + MiniMap poligon + uji radar (`406 pytest` + `flutter analyze` bersih + `56` unit/widget test + `1 live smoke` lulus). |
 | 22 Nov *(Double)* | **SELESAI (`4A` `831df70`/`e37562d` + `4B` `40aadfa`):** Sanitasi JPEG Pillow + `report-payload-v1` + Storage & cleanup, `POST/GET /reports` + photo-url + claim/decision atomik (`ruff` bersih + `473 pytest`), serta `UI-04` Lapor Warga/Tinjau + kompresi ~`1024 px` JPEG `75%` + `ReportPanel` & integrasi `UI-03`/`UI-06` (`flutter analyze` bersih + `79` Flutter test + `1 live smoke` lulus). |
-| 23 Nov | **Full Slice 5 (`5-1` `6967afa` + `5-2` `6fb377f` + `5-3` `cac7dbd`) SELESAI awal (22 Nov):** `ruff` bersih + `506 pytest`, `UI-05` Profil, `NotificationCoordinator` (SSE + `/sync` + polling fallback), `flutter_local_notifications ^23.0.3`, prefix/badge `SIMULASI` (`flutter analyze` bersih + `93` Flutter test + `1 live smoke`); **23 Nov** fokus uji emulator/HP Android nyata, E2E `SIMULASI` & notifikasi OS, plus opsional poles UI (`Orchestrator (Opus 5.5)`) sebelum **feature freeze malam 23 Nov**. |
-| 24–26 Nov | QA 24 Nov (+ opsional poles UI `Opus 5.5`), security+deploy/fallback 25 Nov, smoke final+target tag `v1.0.0` pada 26 Nov. |
-| Mulai 27 Nov | Video >= 10 menit; artikel <= 11–12 halaman. |
+| 26 Nov *(jeda 23–25 Nov)* | **Full Slice 5 (`5-1` `6967afa` + `5-2` `6fb377f` + `5-3` `cac7dbd`) SELESAI awal (22 Nov):** `ruff` bersih + `506 pytest`, `UI-05` Profil, `NotificationCoordinator` (SSE + `/sync` + polling fallback), `flutter_local_notifications ^23.0.3`, prefix/badge `SIMULASI` (`flutter analyze` bersih + `93` Flutter test + `1 live smoke`, `app-debug.apk` sukses); **26 Nov** fokus uji emulator/HP Android nyata, E2E `SIMULASI` & notifikasi OS, plus opsional poles UI (`Orchestrator (Opus 5.5)`) sebelum **feature freeze malam 26 Nov**. |
+| 27–29 Nov | QA 27 Nov (+ opsional poles UI `Opus 5.5`), security+deploy/fallback 28 Nov, smoke final+target tag `v1.0.0` pada 29 Nov. |
+| Mulai 30 Nov | Video >= 10 menit; artikel <= 11–12 halaman. |
 
 Tiap slice berjalan secara **micro-batch terpisah** (`Backend` dan `Mobile` tidak digabung): **Codex** (`medium` default, `high` hanya di titik kritis `3A-1`/`4A`/`5`) menulis modul kode tanpa menjalankan `flutter.bat`/`.tooling/`/`git` (dengan panduan skill relevan disertakan di prompt); **Antigravity (`Orchestrator (Neon)`, fallback `Gemini 4 Argon` saat limit)** menangani `context7`/`pub add`, seluruh pengujian berat (`pytest`, `flutter analyze/test`, `smoke_live`, HP Android), perbaikan minor, serta commit/push; **`Orchestrator (Opus 5.5)`** opsional untuk poles UI akhir setelah semua fitur selesai atau saat bug mentok >30m. Maritim tetap pasca-UAS.
 

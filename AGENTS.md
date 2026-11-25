@@ -11,7 +11,7 @@ Dokumen ini adalah acuan bersama untuk **Codex (`gpt-6.2-astra`)** dan **Antigra
 3. **Database Wajib Relasional (SQL):** Menggunakan **PostgreSQL (Supabase)**. **DILARANG keras memakai NoSQL** (seperti Firestore atau MongoDB) sebagai database aplikasi. Wajib ada struktur tabel relasional (`Primary Key`, `Foreign Key`, `Index`).
 4. **Backend REST API Terpisah:** Dibangun dengan **Python FastAPI (`0.163.0` / Python `3.15`)** di folder `backend/`. Flutter **tidak boleh** mengakses tabel Supabase langsung untuk logika bisnis utama—semua alur data, sinkronisasi BMKG, kalkulasi radius lokasi, upload/validasi laporan warga, dan trigger notifikasi harus melewati Backend REST API FastAPI.
 5. **Karya Sendiri & Unik:** Tidak boleh copy-paste proyek orang lain; harus memiliki pembeda/fitur unggulan yang jelas.
-6. **Perkembangan Repo GitHub dari Awal:** Commit harus berjalan bertahap sejak Minggu 13 (mulai 15 Nov 2026) hingga rampung pada **26 Nov 2026** (freeze **23 Nov**), jauh sebelum UAS Minggu 16.
+6. **Perkembangan Repo GitHub dari Awal:** Commit harus berjalan bertahap sejak Minggu 13 (mulai 15 Nov 2026) hingga rampung pada **29 Nov 2026** (freeze **26 Nov**, jeda 23–25 Nov), jauh sebelum UAS Minggu 16.
 
 ---
 
@@ -81,7 +81,7 @@ Dokumen ini adalah acuan bersama untuk **Codex (`gpt-6.2-astra`)** dan **Antigra
 4. **Tanpa Web Admin Terpisah / Live Chat:** Jika butuh moderasi laporan, gunakan role/tab Admin di aplikasi Flutter yang sama atau Swagger `/docs` FastAPI.
 5. **Milestone Deadline (Internal Guardrail):**
    * **Hari 1–2 (15–16 Nov 2026):** Planning & Dokumen (`docs/`) — **Lock Planning di akhir 16 Nov**.
-   * **Hari 3–9 (17–23 Nov 2026):** Coding iteratif per slice (termasuk Double Slice `4A`+`4B` pada `22 Nov`) — **Feature Freeze mutlak di 23 Nov**.
-   * **Hari 10–12 (24–26 Nov 2026):** QA/Testing, `security-audit`, Deploy Railway & fallback lokal, tag rilis `v1.0.0` pada **26 Nov 2026**.
-   * **27 Nov – UAS (Minggu 16):** Video demo min. 10 menit (YouTube) + Artikel maks. 11–12 halaman.
+   * **Hari 3–9 (17–22 Nov + 26 Nov 2026, jeda 23–25 Nov):** Coding iteratif per slice (Double Slice `4A`+`4B` & Full Slice `5` selesai pada `22 Nov`) — uji perangkat Android & **Feature Freeze mutlak di 26 Nov**.
+   * **Hari 10–12 (27–29 Nov 2026):** QA/Testing, `security-audit`, Deploy Railway & fallback lokal, tag rilis `v1.0.0` pada **29 Nov 2026**.
+   * **30 Nov – UAS (Minggu 16):** Video demo min. 10 menit (YouTube) + Artikel maks. 11–12 halaman.
 6. **Keamanan Repo:** DILARANG keras commit `.env`, API key, token, atau password database ke GitHub.
