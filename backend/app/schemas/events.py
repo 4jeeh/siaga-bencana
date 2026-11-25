@@ -182,6 +182,9 @@ class Detail(BaseModel):
 
 
 class Marker(BaseModel):
+    magnitude: float | None = None
+    depth_km: float | None = None
+    potential: str | None = None
     id: UUID
     kind: Literal["event", "report"]
     source: Literal["BMKG_TEWS", "BMKG_NOWCAST", "CITIZEN"]

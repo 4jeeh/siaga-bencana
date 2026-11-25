@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     jwt_secret: SecretStr
     jwt_issuer: str = Field(default="siaga-bencana", min_length=1)
     jwt_audience: str = Field(default="siaga-mobile", min_length=1)
-    jwt_ttl_seconds: int = Field(default=3600, ge=3600, le=3600)
+    jwt_ttl_seconds: int = Field(default=604800, ge=3600, le=604800)
     media_signing_secret: SecretStr
     storage_backend: Literal["local", "supabase"] = "local"
     storage_root: Path = Path(".storage/local_live")

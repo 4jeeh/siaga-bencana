@@ -86,9 +86,9 @@ def test_ready_wrong_revision(client, database):
             owner.execute("UPDATE siaga.schema_migrations SET revision='0001_foundation'")
 
 
-def test_register_login_me(client, account, database):
+def test_register_login_me(client, account, database, settings):
     body, auth, headers = account
-    assert auth["token_type"] == "bearer" and auth["expires_in"] == 3600
+    assert auth["token_type"] == "bearer" and auth["expires_in"] == settings.jwt_ttl_seconds
     assert auth["user"]["display_name"] == "Warga Demo"
     assert auth["user"]["role"] == "citizen" and auth["user"]["has_zone"] is False
     assert set(auth["user"]) == {"id", "email", "display_name", "role", "has_zone"}
@@ -326,7 +326,8 @@ def test_simulation_does_not_change_token_clock(client, app, account, database):
         "server_time": "2020-01-01T00:00:00Z",
     }
     expires = datetime.fromisoformat(response.json()["data"]["expires_at"].replace("Z", "+00:00"))
-    assert timedelta(minutes=59) < expires - datetime.now(UTC) <= timedelta(hours=1)
+    ttl = timedelta(seconds=app.state.settings.jwt_ttl_seconds)
+    assert ttl - timedelta(minutes=1) < expires - datetime.now(UTC) <= ttl
     with psycopg.connect(database["owner"]) as owner:
         created = owner.execute(
             "SELECT created_at FROM siaga.users WHERE email=%s", (body["email"],)

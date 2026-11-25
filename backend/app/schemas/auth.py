@@ -54,6 +54,6 @@ class UserDTO(BaseModel):
 class AuthData(BaseModel):
     access_token: str
     token_type: Literal["bearer"] = "bearer"
-    expires_in: Literal[3600] = 3600
+    expires_in: int = Field(default=604800, ge=3600, le=604800)
     expires_at: datetime
     user: UserDTO

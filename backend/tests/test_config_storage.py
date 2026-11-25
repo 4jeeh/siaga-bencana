@@ -12,7 +12,8 @@ from app.services.readiness import StorageProbe
     [
         {"jwt_secret": "short"},
         {"media_signing_secret": "short"},
-        {"jwt_ttl_seconds": 7200},
+        {"jwt_ttl_seconds": 3599},
+        {"jwt_ttl_seconds": 604801},
         {"database_url": "sqlite:///local.db"},
         {"database_url": "postgresql+psycopg://postgres@localhost/dev"},
         {"app_mode": "local_live", "simulation_clock": "2020-01-01T00:00:00Z"},
@@ -81,6 +82,6 @@ def test_env_example_loads_numeric_ttl_from_dotenv(settings, tmp_path):
     env_file = tmp_path / ".env"
     env_file.write_text(template, encoding="utf-8")
     parsed = Settings(_env_file=env_file)
-    assert parsed.jwt_ttl_seconds == 3600
+    assert parsed.jwt_ttl_seconds == 604800
     assert parsed.app_mode == "local_live"
     assert parsed.cors_origins == []

@@ -14,6 +14,7 @@ from app.core.errors import ApiError, error_response, install_handlers
 from app.core.rate_limit import RateLimiter
 from app.db.session import make_engine
 from app.schemas.events import FeedQuery, MapQuery
+from app.schemas.locations import LocationSearchQuery
 from app.schemas.notifications import (
     NotificationHistoryQuery,
     NotificationStreamQuery,
@@ -21,9 +22,11 @@ from app.schemas.notifications import (
 )
 from app.schemas.reports import ReportListQuery, SignedPhotoQuery, VerificationQuery
 from app.services.bmkg_sync import scheduler
+from app.services.locations import LocationService
 from app.services.notification_stream import StreamRegistry
 from app.services.readiness import StorageProbe, start_storage, stop_storage
 from app.services.storage import build_storage_adapter
+from app.services.weather import WeatherService
 
 logger = logging.getLogger("siaga")
 AUTH_PATHS = {"/api/v1/auth/login": 5, "/api/v1/auth/register": 3}
@@ -33,6 +36,8 @@ NOTIFICATION_READ_PATH = re.compile(r"/api/v1/me/notifications/[^/]+/read")
 VERIFICATIONS_PATH = re.compile(r"/api/v1/reports/[^/]+/verifications")
 MEDIA_PATH = re.compile(r"/api/v1/media/reports/[^/]+/photo")
 QUERY_FIELDS = {
+    ("GET", "/api/v1/locations/search"): LocationSearchQuery.model_fields,
+    ("GET", "/api/v1/me/weather"): (),
     ("GET", "/api/v1/me/notifications"): NotificationHistoryQuery.model_fields,
     ("GET", "/api/v1/me/notifications/sync"): NotificationSyncQuery.model_fields,
     ("GET", "/api/v1/me/notifications/stream"): NotificationStreamQuery.model_fields,
@@ -98,6 +103,8 @@ def create_app(settings: Settings | None = None):
 
     app = FastAPI(title="Siaga Bencana", version="0.1.0", lifespan=lifespan, redirect_slashes=False)
     app.state.settings = settings
+    app.state.locations = LocationService()
+    app.state.weather = WeatherService()
     app.state.engine = make_engine(settings)
     app.state.limiter = RateLimiter()
     app.state.stop = asyncio.Event()

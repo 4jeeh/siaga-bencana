@@ -9,7 +9,10 @@ from app.schemas.auth import AuthData
 
 def auth_data(session, user, settings):
     token, expires = issue_token(user.id, settings)
-    return AuthData(access_token=token, expires_at=expires, user=user_dto(session, user))
+    return AuthData(
+        access_token=token, expires_at=expires, expires_in=settings.jwt_ttl_seconds,
+        user=user_dto(session, user),
+    )
 
 
 def register(session, body, settings):

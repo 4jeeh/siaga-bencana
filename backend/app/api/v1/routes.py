@@ -20,6 +20,7 @@ from app.repositories.users import user_dto
 from app.schemas.auth import AuthData, LoginRequest, RegisterRequest, UserDTO
 from app.schemas.common import Envelope, StatusData, envelope, response_meta
 from app.schemas.events import Detail, Feed, FeedQuery, MapQuery, MarkerFeed
+from app.schemas.locations import LocationSearchData, LocationSearchQuery
 from app.schemas.notifications import (
     NotificationHistoryFeed,
     NotificationHistoryQuery,
@@ -42,6 +43,7 @@ from app.schemas.reports import (
     VerificationFeed,
     VerificationQuery,
 )
+from app.schemas.weather import CurrentWeatherDTO
 from app.schemas.zone import ZoneDTO, ZoneRequest
 from app.services import auth, events, notification_stream, notifications, reports, zones
 from app.services.readiness import database_ready
@@ -196,6 +198,28 @@ def me(request: Request, session: SessionDep, user: UserDep):
 @router.get("/me/zone", response_model=Envelope[ZoneDTO | None])
 def get_zone(request: Request, session: SessionDep, user: UserDep):
     return envelope(request, zones.get_zone(session, user.id))
+
+
+@router.get("/locations/search", response_model=Envelope[LocationSearchData])
+def search_locations(
+    request: Request, session: SessionDep, user: UserDep,
+    query: Annotated[LocationSearchQuery, Query()],
+):
+    session.close()
+    state = request.app.state
+    return envelope(request, state.locations.search(query, state.settings))
+
+
+@router.get("/me/weather", response_model=Envelope[CurrentWeatherDTO | None])
+def current_weather(request: Request, session: SessionDep, user: UserDep):
+    zone = zones.get_zone(session, user.id)
+    if zone is None:
+        raise ApiError(
+            409, "ZONE_REQUIRED", "Atur zona pantau terlebih dahulu.", {"action": "setup_zone"}
+        )
+    session.close()
+    state = request.app.state
+    return envelope(request, state.weather.current(zone, state.settings))
 
 
 @router.put("/me/zone", response_model=Envelope[ZoneDTO])

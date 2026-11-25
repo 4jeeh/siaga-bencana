@@ -126,7 +126,7 @@ def summary(event, areas, ctx):
     )
 
 
-def summaries(session, statement, ctx, radius_only):
+def _summary_rows(session, statement, ctx, radius_only):
     rows = session.exec(statement.execution_options(yield_per=64))
     try:
         for batch in batched(rows, 64):
@@ -136,9 +136,14 @@ def summaries(session, statement, ctx, radius_only):
             for event in batch:
                 item = summary(event, areas[event.id], ctx)
                 if not radius_only or item.priority.within_radius:
-                    yield item
+                    yield event, item
     finally:
         rows.close()
+
+
+def summaries(session, statement, ctx, radius_only):
+    for _, item in _summary_rows(session, statement, ctx, radius_only):
+        yield item
 
 
 def invalid_query(field):
@@ -230,7 +235,7 @@ def parse_bbox(value):
 
 def official_markers(session, ctx, query, radius_box, viewport):
     statement = repo.event_candidates(ctx.now, query.category, True, radius_box, viewport)
-    for item in summaries(session, statement, ctx, query.radius_only):
+    for event, item in _summary_rows(session, statement, ctx, query.radius_only):
         p = item.priority
         if item.latitude is not None and p.match_distance_km is not None:
             yield (
@@ -238,6 +243,9 @@ def official_markers(session, ctx, query, radius_box, viewport):
                 Marker(
                     id=item.id,
                     kind="event",
+                    magnitude=event.magnitude if item.category == "earthquake" else None,
+                    depth_km=event.depth_km if item.category == "earthquake" else None,
+                    potential=event.potential if item.category == "earthquake" else None,
                     source=item.source,
                     category=item.category,
                     title=item.title,
