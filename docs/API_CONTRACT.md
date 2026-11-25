@@ -14,7 +14,7 @@
 
 ### Autentikasi dan throttle
 
-JWT HS256 (allowlist hanya HS256), `sub=user UUID`, `iss`, `aud`, `iat`, `exp`; validasi signature/issuer/audience/subject/expiry, lalu ambil `users.active` dan role dari DB. TTL **3600 detik**, token hanya memori sesi Flutter, tanpa refresh/revocation MVP. Logout lokal menutup kanal dan menghapus token/cache; token yang sudah diterbitkan tetap valid hingga expiry. Restart login lagi. Password Argon2, 10..128 karakter tanpa trim; email trim/lowercase, maksimal 254, valid format email. display_name trim 1..80 karakter. Provisioning admin hanya operator; register selalu citizen, role input ditolak.
+JWT HS256 (allowlist hanya HS256), `sub=user UUID`, `iss`, `aud`, `iat`, `exp`; validasi signature/issuer/audience/subject/expiry, lalu ambil `users.active` dan role dari DB. TTL dapat dikonfigurasi **`3600–604800` detik** (default **`604800`** / 7 hari), tanpa refresh/revocation MVP. Di mobile Flutter (`Tetap masuk` default aktif), token disimpan terenkripsi di `flutter_secure_storage` (tanpa password) dan dipulihkan via `GET /api/v1/me`. Logout lokal menutup kanal dan menghapus token tersimpan; token lama yang sudah diterbitkan tetap valid hingga expiry. Password Argon2, 10..128 karakter tanpa trim; email trim/lowercase, maksimal 254, valid format email. display_name trim 1..80 karakter. Provisioning admin hanya operator; register selalu citizen, role input ditolak.
 
 `401` token hilang/invalid/expired, akun nonaktif atau login gagal; kirim `WWW-Authenticate: Bearer`. `403` token valid tetapi role/self-review/non-owner klaim dilarang. `404` objek privat tidak terlihat (termasuk foto/audit), tidak membocorkan keberadaannya. Mode guest bukan role SQL.
 
@@ -177,8 +177,8 @@ Anonim; JSON `{email,password,display_name}` wajib. Server normalisasi email/nam
   "data": {
     "access_token": "contoh-token-bukan-kredensial",
     "token_type": "bearer",
-    "expires_in": 3600,
-    "expires_at": "2026-11-16T04:00:00Z",
+    "expires_in": 604800,
+    "expires_at": "2026-11-23T03:00:00Z",
     "user": {
       "id": "10000000-0000-4000-8000-000000000001",
       "email": "warga@example.test",
@@ -211,8 +211,8 @@ Anonim; JSON email/password wajib; generik INVALID_CREDENTIALS401 untuk email/pa
   "data": {
     "access_token": "contoh-token-bukan-kredensial",
     "token_type": "bearer",
-    "expires_in": 3600,
-    "expires_at": "2026-11-16T04:00:00Z",
+    "expires_in": 604800,
+    "expires_at": "2026-11-23T03:00:00Z",
     "user": {
       "id": "10000000-0000-4000-8000-000000000001",
       "email": "warga@example.test",
@@ -308,6 +308,57 @@ Bearer citizen/admin; full replacement lima field di bawah wajib (UI default rad
     "server_time": "2026-11-16T03:00:00Z",
     "mode": "simulation",
     "is_simulated": true
+  }
+}
+```
+
+### GET /api/v1/locations/search
+
+Bearer citizen/admin. Query `q` (wajib, `2..100` karakter) dan `limit` (`1..10`, default `6`). Pada mode live mencoba OpenStreetMap Nominatim (`countrycodes=id`, throttle 1 req/dtk, cache TTL 15 menit) dan otomatis jatuh ke daftar lokal terkurasi (`LOCAL_FALLBACK`) bila timeout/error; pada `simulation` memakai `LOCAL_FALLBACK`. `200 Envelope[LocationSearchData]`; 401/422/429/503.
+
+```json
+{
+  "data": {
+    "items": [
+      {
+        "label": "Bandung",
+        "subtitle": "Jawa Barat",
+        "latitude": -6.9175,
+        "longitude": 107.6191,
+        "source": "LOCAL_FALLBACK"
+      }
+    ]
+  },
+  "meta": {
+    "server_time": "2026-11-16T03:00:00Z",
+    "mode": "simulation",
+    "is_simulated": true
+  }
+}
+```
+
+### GET /api/v1/me/weather
+
+Bearer citizen/admin; zona wajib (`409 ZONE_REQUIRED` bila belum diatur). Mengambil ringkasan cuaca saat ini untuk koordinat zona dari Open-Meteo (cache TTL 10 menit). Bila penyedia timeout/error atau mode `simulation`, tetap mengembalikan `200` dengan `data: null` (non-blocking). 401/409/429/503.
+
+```json
+{
+  "data": {
+    "temperature_c": 27.5,
+    "humidity_percent": 78,
+    "precipitation_mm": 0.2,
+    "wind_speed_kmh": 8.4,
+    "weather_code": 3,
+    "condition_code": "cloudy",
+    "condition_label": "Berawan",
+    "observed_at": "2026-11-26T04:00",
+    "source": "OPEN_METEO",
+    "is_cached": false
+  },
+  "meta": {
+    "server_time": "2026-11-26T04:00:00Z",
+    "mode": "local_live",
+    "is_simulated": false
   }
 }
 ```
@@ -602,7 +653,7 @@ Fixture tambahan Priority CAP (proyeksi field berikut; implementasi tetap mengir
 
 Bearer citizen/admin, zona wajib. Query `category` opsional kelima kategori, `radius_only` default true, `include_reports` default true, `bbox=west,south,east,north` opsional. West/east [-180,180], south/north [-90,90], south<=north; west>east berarti antimeridian; -180/180 bbox dunia diizinkan sebagai batas query (bukan longitude tersimpan). Jangan memakai limit/offset; hard cap **100 total**. Filter radius dan viewport sebelum cap; pilih match_distance_km ASC, waktu DESC,id DESC (UUID global unik operasional). Gempa 7 hari, cuaca aktif, warga verified; no_geometry tidak punya marker. Bbox menguji **koordinat marker**; CAP membership radius tetap semua polygon, marker representatif bisa di luar viewport. Perluasan viewport/refilter untuk melihatnya; peta tidak mengklaim seluruh polygon terlihat.
 
-`200 {items:Marker[],truncated:boolean,cap:100,meta}`; Marker `{id,kind:event|report,source,category,title,latitude,longitude,match_method,match_distance_km,priority_label:null|enum,is_simulated}`. Warga match_method point_distance, priority_label null. Tidak ada polygon/foto/full priority. 401/409/422/429/503. Request `GET /api/v1/map/markers?bbox=112,-8,114,-6&radius_only=true&include_reports=true` + Bearer.
+`200 {items:Marker[],truncated:boolean,cap:100,meta}`; Marker `{id,kind:event|report,source,category,title,latitude,longitude,match_method,match_distance_km,priority_label:null|enum,is_simulated,magnitude:null|number,depth_km:null|number,potential:null|string}`. Field `magnitude`/`depth_km`/`potential` terisi untuk marker gempa (`BMKG_TEWS`) bila tersedia, dan `null` untuk cuaca ekstrem maupun laporan warga (warga juga `match_method=point_distance`, `priority_label=null`). Tidak ada polygon/foto/full priority. 401/409/422/429/503. Request `GET /api/v1/map/markers?bbox=112,-8,114,-6&radius_only=true&include_reports=true` + Bearer.
 
 ```json
 {
@@ -618,7 +669,10 @@ Bearer citizen/admin, zona wajib. Query `category` opsional kelima kategori, `ra
       "match_method": "point_distance",
       "match_distance_km": 0,
       "priority_label": "unavailable",
-      "is_simulated": true
+      "is_simulated": true,
+      "magnitude": 5.2,
+      "depth_km": 10.0,
+      "potential": "Tidak berpotensi TSUNAMI"
     }
   ],
   "truncated": false,

@@ -15,9 +15,9 @@ Tepat **UI-01..UI-05 lima layar utama + UI-06 Detail Bencana**. Bottom navigatio
 | UI-05 | `/profile` | `ProfileScreen` / `ProfileViewModel`, `NotificationViewModel` |
 | UI-06 | `/events/:eventId` | `EventDetailScreen` / `EventDetailViewModel` |
 
-`SessionCoordinator` memegang token memori, guard, baseline cursor; `NotificationCoordinator` memegang lifecycle kanal. Bukan View yang membuka SSE setiap rebuild. Repository memetakan DTO manual fromJson/toJson; tidak ada bisnis langsung Supabase. Detail laporan menggunakan `ReportPanel` yang dapat dipasang pada UI-03/04/06. Profil memakai ulang langkah zona UI-01 lalu kembali Profil setelah simpan.
+`SessionCoordinator` memegang token memori, persistensi sesi terenkripsi opsional via `SessionStore` (`flutter_secure_storage` untuk token/expiry saja, dikendalikan checkbox **Tetap masuk** default aktif), guard, baseline cursor; `NotificationCoordinator` memegang lifecycle kanal. Bukan View yang membuka SSE setiap rebuild. Repository memetakan DTO manual fromJson/toJson; tidak ada bisnis langsung Supabase. Detail laporan menggunakan `ReportPanel` yang dapat dipasang pada UI-03/04/06. Profil memakai ulang langkah zona UI-01 lalu kembali Profil setelah simpan.
 
-Guard: tanpa token→UI-01 login; token valid tanpa zona→UI-01 zone. Mode pick_zone UI-03 diizinkan saat setup tanpa zona, tetapi **tidak** memanggil marker API yang membutuhkan zona. Setelah login `GET /api/v1/me` + `GET /api/v1/me/zone`, baseline notifikasi dahulu, history kemudian; kanal aktif setelah guard selesai dan app resumed. Deep link Detail disimpan sebagai tujuan sementara, dilanjutkan setelah login+zona. UI-06 back kembali asal; empat nav utama tetap konsisten. Citizen tidak melihat Tinjau; backend tetap memeriksa403.
+Guard: saat cold start dengan sesi tersimpan yang valid, `restore()` memverifikasi `GET /api/v1/me` dan memuat zona otomatis; tanpa token valid→UI-01 login; token valid tanpa zona→UI-01 zone. Mode pick_zone UI-03 diizinkan saat setup tanpa zona, tetapi **tidak** memanggil marker API yang membutuhkan zona. Setelah login/restore `GET /api/v1/me` + `GET /api/v1/me/zone`, baseline notifikasi dahulu, history kemudian; kanal aktif setelah guard selesai dan app resumed. Memasuki UI-02 untuk pertama kali di perangkat menampilkan dialog onboarding izin **Lokasi** & **Notifikasi** opsional (`[Izinkan]` / `[Nanti saja]`) yang tidak memblokir bila ditolak. Deep link Detail disimpan sebagai tujuan sementara, dilanjutkan setelah login+zona. UI-06 back kembali asal; empat nav utama tetap konsisten. Citizen tidak melihat Tinjau; backend tetap memeriksa403.
 
 Komponen bersama: `Scaffold`, `SafeArea`, `AppBar`, `NavigationBar`, `ListView.builder`, `Card`, `ListTile`, `FilledButton`, `OutlinedButton`, `TextButton`, `TextFormField`, `SwitchListTile`, `SegmentedButton`, `FilterChip`, `TabBar`, `AlertDialog`, `ModalBottomSheet`, `LinearProgressIndicator`, `CircularProgressIndicator`, `SnackBar`. Tanpa kit/animasi/3D berat. Banner data `SIMULASI — data demo`, ikon lab + teks, menetap; badge per kartu/detail/foto serta prefix notifikasi. Status kesegaran sumber adalah dimensi terpisah: SIMULASI bisa juga STALE. LIVE berarti mode data aktual, bukan jaminan data baru.
 
@@ -68,6 +68,7 @@ SafeArea > Scaffold > AppBar: Siaga Bencana
 | Banner mode awal | `GET /api/v1/health` → meta.mode/is_simulated; jika tidak tersedia tampilkan API tidak terjangkau, jangan mengarang mode live. |
 | Daftar | `POST /api/v1/auth/register` → email/password/display_name; Auth DTO access_token/expires_in/expires_at/user. Role input tidak ada. |
 | Masuk / guard | `POST /api/v1/auth/login`, `GET /api/v1/me` → User.has_zone/role; `GET /api/v1/me/zone` → Zone/null. |
+| Cari wilayah | `GET /api/v1/locations/search?q=...` → mengisi draft lat/lon dari nama provinsi/kota/kecamatan tanpa memanggil PUT sampai Simpan. |
 | GPS sekali | geolocator setelah tap, timeout10s; hasil lokal belum disimpan. Denied→pilih manual, permanentlyDenied→pengaturan OS opsional. Tidak ada endpoint GPS. |
 | Pilih manual | UI-03 pick_zone, hasil latitude/longitude kembali draft ZoneViewModel; tidak PUT sampai user Simpan. |
 | Simpan | `PUT /api/v1/me/zone` → latitude/longitude/radius_km/notify_earthquake/notify_weather. Return zone_version/alert_eligible_since/updated_at. Sukses→Beranda (atau kembali Profil); refresh semua response personal. |
@@ -119,7 +120,7 @@ Scaffold > AppBar: Beranda   [ikon+Ubah Zona]
 
 | Aksi/komponen | Wiring exact |
 |---|---|
-| Zona header | `GET /api/v1/me/zone` → radius_km/latitude/longitude/zone_version; edit membuka UI-01. Titik pribadi tidak dibagikan. |
+| Zona header | `GET /api/v1/me/zone` → radius_km/latitude/longitude/zone_version; `GET /api/v1/me/weather` → cuaca ringan zona opsional (nullable); edit membuka UI-01. Titik pribadi tidak dibagikan. |
 | Feed/refresh/filter/load-more | `GET /api/v1/events?radius_only=true&limit=20&offset=0`; category opsional earthquake/extreme_weather, sort recent/priority hanya gempa, weather_status active/all (all hanya radius_only=false). |
 | Card/reasons | EventSummary.source/title/occurred_at/is_simulated/lifecycle_status/cap; priority.priority_display/priority_label/priority_algo/priority_reasons/match_distance_km/within_radius/match_method/evaluated_at. eq-priority-v1 angka; cap-priority-v1 severity tanpa angka. |
 | Freshness | meta.sources[].source/state/last_success_at; meta.is_simulated; cached error tidak menyembunyikan freshness. |
@@ -168,7 +169,7 @@ Scaffold > AppBar: Peta / Pilih titik [Kembali]
 | Aksi | Wiring exact |
 |---|---|
 | Browse/update viewport | Debounce300ms; `GET /api/v1/map/markers?bbox=west,south,east,north&radius_only=true&include_reports=true`, category opsional lima nilai. Tidak limit100 di list API, tidak paging marker. Abaikan response viewport lama. |
-| Marker/legenda | Marker.id/kind/source/category/title/latitude/longitude/match_method/match_distance_km/priority_label/is_simulated; response truncated/cap=100, meta.zone_version/sources. Jangan download semua polygon. |
+| Marker/legenda | Marker.id/kind/source/category/title/latitude/longitude/match_method/match_distance_km/priority_label/is_simulated + opsional `magnitude`/`depth_km`/`potential` gempa; response truncated/cap=100, meta.zone_version/sources. Jangan download semua polygon. |
 | Radius | `GET /api/v1/me/zone` → latitude/longitude/radius_km. Client hanya menggambar circle; backend menentukan match. |
 | BMKG tap | Ringkasan lokal Marker kemudian UI-06 menggunakan event id. CAP centroid label “Titik representatif area”, bukan pusat bahaya. |
 | Warga tap | `GET /api/v1/reports/{report_id}` → ReportPublic/Private sesuai akses; foto hanya bila dibuka lewat photo-url. Tidak rute baru. |
