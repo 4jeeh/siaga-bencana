@@ -72,6 +72,7 @@ Future<List<Uri>> _open(
         }
         if (path.endsWith('/events') || path.endsWith('/reports')) return emptyFeed();
         if (path.endsWith('/health')) return ok({'status': 'ok'});
+        if (path.endsWith('/me/weather')) return ok(null);
         fail('Unexpected API path $path');
       }),
     ),

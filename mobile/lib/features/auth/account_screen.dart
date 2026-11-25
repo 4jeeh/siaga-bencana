@@ -19,6 +19,7 @@ class _AccountScreenState extends State<AccountScreen> {
   final _password = TextEditingController();
   final _name = TextEditingController();
   bool _register = false;
+  bool _rememberMe = true;
   bool _obscure = true;
   SessionCoordinator? _session;
 
@@ -52,6 +53,7 @@ class _AccountScreenState extends State<AccountScreen> {
     await vm.submit(
       email: _email.text,
       password: _password.text,
+      rememberMe: _rememberMe,
       displayName: _register ? _name.text : null,
     );
     if (mounted) _password.clear();
@@ -70,6 +72,11 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget build(BuildContext context) {
     final vm = context.watch<AuthViewModel>();
     final session = context.watch<SessionCoordinator>();
+    if (session.restoring) {
+      return const Scaffold(body: Center(child: Column(mainAxisSize: MainAxisSize.min,
+        children: [CircularProgressIndicator(), Text('Memulihkan sesi...')],
+      )));
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Siaga Bencana')),
       body: SafeArea(
@@ -279,6 +286,11 @@ class _AccountScreenState extends State<AccountScreen> {
                             Text('Coba lagi dalam ${vm.retrySeconds} detik.'),
                             const SizedBox(height: 12),
                           ],
+                          if (!_register) CheckboxListTile(
+                            key: const Key('remember-me'), title: const Text('Tetap masuk'),
+                            value: _rememberMe, onChanged: vm.busy ? null : (value) =>
+                                setState(() => _rememberMe = value ?? false),
+                          ),
                           FilledButton(
                             key: const Key('submit'),
                             onPressed: vm.busy || vm.retrySeconds > 0
@@ -294,7 +306,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           ),
                           const SizedBox(height: 16),
                           const Text(
-                            'Sesi disimpan hanya selama aplikasi berjalan.',
+                            'Jika Tetap masuk aktif, sesi terenkripsi disimpan di perangkat hingga keluar atau masa berlaku habis.',
                             style: TextStyle(color: AppColors.textMuted),
                           ),
                         ],

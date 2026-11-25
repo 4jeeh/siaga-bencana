@@ -102,15 +102,34 @@ class ApiClient {
       if (data != null) 'Content-Type': 'application/json; charset=utf-8',
       if (authenticated) 'Authorization': 'Bearer $token',
     };
-    var statusCode = 0;
-    try {
+    var aborted = false;
+    unawaited(abortTrigger?.then<void>((_) { aborted = true; },
+        onError: (Object _) { aborted = true; }));
+    Future<http.Response> send() async {
       final request = (multipart?.call(uri) ?? http.AbortableRequest(method, uri, abortTrigger: abortTrigger))
         ..headers.addAll(headers)
         ..followRedirects = false;
       if (data != null) (request as http.Request).body = jsonEncode(data);
       final pending = client.send(request).then(http.Response.fromStream);
-      final response = await _untilCancelled(pending, abortTrigger)
+      return _untilCancelled(pending, abortTrigger)
           .timeout(Duration(seconds: multipart == null ? 15 : 25));
+    }
+
+    var statusCode = 0;
+    try {
+      final maxAttempts = method == 'GET' ? 2 : 1;
+      late http.Response response;
+      for (var attempt = 1; ; attempt++) {
+        try {
+          response = await send();
+          break;
+        } on http.ClientException {
+          if (aborted) {
+            throw const ApiErrorEnvelope(code: 'CANCELLED', message: 'Permintaan dibatalkan.');
+          }
+          if (attempt >= maxAttempts || (authenticated && generation != session.generation)) rethrow;
+        }
+      }
       statusCode = response.statusCode;
       if (authenticated && generation != session.generation) {
         throw const ApiErrorEnvelope(

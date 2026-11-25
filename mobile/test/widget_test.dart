@@ -248,6 +248,7 @@ void main() {
         requests.add('${request.method} ${request.url.path}');
         if (request.url.path.endsWith('/health')) return ok({'status': 'ok'});
         if (request.method == 'GET' && request.url.path == '/api/v1/events') return emptyFeed();
+        if (request.url.path.endsWith('/me/weather')) return ok(null);
         expect(request.url.path, '/api/v1/me/zone');
         expect(request.headers['Authorization'], 'Bearer memory-token');
         if (request.method == 'GET') return ok(null);

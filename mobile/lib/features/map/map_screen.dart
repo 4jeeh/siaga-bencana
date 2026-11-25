@@ -13,6 +13,7 @@ import '../../core/widgets/status_banners.dart';
 import '../events/event_feed_view_model.dart';
 import 'map_dto.dart';
 import 'map_view_model.dart';
+import '../zone/location_search_field.dart';
 import '../zone/zone_dto.dart';
 import '../zone/zone_view_model.dart';
 import '../auth/auth_view_model.dart';
@@ -59,7 +60,8 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _select(LatLng point) {
-    final lon = ((point.longitude + 180) % 360) - 180;
+    final lon = point.longitude.abs() <= 180
+        ? point.longitude : ((point.longitude + 180) % 360) - 180;
     if (!validCoordinates(point.latitude, lon)) return;
     setState(() {
       _point = LatLng(canonicalCoordinate(point.latitude), canonicalLongitude(lon));
@@ -178,6 +180,11 @@ class _MapScreenState extends State<MapScreen> {
             Padding(padding: const EdgeInsets.all(24), child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                LocationSearchField(onSelected: (item) {
+                  final point = LatLng(item.latitude, item.longitude);
+                  _select(point);
+                  _controller.move(point, 11);
+                }),
                 const Text('Ketuk peta atau masukkan koordinat. Pilihan belum disimpan ke server.'),
                 const SizedBox(height: 16),
                 TextField(
@@ -275,6 +282,9 @@ class _BrowseMapState extends State<_BrowseMap> {
           Text(markerCategories[marker.category]!),
           Text(formatDistanceKm(marker.matchDistanceKm)),
           Text('Koordinat: ${marker.latitude}, ${marker.longitude}'),
+          if (marker.magnitude != null) Text('Magnitudo: M ${marker.magnitude!.toStringAsFixed(1)}'),
+          if (marker.depthKm != null) Text('Kedalaman: ${marker.depthKm!.toStringAsFixed(1)} km'),
+          if (marker.potential?.isNotEmpty == true) Text('Potensi: ${marker.potential!}'),
           if (marker.priorityLabel != null) Text('Prioritas: ${marker.priorityLabel}'),
           if (marker.source == 'BMKG_NOWCAST')
             const Text('Titik representatif area (bukan pusat bahaya). Lihat poligon penuh di Detail Bencana.'),

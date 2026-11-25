@@ -30,6 +30,50 @@ class ZoneViewModel extends ChangeNotifier {
   bool notifyWeather = true;
   String? error;
   String? gpsMessage;
+  List<LocationSuggestionDto> locationResults = const [];
+  bool searchingLocations = false;
+  String? locationSearchError;
+  String? selectedLocationLabel;
+  int _searchRequest = 0;
+
+  Future<void> searchLocations(String query) async {
+    final request = ++_searchRequest;
+    locationResults = const [];
+    searchingLocations = false;
+    if (query.trim().length < 2) {
+      locationSearchError = 'Masukkan minimal 2 huruf nama kota/kecamatan.';
+      _notify();
+      return;
+    }
+    locationSearchError = null;
+    searchingLocations = true;
+    _notify();
+    try {
+      final items = await repository.searchLocations(query);
+      if (request != _searchRequest) return;
+      locationResults = items;
+      if (items.isEmpty) locationSearchError = 'Wilayah tidak ditemukan.';
+    } catch (failure) {
+      if (request == _searchRequest) locationSearchError = _errorMessage(failure);
+    } finally {
+      if (request == _searchRequest) {
+        searchingLocations = false;
+        _notify();
+      }
+    }
+  }
+
+  void applyLocationSuggestion(LocationSuggestionDto item) {
+    if (busy || !session.isValid || !session.verified) return;
+    latitude = canonicalCoordinate(item.latitude);
+    longitude = canonicalLongitude(item.longitude);
+    selectedLocationLabel = item.label;
+    locationResults = const [];
+    gpsMessage = error = null;
+    canOpenSettings = false;
+    _notify();
+  }
+
   bool canOpenSettings = false;
 
   bool get hasLoaded => _loadedGeneration == session.generation;
@@ -55,6 +99,10 @@ class ZoneViewModel extends ChangeNotifier {
   }
 
   void resetDraft() {
+    _searchRequest++;
+    locationResults = const [];
+    selectedLocationLabel = locationSearchError = null;
+    searchingLocations = false;
     latitude = savedZone?.latitude;
     longitude = savedZone?.longitude;
     radiusKm = savedZone?.radiusKm ?? 50;
@@ -86,6 +134,7 @@ class ZoneViewModel extends ChangeNotifier {
 
   void selectPoint(double lat, double lon) {
     if (busy || !session.isValid || !session.verified || !validCoordinates(lat, lon)) return;
+    selectedLocationLabel = null;
     latitude = canonicalCoordinate(lat);
     longitude = canonicalLongitude(lon);
     error = null;
@@ -113,6 +162,7 @@ class ZoneViewModel extends ChangeNotifier {
       if (!validCoordinates(point.latitude, point.longitude)) {
         throw const LocationFailure('Koordinat GPS tidak valid. Pilih titik manual.');
       }
+      selectedLocationLabel = null;
       latitude = canonicalCoordinate(point.latitude);
       longitude = canonicalLongitude(point.longitude);
       gpsMessage = 'Lokasi dipilih sekali. Tekan Simpan Zona Pantau untuk menyimpan.';

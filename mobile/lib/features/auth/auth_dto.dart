@@ -12,17 +12,12 @@ class UserDto {
   final String role;
   final bool hasZone;
   factory UserDto.fromJson(Map<String, dynamic> json) {
-    final role = json['role'] as String;
-    if (!['citizen', 'admin'].contains(role)) {
-      throw const FormatException('Invalid user role');
+    if (json case {'id': String id, 'email': String email, 'display_name': String name,
+        'role': String role, 'has_zone': bool hasZone}
+        when role == 'citizen' || role == 'admin') {
+      return UserDto(id: id, email: email, displayName: name, role: role, hasZone: hasZone);
     }
-    return UserDto(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      displayName: json['display_name'] as String,
-      role: role,
-      hasZone: json['has_zone'] as bool,
-    );
+    throw const FormatException('Invalid user response');
   }
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -45,15 +40,16 @@ class AuthData {
   final int expiresIn;
   final UserDto user;
   factory AuthData.fromJson(Map<String, dynamic> json) {
-    if (json['token_type'] != 'bearer' || json['expires_in'] != 3600) {
+    final expiresIn = json['expires_in'];
+    if (json['token_type'] != 'bearer' || expiresIn is! int || expiresIn < 3600 || expiresIn > 604800) {
       throw const FormatException('Invalid auth response');
     }
-    return AuthData(
-      accessToken: json['access_token'] as String,
-      expiresAt: DateTime.parse(json['expires_at'] as String).toUtc(),
-      expiresIn: json['expires_in'] as int,
-      user: UserDto.fromJson(json['user'] as Map<String, dynamic>),
-    );
+    if (json case {'access_token': String token, 'expires_at': String expiry,
+        'user': Map<String, dynamic> user} when token.trim().isNotEmpty) {
+      return AuthData(accessToken: token, expiresAt: DateTime.parse(expiry).toUtc(),
+        expiresIn: expiresIn, user: UserDto.fromJson(user));
+    }
+    throw const FormatException('Invalid auth response');
   }
 }
 

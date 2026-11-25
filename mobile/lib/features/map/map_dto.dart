@@ -18,11 +18,13 @@ class MapMarkerDto {
     required this.category, required this.title, required this.latitude,
     required this.longitude, required this.matchMethod, required this.matchDistanceKm,
     required this.priorityLabel, required this.isSimulated,
+    this.magnitude, this.depthKm, this.potential,
   });
 
   final String id, kind, source, category, title, matchMethod;
   final double latitude, longitude, matchDistanceKm;
-  final String? priorityLabel;
+  final String? priorityLabel, potential;
+  final double? magnitude, depthKm;
   final bool isSimulated;
 
   factory MapMarkerDto.fromJson(Map<String, dynamic> json) {
@@ -38,19 +40,30 @@ class MapMarkerDto {
       }
       throw FormatException('Invalid $key');
     }
+    final id = json['id'];
+    final title = json['title'];
+    final isSimulated = json['is_simulated'];
+    if (id is! String || title is! String || isSimulated is! bool) {
+      throw const FormatException('Invalid marker');
+    }
+    final potential = json['potential'];
+    if (potential != null && potential is! String) throw const FormatException('Invalid potential');
     return MapMarkerDto(
-      id: json['id'] as String,
+      magnitude: json['magnitude'] == null ? null : number('magnitude', -double.maxFinite, double.maxFinite),
+      depthKm: json['depth_km'] == null ? null : number('depth_km', 0, double.maxFinite),
+      potential: potential as String?,
+      id: id,
       kind: choice('kind', const ['event', 'report']),
       source: choice('source', const ['BMKG_TEWS', 'BMKG_NOWCAST', 'CITIZEN']),
       category: choice('category', markerCategories.keys),
-      title: json['title'] as String,
+      title: title,
       latitude: number('latitude', -90, 90),
       longitude: number('longitude', -180, 180),
       matchMethod: choice('match_method', const ['point_distance', 'inside_polygon', 'near_polygon_sample']),
       matchDistanceKm: number('match_distance_km', 0, double.maxFinite),
       priorityLabel: json['priority_label'] == null ? null : choice('priority_label',
           const ['ordinary', 'attention', 'high', 'information', 'unavailable']),
-      isSimulated: json['is_simulated'] as bool,
+      isSimulated: isSimulated,
     );
   }
 }

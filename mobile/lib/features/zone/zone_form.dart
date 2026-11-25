@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/session/session_coordinator.dart';
 import '../notifications/notification_coordinator.dart';
+import 'location_search_field.dart';
 import 'zone_dto.dart';
 import 'zone_view_model.dart';
 
@@ -32,6 +33,8 @@ class ZoneForm extends StatelessWidget {
           onPressed: vm.busy ? null : () => context.push('/map?mode=pick_zone'),
           child: const Text('Pilih titik di peta / manual'),
         ),
+        LocationSearchField(onSelected: vm.applyLocationSuggestion),
+        if (vm.selectedLocationLabel != null) Text(vm.selectedLocationLabel!),
         if (vm.gpsMessage != null) Semantics(
           liveRegion: true, child: Text(vm.gpsMessage!),
         ),

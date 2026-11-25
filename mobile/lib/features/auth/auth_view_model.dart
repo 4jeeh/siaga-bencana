@@ -43,6 +43,7 @@ class AuthViewModel extends ChangeNotifier {
     required String email,
     required String password,
     String? displayName,
+    bool rememberMe = true,
   }) async {
     if (busy || retrySeconds > 0) return;
     busy = true;
@@ -57,7 +58,7 @@ class AuthViewModel extends ChangeNotifier {
               RegisterRequest(email, password, displayName),
             );
       if (_disposed || initialGeneration != session.generation) return;
-      session.establish(auth);
+      session.establish(auth, rememberMe: rememberMe);
       establishedGeneration = session.generation;
       final user = await repository.me();
       if (_disposed) return;

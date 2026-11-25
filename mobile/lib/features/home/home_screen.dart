@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/session/session_coordinator.dart';
+import '../../core/widgets/permission_onboarding_dialog.dart';
+import '../profile/profile_view_model.dart';
+import '../weather/weather_view_model.dart';
+import '../zone/location_service.dart';
 import '../../core/utils/time_format.dart';
 import '../../core/widgets/status_banners.dart';
 import '../auth/auth_view_model.dart';
@@ -14,8 +19,35 @@ void _editZone(BuildContext context) {
   context.go('/account?edit=zone');
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _promptPermissions());
+  }
+
+  Future<void> _promptPermissions() async {
+    if (!mounted) return;
+    final session = context.read<SessionCoordinator>();
+    final generation = session.generation;
+    if (!session.canNavigate || await session.store.hasPromptedOnboarding()) return;
+    if (!mounted || generation != session.generation || ModalRoute.of(context)?.isCurrent != true) return;
+    final allowed = await showDialog<bool>(context: context,
+      builder: (_) => const PermissionOnboardingDialog());
+    await session.store.markOnboardingPrompted();
+    if (!mounted || allowed != true || generation != session.generation) return;
+    await context.read<ProfileViewModel>().requestOsPermission();
+    if (!mounted || generation != session.generation) return;
+    if (context.read<ZoneViewModel>().locationService case LocationPermissionRequester requester) {
+      await requester.requestLocationPermission();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +72,9 @@ class HomeScreen extends StatelessWidget {
           if (simulation) const SimulationBanner(),
           Semantics(container: true, liveRegion: true, label: status, child: const SizedBox.shrink()),
           Expanded(child: RefreshIndicator(
-            onRefresh: vm.refresh,
+            onRefresh: () async {
+              await Future.wait([vm.refresh(), context.read<WeatherViewModel>().refresh()]);
+            },
             child: ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(12),
@@ -66,6 +100,7 @@ class _FeedHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final zone = context.watch<ZoneViewModel>().savedZone;
+    final weather = context.watch<WeatherViewModel>().weather;
     final sources = vm.meta?.sources;
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       if (sources != null) FreshnessBanner(sources: sources),
@@ -73,6 +108,7 @@ class _FeedHeader extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Semantics(header: true,
             child: Text('Titik pantau', style: Theme.of(context).textTheme.titleMedium)),
+          if (weather != null) Text('Cuaca saat ini: ${weather.conditionLabel} · ${weather.temperatureC.toStringAsFixed(0)}°C'),
           if (zone != null) Text('${zone.latitude}, ${zone.longitude} · Radius ${zone.radiusKm} km'),
           const SizedBox(height: 8),
           const Text('Prioritas informasi aplikasi, bukan penilaian risiko ilmiah. Di luar radius bukan berarti aman.'),

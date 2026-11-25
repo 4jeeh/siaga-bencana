@@ -17,8 +17,23 @@ abstract interface class LocationService {
   Future<bool> openAppSettings();
 }
 
-class GeolocatorLocationService implements LocationService {
+abstract interface class LocationPermissionRequester {
+  Future<bool> requestLocationPermission();
+}
+
+class GeolocatorLocationService implements LocationService, LocationPermissionRequester {
   const GeolocatorLocationService();
+
+  @override
+  Future<bool> requestLocationPermission() async {
+    try {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
+      return permission == LocationPermission.whileInUse || permission == LocationPermission.always;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   Future<ZoneLocation> locateOnce() async {

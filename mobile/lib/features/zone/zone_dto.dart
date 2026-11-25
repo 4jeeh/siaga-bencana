@@ -8,6 +8,23 @@ double canonicalCoordinate(double value) => value == 0 ? 0.0 : value;
 double canonicalLongitude(double value) =>
     value == 180 ? -180.0 : canonicalCoordinate(value);
 
+class LocationSuggestionDto {
+  const LocationSuggestionDto({required this.label, required this.subtitle,
+    required this.latitude, required this.longitude, required this.source});
+  final String label, subtitle, source;
+  final double latitude, longitude;
+
+  factory LocationSuggestionDto.fromJson(Map<String, dynamic> json) {
+    if (json case {'label': String label, 'subtitle': String subtitle,
+        'source': String source, 'latitude': num lat, 'longitude': num lon}
+        when label.trim().isNotEmpty && validCoordinates(lat.toDouble(), lon.toDouble())) {
+      return LocationSuggestionDto(label: label, subtitle: subtitle, source: source,
+        latitude: lat.toDouble(), longitude: lon.toDouble());
+    }
+    throw const FormatException('Hasil pencarian wilayah tidak valid.');
+  }
+}
+
 class ZoneUpdateRequest {
   const ZoneUpdateRequest({
     required this.latitude,

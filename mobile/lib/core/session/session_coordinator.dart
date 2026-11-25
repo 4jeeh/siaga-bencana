@@ -3,11 +3,15 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../features/auth/auth_dto.dart';
+import 'session_store.dart';
 
 class SessionCoordinator extends ChangeNotifier {
-  SessionCoordinator({DateTime Function()? now})
-    : _now = now ?? (() => DateTime.now().toUtc());
+  SessionCoordinator({DateTime Function()? now, SessionStore? store})
+    : store = store ?? MemorySessionStore(), _now = now ?? (() => DateTime.now().toUtc());
   final DateTime Function() _now;
+  final SessionStore store;
+  bool restoring = false;
+  bool _rememberOnConfirm = true;
   String? _token;
   DateTime? expiresAt;
   UserDto? user;
@@ -19,8 +23,10 @@ class SessionCoordinator extends ChangeNotifier {
   String? get token => isValid ? _token : null;
   bool get isValid =>
       _token != null && expiresAt != null && _now().isBefore(expiresAt!);
-  bool get canNavigate => isValid && verified && user?.hasZone == true;
-  void establish(AuthData auth) {
+  bool get canNavigate => !restoring && isValid && verified && user?.hasZone == true;
+  void establish(AuthData auth, {bool rememberMe = true}) {
+    _rememberOnConfirm = rememberMe;
+    restoring = false;
     _expiryTimer?.cancel();
     generation++;
     _token = auth.accessToken;
@@ -41,7 +47,49 @@ class SessionCoordinator extends ChangeNotifier {
     if (generation != expectedGeneration || !isValid) return;
     user = current;
     verified = true;
+    unawaited(_rememberOnConfirm
+        ? store.writeSession(StoredSession(_token!, expiresAt!)) : store.clearSession());
     notifyListeners();
+  }
+
+  Future<void> restore({
+    required Future<UserDto> Function() fetchMe,
+    Future<void> Function()? loadZone,
+  }) async {
+    if (restoring || isValid) return;
+    final expected = ++generation;
+    restoring = true;
+    notifyListeners();
+    try {
+      final stored = await store.readSession();
+      if (generation != expected || stored == null) return;
+      if (!_now().isBefore(stored.expiresAt)) {
+        await store.clearSession();
+        return;
+      }
+      _rememberOnConfirm = true;
+      _token = stored.accessToken;
+      expiresAt = stored.expiresAt;
+      verified = false;
+      _expiryTimer?.cancel();
+      _expiryTimer = Timer(stored.expiresAt.difference(_now()), () => clear(expired: true));
+      final me = await fetchMe();
+      if (generation != expected) return;
+      if (!isValid) {
+        clear(expired: true);
+        return;
+      }
+      user = me;
+      verified = true;
+      if (me.hasZone && loadZone != null) await loadZone();
+    } catch (_) {
+      if (generation == expected) clear();
+    } finally {
+      if (generation == expected) {
+        restoring = false;
+        notifyListeners();
+      }
+    }
   }
 
   void checkExpiry() {
@@ -59,6 +107,8 @@ class SessionCoordinator extends ChangeNotifier {
 
   void clear({bool expired = false}) {
     generation++;
+    restoring = false;
+    unawaited(store.clearSession());
     _expiryTimer?.cancel();
     _expiryTimer = null;
     _token = null;
@@ -72,6 +122,7 @@ class SessionCoordinator extends ChangeNotifier {
 
   @override
   void dispose() {
+    generation++;
     _expiryTimer?.cancel();
     super.dispose();
   }

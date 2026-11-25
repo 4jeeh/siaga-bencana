@@ -14,6 +14,9 @@ import 'core/network/api_client.dart';
 import 'core/routing/app_router.dart';
 import 'core/session/session_coordinator.dart';
 import 'core/theme/app_theme.dart';
+import 'core/session/session_store.dart';
+import 'features/weather/weather_repository.dart';
+import 'features/weather/weather_view_model.dart';
 import 'features/auth/auth_repository.dart';
 import 'features/auth/auth_view_model.dart';
 import 'features/event_detail/event_detail_view_model.dart';
@@ -36,6 +39,7 @@ class SiagaApp extends StatefulWidget {
     required this.client,
     required this.baseUrl,
     this.session,
+    this.sessionStore,
     this.initialLocation = '/account',
     this.textScaler,
     this.locationService,
@@ -48,6 +52,7 @@ class SiagaApp extends StatefulWidget {
   final http.Client client;
   final Uri baseUrl;
   final SessionCoordinator? session;
+  final SessionStore? sessionStore;
   final String initialLocation;
   final TextScaler? textScaler;
   final LocationService? locationService;
@@ -67,6 +72,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
   late final GoRouter router;
   late final ZoneViewModel zone;
   late final EventFeedViewModel feed;
+  late final WeatherViewModel weather;
   late final MapViewModel map;
   late final EventDetailViewModel detail;
   late final NotificationViewModel notifications;
@@ -78,7 +84,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    session = widget.session ?? SessionCoordinator();
+    session = widget.session ?? SessionCoordinator(store: widget.sessionStore);
     api = ApiClient(
       client: widget.client,
       baseUrl: widget.baseUrl,
@@ -91,6 +97,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
     auth = AuthViewModel(AuthRepository(api), session);
     final events = EventRepository(api);
     feed = EventFeedViewModel(events, session, zone);
+    weather = WeatherViewModel(WeatherRepository(api), session, zone);
     final repository = ReportRepository(api);
     reports = ReportsViewModel(repository, events, session, zone,
       widget.locationService ?? const GeolocatorLocationService(), widget.photoService ?? ImagePickerReportPhotoService());
@@ -115,6 +122,17 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
     if (session.canNavigate) feed.refresh();
     if (session.isValid && session.verified) zone.load();
     auth.checkHealth();
+    if (widget.session == null && widget.sessionStore != null) unawaited(_restoreSession());
+  }
+
+  Future<void> _restoreSession() async {
+    await session.restore(fetchMe: auth.repository.me, loadZone: zone.load);
+    if (!mounted || !session.canNavigate) return;
+    // The session listeners may already be refreshing for the restored zone.
+    await Future.wait([
+      if (!feed.initialLoading && !feed.refreshing) feed.refresh(),
+      weather.refresh(),
+    ]);
   }
 
   Future<void> _initializeNotifications(LocalNotificationService local) async {
@@ -152,6 +170,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
     detail.dispose();
     moderation.dispose();
     reports.dispose();
+    weather.dispose();
     feed.dispose();
     map.dispose();
     zone.dispose();
@@ -170,6 +189,7 @@ class _SiagaAppState extends State<SiagaApp> with WidgetsBindingObserver {
       ChangeNotifierProvider.value(value: notifications),
       ChangeNotifierProvider.value(value: notificationCoordinator),
       ChangeNotifierProvider.value(value: feed),
+      ChangeNotifierProvider.value(value: weather),
       ChangeNotifierProvider.value(value: detail),
       ChangeNotifierProvider.value(value: reports),
       ChangeNotifierProvider.value(value: moderation),
