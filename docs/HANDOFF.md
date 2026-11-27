@@ -2,8 +2,8 @@
 
 **Author:** Jiddan Ibnu Ali — **NIM:** 24051214203  
 **Peran:** Codex Planner & Architect  
-**Status:** **Slice 1–5 (`6967afa`, `6fb377f`, `cac7dbd`) & Batch 1 `C1–C6` (`07c112c`, `cb8ce07`, `98c59f3`) SELESAI (`26 Nov 2026`, Feature Freeze tercapai):** `ruff` bersih + `537 pytest`, `flutter analyze` bersih + `110` Flutter test + `1 live smoke`, `app-debug.apk` terpasang di HP fisik (`CPH2145`). Agenda lanjut **Poles UI/UX (`27 Nov`)**, **QA (`28 Nov`)**, **Security/Deploy (`29 Nov`)**, dan **Rilis `v1.0.0` (`30 Nov 2026`)**.**  
-**Target:** feature freeze `26 Nov` (SELESAI); poles UI/UX `27 Nov`; rilis `v1.0.0` `30 Nov 2026`. Rilis belum dilaksanakan.
+**Status:** **Slice 1–5 (`6967afa`, `6fb377f`, `cac7dbd`), Batch 1 `C1–C6` (`07c112c`, `cb8ce07`, `98c59f3`, Feature Freeze `26 Nov`), & Poles UI/UX Hari 10 `U1–U6` (`62762db`, `27 Nov`) SELESAI:** `ruff` bersih + `537 pytest`, `flutter analyze` bersih + `115` Flutter test + `1 live smoke`, `app-debug.apk` terpasang & diverifikasi di HP fisik (`CPH2145` / `42bdf1f7`). Agenda lanjut **QA (`28 Nov`)**, **Security/Deploy (`29 Nov`)**, dan **Rilis `v1.0.0` (`30 Nov 2026`)**.  
+**Target:** feature freeze `26 Nov` (SELESAI); poles UI/UX `27 Nov` (SELESAI); rilis `v1.0.0` `30 Nov 2026`. Rilis belum dilaksanakan.
 
 ## 1. Hasil sesi dan acuan
 
@@ -122,7 +122,7 @@ Seluruh path final berprefix `/api/v1`. DTO/contoh/error ada di [kontrak](API_CO
 | 19–21 Nov | **SELESAI:** **19 Nov (`3A`):** TEWS+Nowcast/radar/lease/worker + `/events`, `/events/{id}`, `/map/markers` (`406 pytest` + `EXPLAIN` + `1 live smoke`); **20 Nov (`3B`):** `UI-02` Feed + `UI-03` Peta Browse (`42` test + `1 live smoke`); **21 Nov (`3C`):** `UI-06` Detail Bencana + MiniMap poligon + uji radar (`406 pytest` + `flutter analyze` bersih + `56` unit/widget test + `1 live smoke` lulus). |
 | 22 Nov *(Double)* | **SELESAI (`4A` `831df70`/`e37562d` + `4B` `40aadfa`):** Sanitasi JPEG Pillow + `report-payload-v1` + Storage & cleanup, `POST/GET /reports` + photo-url + claim/decision atomik (`ruff` bersih + `473 pytest`), serta `UI-04` Lapor Warga/Tinjau + kompresi ~`1024 px` JPEG `75%` + `ReportPanel` & integrasi `UI-03`/`UI-06` (`flutter analyze` bersih + `79` Flutter test + `1 live smoke` lulus). |
 | 26 Nov *(jeda `23–25 Nov`)* | **SELESAI (Feature Freeze):** Full Slice 5 (`5-1` `6967afa` + `5-2` `6fb377f` + `5-3` `cac7dbd`) + Batch 1 perbaikan `C1–C6` (`Fix-A` `07c112c` + `Fix-B` `cb8ce07` + docs `98c59f3`): retry `GET`, `/locations/search`, detail gempa di marker peta, dialog onboarding izin, sesi terenkripsi `flutter_secure_storage` + `"Tetap masuk"` & JWT TTL 7 hari, `/me/weather` Open-Meteo; lulus `ruff` + `537 pytest` + `flutter analyze` bersih + `110` Flutter test + `1 live smoke`, terpasang di HP `42bdf1f7`. |
-| 27 Nov | **Poles UI/UX menyeluruh (`U1–U6` + ide user):** tanpa tambah fitur baru; `impeccable` + `ui-ux-pro-max` (+ opsional `Opus 5.5`), verifikasi `flutter analyze/test` & uji HP `42bdf1f7`. |
+| 27 Nov | **SELESAI (`62762db` — Poles UI/UX Menyeluruh `U1–U6` + Branding):** font lokal `PlusJakartaSans`, UI kit bersama (`IconLabel`, `StatusPill`, `MetricStrip`, `AccentCard`, `TsunamiPotentialBox`), poles seluruh 6 layar (Hero Card gelap `#0F4C5C` + cuaca, filter peta 1 baris + sheet gempa 3 metrik, Extended FAB & ChoiceChip lapor warga, penjelasan rumus `S = 60P + 25M + 15T` di Detail, profil ramah & unread netral), serta ikon perisai-radar + splash Android 12+ tanpa ubah `backend/`; `flutter analyze` bersih + `115` Flutter test lulus + terpasang & ACC di HP `42bdf1f7`. |
 | 28–30 Nov | QA `28 Nov`, security+deploy/fallback `29 Nov`, smoke final+target tag `v1.0.0` pada `30 Nov 2026`. |
 | Mulai 1 Des | Video >= 10 menit; artikel <= 11–12 halaman. |
 
