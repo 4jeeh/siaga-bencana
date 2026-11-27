@@ -9,6 +9,6 @@
 5. [API_CONTRACT.md](API_CONTRACT.md) — REST `/api/v1`, DTO/error, upload, auth, SSE/replay.
 6. [UI_SPEC.md](UI_SPEC.md) — Enam layar Material3, wireframe ASCII, state, endpoint dan a11y; wireframe visual, palet warna & prototype FigCraft selesai di [siaga-bencana-v1.figcraft](wireframes/siaga-bencana-v1.figcraft) ([overview.png](wireframes/png/overview.png) & [overview-hifi.png](wireframes/png/overview-hifi.png)).
 7. [HANDOFF.md](HANDOFF.md) — Keputusan final, hasil validasi dan instruksi Slice 1.
-8. [SCHEDULE.md](SCHEDULE.md) — Freeze 26 Nov, target rilis 29 Nov; bukan klaim rilis sudah dilakukan.
+8. [SCHEDULE.md](SCHEDULE.md) — Freeze 26 Nov (selesai), poles UI/UX 28 Nov, target rilis 1 Des; bukan klaim rilis sudah dilakukan.
 
 Nama/DDL normatif di ERD.sql, wire DTO/endpoint di API_CONTRACT.md, presentasi di UI_SPEC.md; semuanya mengimplementasikan PRD. Jangan mengubah kontrak salah satu tanpa menyelaraskan lainnya dan mencatat handoff. Runtime paket, UI dan deployment tetap gate implementasi.
