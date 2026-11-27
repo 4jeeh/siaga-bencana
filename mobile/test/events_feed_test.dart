@@ -277,8 +277,8 @@ void main() {
     await vm.refresh();
     await tester.pumpAndSettle();
     expect(find.text('SIMULASI — data demo'), findsOneWidget);
-    expect(find.text('BMKG Gempa — healthy'), findsOneWidget);
-    expect(find.text('BMKG Cuaca — stale'), findsOneWidget);
+    expect(find.text('BMKG Gempa — Aktif'), findsOneWidget);
+    expect(find.text('BMKG Cuaca — Belum diperbarui'), findsOneWidget);
     await reveal(tester, find.textContaining('Data terakhir dimuat'));
     await reveal(tester, find.text('Prioritas 74.3 — Tinggi'));
     expect(find.text('SIMULASI'), findsOneWidget);
@@ -307,14 +307,14 @@ void main() {
     await tester.pumpAndSettle();
     await reveal(tester, find.text('Kedaluwarsa'));
     await reveal(tester, find.text('Perkiraan jarak centroid/vertex (bukan irisan eksak)'));
-    expect(find.text('Keparahan: Severe'), findsOneWidget);
+    expect(find.text('Keparahan: Parah'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await closeHome(tester);
   });
 
   testWidgets('empty nearby results offer all and zone edit with unavailable source', (tester) async {
     await openHome(tester, (_) async => response(feed([], state: 'unavailable')));
-    expect(find.text('BMKG Cuaca — unavailable'), findsOneWidget);
+    expect(find.text('BMKG Cuaca — Tidak tersedia'), findsOneWidget);
     expect(find.textContaining('Belum pernah berhasil diperbarui.'), findsOneWidget);
     await reveal(tester, find.text('Belum ada informasi yang cocok dengan radius ini.'));
     expect(find.text('Sebagian data sumber belum tersedia.'), findsOneWidget);

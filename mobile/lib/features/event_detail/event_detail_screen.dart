@@ -1,4 +1,3 @@
-import '../reports/report_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -6,32 +5,18 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/app_theme.dart';
+import '../../core/utils/labels.dart';
 import '../../core/utils/time_format.dart';
 import '../../core/widgets/status_banners.dart';
+import '../../core/widgets/ui_kit.dart';
 import '../auth/auth_view_model.dart';
 import '../events/event_dto.dart';
+import '../reports/report_panel.dart';
 import '../zone/zone_view_model.dart';
 import 'event_detail_view_model.dart';
 
 const _missing = 'Tidak tersedia dari sumber';
-const _levels = {
-  'ordinary': 'Biasa',
-  'attention': 'Perhatian',
-  'high': 'Tinggi',
-  'information': 'Informasi',
-  'unavailable': 'Belum tersedia',
-};
-const _statuses = {
-  'current': 'Terkini',
-  'historical': 'Historis',
-  'invalid_time': 'Waktu tidak valid',
-  'active': 'Aktif',
-  'scheduled': 'Terjadwal',
-  'expired': 'Kedaluwarsa',
-  'cancelled': 'Dibatalkan',
-  'superseded': 'Digantikan',
-  'incomplete': 'Data belum lengkap',
-};
 
 String _match(PriorityDto p) => switch (p.matchMethod) {
   'inside_polygon' => 'Titik pantau berada dalam area',
@@ -39,7 +24,9 @@ String _match(PriorityDto p) => switch (p.matchMethod) {
     'Dekat area peringatan — perkiraan centroid/vertex',
   'near_polygon_sample' when p.withinRadius == false =>
     'Di luar radius menurut sampel centroid/vertex',
-  'point_distance' when p.matchDistanceKm != null => formatDistanceKm(p.matchDistanceKm!),
+  'point_distance' when p.matchDistanceKm != null => formatDistanceKm(
+    p.matchDistanceKm!,
+  ),
   _ => 'Kecocokan lokasi belum tersedia',
 };
 
@@ -53,14 +40,6 @@ Uri? _webUri(String? value) {
   }
   return uri;
 }
-
-Widget _label(IconData icon, String value) => MergeSemantics(
-  child: Wrap(
-    spacing: 8,
-    crossAxisAlignment: WrapCrossAlignment.center,
-    children: [Icon(icon, size: 20), Text(value)],
-  ),
-);
 
 Widget _field(String name, Object? value) => Padding(
   padding: const EdgeInsets.only(top: 8),
@@ -80,18 +59,23 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
+    padding: const EdgeInsets.only(bottom: AppSpace.m),
     child: Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpace.l),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Semantics(
               header: true,
-              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpace.s),
             ...children,
           ],
         ),
@@ -101,7 +85,11 @@ class _Section extends StatelessWidget {
 }
 
 class EventDetailScreen extends StatefulWidget {
-  const EventDetailScreen({super.key, required this.eventId, this.tileProvider});
+  const EventDetailScreen({
+    super.key,
+    required this.eventId,
+    this.tileProvider,
+  });
   final String eventId;
   final TileProvider? tileProvider;
 
@@ -125,7 +113,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   void _scheduleLoad() {
     final id = widget.eventId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && widget.eventId == id) context.read<EventDetailViewModel>().load(id);
+      if (mounted && widget.eventId == id) {
+        context.read<EventDetailViewModel>().load(id);
+      }
     });
   }
 
@@ -153,7 +143,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             },
             child: const Text('Salin URL'),
           ),
-          TextButton(onPressed: () => Navigator.pop(dialog), child: const Text('Tutup')),
+          TextButton(
+            onPressed: () => Navigator.pop(dialog),
+            child: const Text('Tutup'),
+          ),
         ],
       ),
     );
@@ -165,7 +158,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     final current = vm.currentEventId == widget.eventId;
     final detail = current ? vm.detail : null;
     final meta = current ? vm.meta : null;
-    final simulation = context.watch<AuthViewModel>().healthMeta?.isSimulated == true;
+    final simulation =
+        context.watch<AuthViewModel>().healthMeta?.isSimulated == true;
     final loading = !current || vm.initialLoading;
     final url = _webUri(detail?.weather?.webUrl ?? detail?.sourceUrl);
     return Scaffold(
@@ -175,7 +169,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           onPressed: _back,
           icon: const Icon(Icons.arrow_back),
         ),
-        toolbarHeight: MediaQuery.textScalerOf(context).scale(22) > 30 ? 112 : kToolbarHeight,
+        toolbarHeight: MediaQuery.textScalerOf(context).scale(22) > 30
+            ? 112
+            : kToolbarHeight,
         title: const Text('Detail Bencana', maxLines: 2),
         actions: [
           IconButton(
@@ -194,17 +190,34 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 key: ValueKey('detail-list-${widget.eventId}'),
                 padding: EdgeInsets.all(bounds.maxWidth < 400 ? 12 : 20),
                 children: [
-                  if (simulation || detail?.isSimulated == true || meta?.isSimulated == true)
-                    const SimulationBanner(),
-                  if (meta != null) FreshnessBanner(sources: meta.sources),
+                  if (simulation ||
+                      detail?.isSimulated == true ||
+                      meta?.isSimulated == true)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: AppSpace.s),
+                      child: SimulationBanner(),
+                    ),
+                  if (meta != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpace.s),
+                      child: FreshnessBanner(sources: meta.sources),
+                    ),
                   if (loading || vm.refreshing)
-                    Semantics(
-                      liveRegion: true,
-                      child: Text(loading ? 'Memuat detail…' : 'Memperbarui detail…'),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpace.s),
+                      child: Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          loading ? 'Memuat detail…' : 'Memperbarui detail…',
+                        ),
+                      ),
                     ),
                   if (current && vm.notFound)
                     _Section('Informasi tidak tersedia', [
-                      OutlinedButton(onPressed: _back, child: const Text('Kembali')),
+                      OutlinedButton(
+                        onPressed: _back,
+                        child: const Text('Kembali'),
+                      ),
                     ])
                   else if (current && vm.zoneRequired)
                     _Section('Zona pantau belum aktif.', [
@@ -218,46 +231,101 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       _Section('Gagal memuat detail', [
                         Text(vm.error!),
                         if (vm.lastLoadedAt != null)
-                          Text('Data terakhir dimuat ${formatLocalDateTime(vm.lastLoadedAt!)}'),
-                        OutlinedButton(onPressed: vm.refresh, child: const Text('Coba Lagi')),
+                          Text(
+                            'Data terakhir dimuat ${formatLocalDateTime(vm.lastLoadedAt!)}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        const SizedBox(height: AppSpace.s),
+                        OutlinedButton(
+                          onPressed: vm.refresh,
+                          child: const Text('Coba Lagi'),
+                        ),
                       ]),
                     if (detail != null) ...[
                       _header(detail),
+                      if (detail.earthquake case final quake?) ...[
+                        MetricStrip(
+                          tiles: [
+                            MetricTile(
+                              label: 'Magnitudo',
+                              value: quake.magnitude == null
+                                  ? null
+                                  : 'M ${quake.magnitude!.toStringAsFixed(1)}',
+                            ),
+                            MetricTile(
+                              label: 'Kedalaman',
+                              value: quake.depthKm == null
+                                  ? null
+                                  : '${quake.depthKm!.toStringAsFixed(1)} km',
+                            ),
+                            MetricTile(
+                              label: 'Jarak',
+                              value: detail.priority.matchDistanceKm == null
+                                  ? null
+                                  : formatDistanceKm(
+                                      detail.priority.matchDistanceKm!,
+                                    ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpace.m),
+                        TsunamiPotentialBox(potential: quake.potential),
+                        const SizedBox(height: AppSpace.m),
+                      ],
                       _priority(detail),
-                      if (detail.earthquake case final quake?) _earthquake(quake),
-                      if (detail.weather case final weather?) _weather(detail, weather),
+                      if (detail.earthquake != null)
+                        _radarScoreExplanation(detail.priority),
+                      if (detail.earthquake case final quake?)
+                        _earthquake(quake),
+                      if (detail.weather case final weather?)
+                        _weather(detail, weather),
                       _MiniMap(
                         key: ObjectKey(detail),
                         detail: detail,
                         tileProvider: widget.tileProvider,
                       ),
                       Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+                        spacing: AppSpace.s,
+                        runSpacing: AppSpace.s,
                         children: [
-                          OutlinedButton(
+                          OutlinedButton.icon(
                             onPressed: url == null ? null : () => _source(url),
-                            child: const Text('Buka sumber resmi'),
+                            icon: const Icon(Icons.open_in_new),
+                            label: const Text('Buka sumber resmi'),
                           ),
-                          FilledButton(
+                          FilledButton.icon(
                             onPressed: () => context.go(
                               Uri(
                                 path: '/reports',
                                 queryParameters: {'event_id': detail.id},
                               ).toString(),
                             ),
-                            child: const Text('Laporkan kondisi terkait'),
+                            icon: const Icon(Icons.campaign_outlined),
+                            label: const Text('Laporkan kondisi terkait'),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpace.m),
                       _Section('Laporan warga terkait', [
-                        const Text('Warga — ditinjau admin aplikasi'),
-                        if (vm.relatedReportsLoading) const LinearProgressIndicator()
-                        else if (vm.relatedReportsError != null) reportNotice(vm.relatedReportsError!)
-                        else if (vm.relatedReports.isEmpty) const Text('Belum ada laporan warga ditinjau yang terkait'),
-                        for (final report in vm.relatedReports) ...[Text(report.description),
-                          OutlinedButton(onPressed: () => showReportPanel(context, report), child: const Text('Lihat'))],
+                        Text(
+                          'Warga — ditinjau admin aplikasi',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        if (vm.relatedReportsLoading)
+                          const LinearProgressIndicator()
+                        else if (vm.relatedReportsError != null)
+                          reportNotice(vm.relatedReportsError!)
+                        else if (vm.relatedReports.isEmpty)
+                          const Text(
+                            'Belum ada laporan warga ditinjau yang terkait',
+                          ),
+                        for (final report in vm.relatedReports) ...[
+                          Text(report.description),
+                          OutlinedButton(
+                            onPressed: () => showReportPanel(context, report),
+                            child: const Text('Lihat'),
+                          ),
+                        ],
                       ]),
                     ],
                   ],
@@ -274,18 +342,29 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     final quake = d.earthquake != null;
     return _Section(d.title, [
       Wrap(
-        spacing: 12,
-        runSpacing: 6,
+        spacing: AppSpace.s,
+        runSpacing: AppSpace.s,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          _label(
-            quake ? Icons.sensors : Icons.thunderstorm_outlined,
-            quake ? 'BMKG — Gempa' : 'BMKG — Cuaca',
+          IconLabel(
+            icon: quake ? Icons.sensors : Icons.thunderstorm_outlined,
+            text: quake ? 'BMKG — Gempa' : 'BMKG — Cuaca',
+            color: AppColors.textMuted,
           ),
           if (d.isSimulated) const SimulationBadge(),
-          _label(Icons.schedule, _statuses[d.lifecycleStatus]!),
+          StatusPill(
+            icon: Icons.schedule,
+            label: lifecycleLabels[d.lifecycleStatus]!,
+            foreground: AppColors.textPrimary,
+            background: AppColors.surfaceVariant,
+          ),
         ],
       ),
-      if (!quake && d.lifecycleStatus != 'active') const Text('Peringatan tidak aktif.'),
+      if (!quake && d.lifecycleStatus != 'active')
+        const Padding(
+          padding: EdgeInsets.only(top: AppSpace.s),
+          child: Text('Peringatan tidak aktif.'),
+        ),
       _field('Waktu kejadian', formatLocalDateTime(d.occurredAt)),
       _field('Pertama tercatat', formatLocalDateTime(d.firstSeenAt)),
       _field('Terakhir terlihat di sumber', formatLocalDateTime(d.lastSeenAt)),
@@ -294,31 +373,184 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   Widget _priority(EventDetailDto d) {
     final p = d.priority;
+    final quakeColor = switch (p.priorityLabel) {
+      'high' => AppColors.error,
+      'attention' => AppColors.warning,
+      'ordinary' => AppColors.primary,
+      _ => AppColors.textMuted,
+    };
     return _Section('Prioritas informasi', [
       if (d.earthquake != null)
-        _label(
-          Icons.flag_outlined,
-          p.priorityDisplay == null
-              ? 'Prioritas belum tersedia'
-              : 'Prioritas ${p.priorityDisplay} — ${_levels[p.priorityLabel]}',
+        Align(
+          alignment: Alignment.centerLeft,
+          child: StatusPill(
+            icon: Icons.flag_outlined,
+            label: p.priorityDisplay == null
+                ? 'Prioritas belum tersedia'
+                : 'Prioritas ${p.priorityDisplay} — ${priorityLevelLabels[p.priorityLabel]}',
+            foreground: quakeColor,
+            background: quakeColor.withValues(alpha: 0.10),
+          ),
         )
-      else ...[
-        _label(Icons.warning_amber, 'Keparahan: ${d.cap?.severity ?? _missing}'),
-        _label(Icons.flag_outlined, 'Prioritas: ${_levels[p.priorityLabel]}'),
-        _label(Icons.schedule, _statuses[d.lifecycleStatus]!),
-      ],
-      _label(Icons.place_outlined, _match(p)),
-      ExpansionTile(
-        key: PageStorageKey('detail-why-${d.id}'),
-        title: const Text('Mengapa?'),
-        children: [
-          for (final reason in p.priorityReasons)
-            Align(alignment: Alignment.centerLeft, child: Text(reason.text)),
-          _field('Waktu evaluasi', formatLocalDateTime(p.evaluatedAt)),
-        ],
+      else
+        Wrap(
+          spacing: AppSpace.s,
+          runSpacing: AppSpace.s,
+          children: [
+            StatusPill(
+              icon: Icons.warning_amber,
+              label:
+                  'Keparahan: ${capSeverityLabel(d.cap?.severity) ?? _missing}',
+              foreground: AppColors.warning,
+              background: AppColors.warning.withValues(alpha: 0.10),
+            ),
+            StatusPill(
+              icon: Icons.flag_outlined,
+              label: 'Prioritas: ${priorityLevelLabels[p.priorityLabel]}',
+              foreground: AppColors.primary,
+              background: AppColors.primaryContainer,
+            ),
+          ],
+        ),
+      const SizedBox(height: AppSpace.s),
+      IconLabel(icon: Icons.place_outlined, text: _match(p)),
+      const SizedBox(height: AppSpace.s),
+      DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: ExpansionTile(
+          key: PageStorageKey('detail-why-${d.id}'),
+          leading: const Icon(Icons.help_outline, size: 20),
+          title: const Text('Mengapa?'),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          children: [
+            for (final reason in p.priorityReasons)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: IconLabel(
+                    icon: Icons.chevron_right,
+                    text: reason.text,
+                    iconSize: 16,
+                  ),
+                ),
+              ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: _field(
+                'Waktu evaluasi',
+                formatLocalDateTime(p.evaluatedAt),
+              ),
+            ),
+          ],
+        ),
       ),
-      const Text(
+      const SizedBox(height: AppSpace.s),
+      Text(
         'Prioritas informasi aplikasi, bukan penilaian risiko ilmiah. Di luar radius bukan berarti aman.',
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
+    ]);
+  }
+
+  Widget _radarScoreExplanation(PriorityDto p) {
+    final c = p.components;
+    Widget bentoTile(String title, String formula, String? compKey, int w) {
+      final raw = c?[compKey];
+      final detail = raw == null
+          ? null
+          : 'nilai ${raw.toStringAsFixed(2)} → ${(w * raw).toStringAsFixed(1)} poin';
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: AppColors.outline),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpace.m),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 2),
+              Text(formula, style: Theme.of(context).textTheme.bodySmall),
+              if (detail != null) ...[
+                const SizedBox(height: AppSpace.xs),
+                Text(
+                  detail,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: tabularFigures,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    final tiles = [
+      bentoTile('P · Kedekatan', '60% · 1 − jarak/radius', 'p', 60),
+      bentoTile('M · Magnitudo', '25% · M/10', 'm', 25),
+      bentoTile('T · Kebaruan', '15% · 1 − umur jam/24', 't', 15),
+    ];
+
+    return _Section('Cara skor Radar Radius dihitung', [
+      DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpace.m),
+          child: Center(
+            child: Text(
+              'S = 60P + 25M + 15T',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                fontFeatures: tabularFigures,
+              ),
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(height: AppSpace.m),
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final fitsRow =
+              constraints.maxWidth / 3 >=
+              MediaQuery.textScalerOf(context).scale(96);
+          if (fitsRow) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0; i < tiles.length; i++) ...[
+                  if (i > 0) const SizedBox(width: AppSpace.s),
+                  Expanded(child: tiles[i]),
+                ],
+              ],
+            );
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < tiles.length; i++) ...[
+                if (i > 0) const SizedBox(height: AppSpace.s),
+                tiles[i],
+              ],
+            ],
+          );
+        },
+      ),
+      const SizedBox(height: AppSpace.m),
+      Text(
+        'Biasa < 35 · Perhatian 35–65 · Tinggi ≥ 65',
+        style: Theme.of(context).textTheme.bodySmall,
       ),
     ]);
   }
@@ -326,8 +558,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget _earthquake(EarthquakeDetailDto q) {
     final image = _webUri(q.shakemapUrl);
     return _Section('Atribut gempa', [
-      _field('Magnitudo', q.magnitude),
-      _field('Kedalaman', q.depthKm == null ? null : '${q.depthKm} km'),
       _field('Wilayah', q.region),
       _field(
         'Koordinat',
@@ -335,15 +565,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             ? null
             : '${q.latitudeText ?? _missing}, ${q.longitudeText ?? _missing}',
       ),
-      _field('Potensi', q.potential),
       _field('Dirasakan', q.felt),
       _field('Shakemap', q.shakemapUrl),
       if (image != null)
-        Image.network(
-          image.toString(),
-          semanticLabel: 'Shakemap BMKG',
-          errorBuilder: (_, _, _) =>
-              const Text('Pratinjau shakemap tidak dapat dimuat. Detail teks tetap tersedia.'),
+        Padding(
+          padding: const EdgeInsets.only(top: AppSpace.m),
+          child: Image.network(
+            image.toString(),
+            semanticLabel: 'Shakemap BMKG',
+            errorBuilder: (_, _, _) => const Text(
+              'Pratinjau shakemap tidak dapat dimuat. Detail teks tetap tersedia.',
+            ),
+          ),
         ),
     ]);
   }
@@ -352,28 +585,41 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     final cap = d.cap;
     return _Section('Atribut cuaca', [
       _field('Jenis kejadian', w.capEvent),
-      _field('Severity', cap?.severity),
-      _field('Urgency', cap?.urgency),
-      _field('Certainty', cap?.certainty),
+      _field('Keparahan', capSeverityLabel(cap?.severity)),
+      _field('Urgensi', capUrgencyLabel(cap?.urgency)),
+      _field('Kepastian', capCertaintyLabel(cap?.certainty)),
       _field(
         'Masa berlaku',
         '${cap == null ? _missing : formatLocalDateTime(cap.effective)} s.d. '
             '${cap?.expires == null ? _missing : formatLocalDateTime(cap!.expires!)}',
       ),
       _field('Tipe / Status pesan', '${w.msgType} / ${w.status}'),
-      Text(w.lifecycleComplete ? 'Siklus hidup lengkap' : 'Siklus hidup belum lengkap'),
+      Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Text(
+          w.lifecycleComplete
+              ? 'Siklus hidup lengkap'
+              : 'Siklus hidup belum lengkap',
+        ),
+      ),
       _field(
         'Wilayah terdampak',
-        cap == null || cap.areaDescriptions.isEmpty ? null : cap.areaDescriptions.join(', '),
+        cap == null || cap.areaDescriptions.isEmpty
+            ? null
+            : cap.areaDescriptions.join(', '),
       ),
-      _field('Headline', w.headline),
+      _field('Judul', w.headline),
       _field('Deskripsi', w.description),
+      const SizedBox(height: AppSpace.m),
       Semantics(header: true, child: const Text('Rujukan')),
       if (d.references.isEmpty) const Text('Tidak ada rujukan'),
       for (final ref in d.references) ...[
         Text('${ref.relationType} — ${ref.referencedSourceKey}'),
         if (ref.referencedEventId case final id?)
-          OutlinedButton(onPressed: () => _reference(id), child: const Text('Lihat event rujukan')),
+          OutlinedButton(
+            onPressed: () => _reference(id),
+            child: const Text('Lihat event rujukan'),
+          ),
       ],
     ]);
   }
@@ -415,78 +661,108 @@ class _MiniMapState extends State<_MiniMap> {
         point ??
         (rings.isEmpty
             ? null
-            : LatLng(rings.first.centroidLatitude!, rings.first.centroidLongitude!));
-    final pointLabel = d.weather != null ? 'Titik representatif area' : 'Titik kejadian';
+            : LatLng(
+                rings.first.centroidLatitude!,
+                rings.first.centroidLongitude!,
+              ));
+    final pointLabel = d.weather != null
+        ? 'Titik representatif area'
+        : 'Titik kejadian';
     final color = Theme.of(context).colorScheme.primary;
+    final bodySmall = Theme.of(context).textTheme.bodySmall;
     return _Section('Peta mini', [
-      for (final area in d.areas) Text(area.areaDescription),
-      _field(pointLabel, center == null ? null : '${center.latitude}, ${center.longitude}'),
+      for (final area in d.areas) Text(area.areaDescription, style: bodySmall),
+      _field(
+        pointLabel,
+        center == null ? null : '${center.latitude}, ${center.longitude}',
+      ),
       if (zone != null)
-        _field('Titik pantau', '${zone.latitude}, ${zone.longitude} · Radius ${zone.radiusKm} km'),
-      Text(_match(d.priority)),
+        _field(
+          'Titik pantau',
+          '${zone.latitude}, ${zone.longitude} · Radius ${zone.radiusKm} km',
+        ),
+      const SizedBox(height: AppSpace.s),
+      IconLabel(icon: Icons.place_outlined, text: _match(d.priority)),
       if (center != null) ...[
-        AspectRatio(
-          aspectRatio: 1.6,
-          child: FlutterMap(
-            options: MapOptions(
-              initialCenter: center,
-              initialZoom: 7,
-              interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                tileProvider: widget.tileProvider,
-                userAgentPackageName: 'id.ac.siaga.siaga_bencana',
-                errorTileCallback: (_, _, _) => _onTileError(),
+        const SizedBox(height: AppSpace.m),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: AspectRatio(
+            aspectRatio: 1.6,
+            child: FlutterMap(
+              options: MapOptions(
+                initialCenter: center,
+                initialZoom: 7,
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.none,
+                ),
               ),
-              if (rings.isNotEmpty)
-                PolygonLayer<Object>(
-                  // The projection wraps adjacent vertices; raw west/east bounds can
-                  // exclude the visible strip at the date line during culling.
-                  polygonCulling: !rings.any((ring) => ring.crossesAntimeridian == true),
-                  polygons: [
-                    for (final p in rings)
-                      Polygon(
-                        points: [for (final v in p.vertices) LatLng(v.latitude, v.longitude)],
-                        color: color.withValues(alpha: 0.2),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  tileProvider: widget.tileProvider,
+                  userAgentPackageName: 'id.ac.siaga.siaga_bencana',
+                  errorTileCallback: (_, _, _) => _onTileError(),
+                ),
+                if (rings.isNotEmpty)
+                  PolygonLayer<Object>(
+                    // The projection wraps adjacent vertices; raw west/east bounds can
+                    // exclude the visible strip at the date line during culling.
+                    polygonCulling: !rings.any(
+                      (ring) => ring.crossesAntimeridian == true,
+                    ),
+                    polygons: [
+                      for (final p in rings)
+                        Polygon(
+                          points: [
+                            for (final v in p.vertices)
+                              LatLng(v.latitude, v.longitude),
+                          ],
+                          color: color.withValues(alpha: 0.2),
+                          borderColor: color,
+                          borderStrokeWidth: 2,
+                        ),
+                    ],
+                  ),
+                if (zone != null)
+                  CircleLayer<Object>(
+                    circles: [
+                      CircleMarker(
+                        point: LatLng(zone.latitude, zone.longitude),
+                        radius: zone.radiusKm * 1000.0,
+                        useRadiusInMeter: true,
+                        color: color.withValues(alpha: 0.1),
                         borderColor: color,
-                        borderStrokeWidth: 2,
+                        borderStrokeWidth: 1,
+                      ),
+                    ],
+                  ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: center,
+                      child: Icon(Icons.location_on, semanticLabel: pointLabel),
+                    ),
+                    if (zone != null)
+                      Marker(
+                        point: LatLng(zone.latitude, zone.longitude),
+                        child: const Icon(
+                          Icons.my_location,
+                          semanticLabel: 'Titik pantau',
+                        ),
                       ),
                   ],
                 ),
-              if (zone != null)
-                CircleLayer<Object>(
-                  circles: [
-                    CircleMarker(
-                      point: LatLng(zone.latitude, zone.longitude),
-                      radius: zone.radiusKm * 1000.0,
-                      useRadiusInMeter: true,
-                      color: color.withValues(alpha: 0.1),
-                      borderColor: color,
-                      borderStrokeWidth: 1,
-                    ),
-                  ],
-                ),
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    point: center,
-                    child: Icon(Icons.location_on, semanticLabel: pointLabel),
-                  ),
-                  if (zone != null)
-                    Marker(
-                      point: LatLng(zone.latitude, zone.longitude),
-                      child: const Icon(Icons.my_location, semanticLabel: 'Titik pantau'),
-                    ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-        const Text('© OpenStreetMap contributors'),
+        const SizedBox(height: AppSpace.xs),
+        Text('© OpenStreetMap contributors', style: bodySmall),
         if (_tileFailed)
-          const Text('Peta dasar tidak tersedia. Daftar dan koordinat tetap dapat digunakan.'),
+          const Text(
+            'Peta dasar tidak tersedia. Daftar dan koordinat tetap dapat digunakan.',
+          ),
       ],
     ]);
   }

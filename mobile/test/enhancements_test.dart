@@ -12,10 +12,14 @@ import 'package:siaga_bencana/core/network/api_client.dart';
 import 'package:siaga_bencana/core/network/api_envelope.dart';
 import 'package:siaga_bencana/core/session/session_coordinator.dart';
 import 'package:siaga_bencana/core/session/session_store.dart';
+import 'package:siaga_bencana/core/theme/app_theme.dart';
 import 'package:siaga_bencana/core/widgets/permission_onboarding_dialog.dart';
+import 'package:siaga_bencana/core/widgets/ui_kit.dart';
 import 'package:siaga_bencana/features/auth/auth_dto.dart';
 import 'package:siaga_bencana/features/home/home_screen.dart';
 import 'package:siaga_bencana/features/map/map_dto.dart';
+import 'package:siaga_bencana/features/notifications/local_notification_service.dart';
+import 'package:siaga_bencana/features/profile/profile_screen.dart';
 import 'package:siaga_bencana/features/weather/weather_view_model.dart';
 import 'package:siaga_bencana/features/zone/location_service.dart';
 import 'package:siaga_bencana/features/zone/zone_dto.dart';
@@ -159,9 +163,9 @@ void main() {
     expect([dto.magnitude, dto.depthKm, dto.potential], [5.7, 10.0, item['potential']]);
     await openBrowse(tester, {...markers([quakeId]), 'items': [item]});
     await tapVisible(tester, find.byKey(const ValueKey('pin-$quakeId')));
-    expect(find.text('Magnitudo: M 5.7'), findsOneWidget);
-    expect(find.text('Kedalaman: 10.0 km'), findsOneWidget);
-    expect(find.text('Potensi: Tidak berpotensi tsunami'), findsOneWidget);
+    expect(find.text('M 5.7'), findsOneWidget);
+    expect(find.text('10.0 km'), findsOneWidget);
+    expect(find.text('Tidak berpotensi tsunami'), findsOneWidget);
     await closeApp(tester);
   });
 
@@ -303,14 +307,17 @@ void main() {
     await tester.pumpAndSettle();
     final vm = tester.element(find.byType(HomeScreen)).read<WeatherViewModel>();
     expect(vm.weather?.windSpeedKmh, 9.4);
-    final line = find.text('Cuaca saat ini: Berawan · 28°C');
-    expect(line, findsOneWidget);
+    final temp = find.text('28°C');
+    final cond = find.text('Berawan');
+    expect(temp, findsOneWidget);
+    expect(cond, findsOneWidget);
     final refresh = tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).onRefresh;
     payload = null;
     await refresh();
     await tester.pumpAndSettle();
     expect(vm.weather, isNull);
-    expect(line, findsNothing);
+    expect(temp, findsNothing);
+    expect(cond, findsNothing);
     offline = true;
     await refresh();
     await tester.pumpAndSettle();
@@ -318,5 +325,145 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     session.clear();
+  });
+
+  testWidgets('U3: password helper only shows on Daftar when password field has focus at 360px / 200%', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(SiagaApp(
+      baseUrl: base,
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
+      textScaler: const TextScaler.linear(2),
+      client: MockClient((_) async => ok({'status': 'ok'})),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('10–128 karakter. Spasi ikut dihitung.'), findsNothing);
+    await tapVisible(tester, find.text('Daftar'));
+    expect(find.text('10–128 karakter. Spasi ikut dihitung.'), findsNothing);
+    await tapVisible(tester, find.byKey(const Key('password')));
+    expect(find.text('10–128 karakter. Spasi ikut dihitung.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('U4: duplicate email 409 offers Pindah ke Masuk and preserves typed email at 360px / 200%', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(SiagaApp(
+      baseUrl: base,
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
+      textScaler: const TextScaler.linear(2),
+      client: MockClient((r) async {
+        if (r.url.path.endsWith('/health')) return ok({'status': 'ok'});
+        return http.Response(
+          jsonEncode({
+            'code': 'EMAIL_ALREADY_REGISTERED',
+            'message': 'Email sudah terdaftar. Silakan masuk.',
+            'request_id': 'req-duplicate',
+          }),
+          409,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    ));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.text('Daftar'));
+    await tester.enterText(find.byKey(const Key('name')), 'Warga');
+    await tester.enterText(find.byKey(const Key('email')), 'terdaftar@siaga.test');
+    await tester.enterText(find.byKey(const Key('password')), 'password panjang');
+    await tapVisible(tester, find.byKey(const Key('submit')));
+    await tapVisible(tester, find.byKey(const Key('switch-to-login')));
+    expect(find.byKey(const Key('name')), findsNothing);
+    expect(
+      tester.widget<TextFormField>(find.byKey(const Key('email'))).controller!.text,
+      'terdaftar@siaga.test',
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('U5: Lupa kata sandi opens honest help dialog at 360px / 200%', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(SiagaApp(
+      baseUrl: base,
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
+      textScaler: const TextScaler.linear(2),
+      client: MockClient((_) async => ok({'status': 'ok'})),
+    ));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('forgot-password')));
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.textContaining('belum tersedia di versi ini'), findsOneWidget);
+    await tapVisible(tester, find.text('Mengerti'));
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('UI-05: unread 0 on Profile uses neutral StatusPill without Badge at 360px / 200%', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final session = signedIn();
+    addTearDown(session.dispose);
+    await tester.pumpWidget(SiagaApp(
+      baseUrl: base,
+      session: session,
+      initialLocation: '/profile',
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
+      textScaler: const TextScaler.linear(2),
+      client: MockClient((r) async => switch (r.url.path) {
+        '/api/v1/health' => ok({'status': 'ok'}),
+        '/api/v1/me/zone' => ok(zoneJson),
+        '/api/v1/notifications' => ok({
+          'items': <Object>[],
+          'page': {'limit': 20, 'offset': 0, 'next_offset': null, 'has_more': false},
+          'unread_count': 0,
+        }),
+        _ => ok(null),
+      }),
+    ));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(ProfileScreen),
+        matching: find.byType(Badge),
+      ),
+      findsNothing,
+    );
+    expect(find.text('0'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    session.clear();
+  });
+
+  testWidgets('TsunamiPotentialBox renders error tone for Berpotensi tsunami at 360px / 200%', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(MaterialApp(
+      theme: appTheme(),
+      home: MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+        child: const Scaffold(
+          body: Padding(
+            padding: EdgeInsets.all(16),
+            child: TsunamiPotentialBox(potential: 'Berpotensi tsunami'),
+          ),
+        ),
+      ),
+    ));
+    expect(find.byIcon(Icons.tsunami), findsOneWidget);
+    final title = tester.widget<Text>(find.text('Potensi'));
+    expect(title.style?.color, AppColors.error);
+    expect(tester.takeException(), isNull);
   });
 }

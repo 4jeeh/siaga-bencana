@@ -244,7 +244,7 @@ void main() {
     await tapVisible(tester, find.byKey(const ValueKey('pin-$quakeId')));
     expect(find.text('BMKG — Gempa'), findsOneWidget);
     expect(find.text('SIMULASI'), findsOneWidget);
-    await tapVisible(tester, find.text('Detail Bencana'));
+    await tapVisible(tester, find.text('Lihat Detail Bencana'));
     final screen = find.byType(EventDetailScreen);
     expect(tester.widget<EventDetailScreen>(screen).eventId, quakeId);
     expect(GoRouter.of(tester.element(screen)).state.uri.path, '/events/$quakeId');
@@ -256,7 +256,7 @@ void main() {
     expect(find.text('Peta dasar tidak tersedia. Daftar dan koordinat tetap dapat digunakan.'), findsOneWidget);
     await tapVisible(tester, find.byKey(const ValueKey('pin-$weatherId')));
     expect(find.textContaining('Titik representatif area (bukan pusat bahaya)'), findsOneWidget);
-    Navigator.of(tester.element(find.text('Detail Bencana'))).pop();
+    Navigator.of(tester.element(find.text('Lihat Detail Bencana'))).pop();
     await tester.pumpAndSettle();
     await tapVisible(tester, find.text('Tampilkan daftar hasil'));
     final reportTile = find.byKey(const ValueKey(reportId));

@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 
 import '../../core/session/session_coordinator.dart';
 import '../../core/theme/app_theme.dart';
-import 'auth_view_model.dart';
+import '../../core/widgets/status_banners.dart';
+import '../../core/widgets/ui_kit.dart';
 import '../zone/zone_form.dart';
+import 'auth_view_model.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key, this.editZone = false});
@@ -18,10 +20,21 @@ class _AccountScreenState extends State<AccountScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _name = TextEditingController();
+  final _passwordFocus = FocusNode();
   bool _register = false;
   bool _rememberMe = true;
   bool _obscure = true;
   SessionCoordinator? _session;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordFocus.addListener(_onPasswordFocusChanged);
+  }
+
+  void _onPasswordFocusChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   void didChangeDependencies() {
@@ -41,6 +54,8 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   void dispose() {
     _session?.removeListener(_sessionChanged);
+    _passwordFocus.removeListener(_onPasswordFocusChanged);
+    _passwordFocus.dispose();
     _email.dispose();
     _password.dispose();
     _name.dispose();
@@ -59,6 +74,25 @@ class _AccountScreenState extends State<AccountScreen> {
     if (mounted) _password.clear();
   }
 
+  Future<void> _showForgotPasswordDialog() => showDialog<void>(
+    context: context,
+    builder: (dialog) => AlertDialog(
+      scrollable: true,
+      title: const Text('Lupa kata sandi?'),
+      content: const Text(
+        'Atur ulang kata sandi lewat email belum tersedia di versi ini. '
+        'Hubungi admin aplikasi Siaga Bencana agar akun Anda dibantu diatur ulang, '
+        'atau daftar dengan email lain.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialog),
+          child: const Text('Mengerti'),
+        ),
+      ],
+    ),
+  );
+
   String? _serverFieldError(AuthViewModel vm, String name) {
     final fields = vm.error?.details?['fields'];
     if (fields is List &&
@@ -73,10 +107,20 @@ class _AccountScreenState extends State<AccountScreen> {
     final vm = context.watch<AuthViewModel>();
     final session = context.watch<SessionCoordinator>();
     if (session.restoring) {
-      return const Scaffold(body: Center(child: Column(mainAxisSize: MainAxisSize.min,
-        children: [CircularProgressIndicator(), Text('Memulihkan sesi...')],
-      )));
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: AppSpace.m),
+              Text('Memulihkan sesi...'),
+            ],
+          ),
+        ),
+      );
     }
+    final isDuplicateEmail = vm.error?.code == 'EMAIL_ALREADY_REGISTERED';
     return Scaffold(
       appBar: AppBar(title: const Text('Siaga Bencana')),
       body: SafeArea(
@@ -84,64 +128,80 @@ class _AccountScreenState extends State<AccountScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(AppSpace.xl),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(
-                    Icons.shield_outlined,
-                    size: 48,
-                    color: AppColors.primary,
+                  Semantics(
+                    liveRegion: true,
+                    child: vm.healthError != null
+                        ? Padding(
+                            padding: const EdgeInsets.only(bottom: AppSpace.l),
+                            child: Card(
+                              color: AppColors.error.withValues(alpha: 0.06),
+                              child: Padding(
+                                padding: const EdgeInsets.all(AppSpace.l),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    IconLabel(
+                                      icon: Icons.cloud_off_outlined,
+                                      text: vm.healthError!,
+                                      color: AppColors.error,
+                                    ),
+                                    const SizedBox(height: AppSpace.s),
+                                    TextButton.icon(
+                                      onPressed: vm.checkingHealth
+                                          ? null
+                                          : vm.checkHealth,
+                                      icon: const Icon(Icons.refresh),
+                                      label: const Text('Periksa koneksi'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        : vm.healthMeta?.isSimulated == true
+                        ? const Padding(
+                            padding: EdgeInsets.only(bottom: AppSpace.l),
+                            child: SimulationBanner(),
+                          )
+                        : const SizedBox.shrink(),
                   ),
-                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryContainer,
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                      ),
+                      child: const SizedBox(
+                        width: 64,
+                        height: 64,
+                        child: Icon(
+                          Icons.shield_outlined,
+                          size: 36,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpace.l),
                   Text(
                     session.isValid
                         ? 'Zona pantau Anda'
                         : 'Siap, peduli, terhubung.',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
+                  const SizedBox(height: AppSpace.s),
+                  Text(
                     'Informasi bencana dan laporan warga dalam satu aplikasi.',
-                  ),
-                  const SizedBox(height: 20),
-                  Semantics(
-                    liveRegion: true,
-                    child: Card(
-                      color: AppColors.surfaceVariant,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              vm.checkingHealth
-                                  ? 'Memeriksa konektivitas API…'
-                                  : vm.healthError ??
-                                        (vm.healthMeta == null
-                                            ? 'Status API belum diperiksa.'
-                                            : vm.healthMeta!.isSimulated
-                                            ? 'SIMULASI — data demo'
-                                            : 'API terhubung • ${vm.healthMeta!.mode == 'local_live' ? 'Lokal' : 'Produksi'}'),
-                              style: TextStyle(
-                                color: vm.healthMeta?.isSimulated == true
-                                    ? AppColors.simulation
-                                    : AppColors.textPrimary,
-                              ),
-                            ),
-                            TextButton.icon(
-                              onPressed: vm.checkingHealth
-                                  ? null
-                                  : vm.checkHealth,
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Periksa koneksi'),
-                            ),
-                          ],
-                        ),
-                      ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textMuted,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpace.xl),
                   if (session.message != null) ...[
                     Semantics(
                       liveRegion: true,
@@ -150,44 +210,35 @@ class _AccountScreenState extends State<AccountScreen> {
                         style: const TextStyle(color: AppColors.error),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpace.l),
                   ],
                   if (session.isValid && session.verified) ...[
-                    Text('Selamat datang, ${session.user!.displayName}.'),
-                    const SizedBox(height: 16),
+                    Text(
+                      'Selamat datang, ${session.user!.displayName}.',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppSpace.l),
                     ZoneForm(editZone: widget.editZone),
                   ] else ...[
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        ChoiceChip(
-                          label: const Text('Masuk'),
-                          selected: !_register,
-                          onSelected: vm.busy
-                              ? null
-                              : (_) {
-                                  vm.clearError();
-                                  setState(() {
-                                    _register = false;
-                                    _password.clear();
-                                  });
-                                },
-                        ),
-                        ChoiceChip(
-                          label: const Text('Daftar'),
-                          selected: _register,
-                          onSelected: vm.busy
-                              ? null
-                              : (_) {
-                                  vm.clearError();
-                                  setState(() {
-                                    _register = true;
-                                    _password.clear();
-                                  });
-                                },
-                        ),
+                    SegmentedButton<bool>(
+                      style: SegmentedButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                      ),
+                      showSelectedIcon: false,
+                      segments: const [
+                        ButtonSegment(value: false, label: Text('Masuk')),
+                        ButtonSegment(value: true, label: Text('Daftar')),
                       ],
+                      selected: {_register},
+                      onSelectionChanged: vm.busy
+                          ? null
+                          : (values) {
+                              vm.clearError();
+                              setState(() {
+                                _register = values.single;
+                                _password.clear();
+                              });
+                            },
                     ),
                     const SizedBox(height: 20),
                     Form(
@@ -214,7 +265,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                   ? 'Nama harus 1–80 karakter.'
                                   : null,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: AppSpace.l),
                           ],
                           TextFormField(
                             key: const Key('email'),
@@ -234,10 +285,11 @@ class _AccountScreenState extends State<AccountScreen> {
                                 ? 'Masukkan alamat email yang valid.'
                                 : null,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpace.l),
                           TextFormField(
                             key: const Key('password'),
                             controller: _password,
+                            focusNode: _passwordFocus,
                             enabled: !vm.busy,
                             obscureText: _obscure,
                             autocorrect: false,
@@ -248,8 +300,9 @@ class _AccountScreenState extends State<AccountScreen> {
                             },
                             decoration: InputDecoration(
                               labelText: 'Kata sandi',
-                              helperText:
-                                  '10–128 karakter. Spasi ikut dihitung.',
+                              helperText: _register && _passwordFocus.hasFocus
+                                  ? '10–128 karakter. Spasi ikut dihitung.'
+                                  : null,
                               helperMaxLines: 3,
                               errorText: _serverFieldError(vm, 'password'),
                               suffixIcon: IconButton(
@@ -271,8 +324,56 @@ class _AccountScreenState extends State<AccountScreen> {
                                 ? 'Kata sandi harus 10–128 karakter.'
                                 : null,
                           ),
-                          const SizedBox(height: 20),
-                          if (vm.error != null) ...[
+                          if (!_register)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                key: const Key('forgot-password'),
+                                onPressed: vm.busy
+                                    ? null
+                                    : _showForgotPasswordDialog,
+                                child: const Text('Lupa kata sandi?'),
+                              ),
+                            ),
+                          const SizedBox(height: AppSpace.l),
+                          if (isDuplicateEmail) ...[
+                            Semantics(
+                              liveRegion: true,
+                              child: Card(
+                                color: AppColors.primaryContainer,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(AppSpace.l),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      const IconLabel(
+                                        icon: Icons.mark_email_read_outlined,
+                                        text:
+                                            'Email ini sudah terdaftar. Satu email hanya untuk satu akun — silakan masuk.',
+                                        color: AppColors.primary,
+                                      ),
+                                      const SizedBox(height: AppSpace.m),
+                                      FilledButton.tonal(
+                                        key: const Key('switch-to-login'),
+                                        onPressed: vm.busy
+                                            ? null
+                                            : () {
+                                                vm.clearError();
+                                                setState(() {
+                                                  _register = false;
+                                                  _password.clear();
+                                                });
+                                              },
+                                        child: const Text('Pindah ke Masuk'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: AppSpace.m),
+                          ] else if (vm.error != null) ...[
                             Semantics(
                               liveRegion: true,
                               child: Text(
@@ -280,17 +381,24 @@ class _AccountScreenState extends State<AccountScreen> {
                                 style: const TextStyle(color: AppColors.error),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpace.m),
                           ],
                           if (vm.retrySeconds > 0) ...[
                             Text('Coba lagi dalam ${vm.retrySeconds} detik.'),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpace.m),
                           ],
-                          if (!_register) CheckboxListTile(
-                            key: const Key('remember-me'), title: const Text('Tetap masuk'),
-                            value: _rememberMe, onChanged: vm.busy ? null : (value) =>
-                                setState(() => _rememberMe = value ?? false),
-                          ),
+                          if (!_register)
+                            CheckboxListTile(
+                              key: const Key('remember-me'),
+                              contentPadding: EdgeInsets.zero,
+                              title: const Text('Tetap masuk'),
+                              value: _rememberMe,
+                              onChanged: vm.busy
+                                  ? null
+                                  : (value) => setState(
+                                      () => _rememberMe = value ?? false,
+                                    ),
+                            ),
                           FilledButton(
                             key: const Key('submit'),
                             onPressed: vm.busy || vm.retrySeconds > 0
@@ -304,10 +412,10 @@ class _AccountScreenState extends State<AccountScreen> {
                                   : 'Masuk',
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          const Text(
+                          const SizedBox(height: AppSpace.l),
+                          Text(
                             'Jika Tetap masuk aktif, sesi terenkripsi disimpan di perangkat hingga keluar atau masa berlaku habis.',
-                            style: TextStyle(color: AppColors.textMuted),
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
                       ),

@@ -254,8 +254,7 @@ void main() {
     expect(find.text('Terkait event: related-event'), findsOneWidget); expect(find.text('Tinjau'), findsNothing);
     await tester.tap(find.text('Tulis Laporan')); await tester.pumpAndSettle(); final form = find.byType(ReportForm);
     final vm = tester.element(form).read<ReportsViewModel>();
-    await tester.tap(find.byType(DropdownButtonFormField<String>)); await tester.pumpAndSettle();
-    await tester.tap(find.text('Banjir').last); await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Banjir')); await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField), description);
     await tester.pumpAndSettle();
     await scrollTo(tester, find.text('Pilih titik manual'), form); await tester.tap(find.text('Pilih titik manual')); await tester.pumpAndSettle();

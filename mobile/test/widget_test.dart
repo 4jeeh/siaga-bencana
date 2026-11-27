@@ -260,7 +260,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(location.calls, 0);
     expect(tester.widget<FilledButton>(find.byKey(const Key('save-zone'))).onPressed, isNull);
-    await tapVisible(tester, find.text('Gunakan lokasi saya sekali'));
+    await tapVisible(tester, find.text('Pakai GPS sekali'));
     expect(location.calls, 1);
     expect(find.textContaining('Lintang: -7.25'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -296,13 +296,13 @@ void main() {
       ));
       await tester.pumpAndSettle();
       final vm = tester.element(find.byType(AccountScreen)).read<ZoneViewModel>();
-      await tapVisible(tester, find.text('Gunakan lokasi saya sekali'));
+      await tapVisible(tester, find.text('Pakai GPS sekali'));
       expect(find.text('Izin lokasi ditolak. Pilih titik manual.'), findsOneWidget);
       if (permanentlyDenied) {
         await tapVisible(tester, find.text('Buka Pengaturan'));
         expect(location.settingsCalls, 1);
       }
-      await tapVisible(tester, find.text('Pilih titik di peta / manual'));
+      await tapVisible(tester, find.text('Pilih di peta'));
       expect(find.byType(NavigationBar), findsNothing);
       expect(find.text('\u00a9 OpenStreetMap contributors'), findsOneWidget);
       final map = find.byKey(const Key('zone-map'));
@@ -333,7 +333,7 @@ void main() {
       expect(vm.longitude, -180);
       expect(session.user!.hasZone, false);
       expect(requests.any((value) => value.startsWith('PUT') || value.contains('/map/')), false);
-      await tapVisible(tester, find.text('Pilih titik di peta / manual'));
+      await tapVisible(tester, find.text('Pilih di peta'));
       await tester.enterText(find.byKey(const Key('zone-latitude')), '12');
       await tapVisible(tester, find.text('Batal'));
       expect(vm.latitude, -7.25);
@@ -619,7 +619,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(paths, ['/api/v1/health']);
     expect(find.byType(AccountScreen), findsOneWidget);
-    expect(find.textContaining('API terhubung'), findsOneWidget);
+    expect(find.textContaining('API terhubung'), findsNothing);
     expect(tester.takeException(), isNull);
     await tester.ensureVisible(find.byKey(const Key('submit')));
     await tester.tap(find.byKey(const Key('submit')));
@@ -683,7 +683,7 @@ void main() {
         await tester.ensureVisible(find.byKey(const Key('submit')));
         await tester.tap(find.byKey(const Key('submit')));
         await tester.pumpAndSettle();
-        expect(find.text('UI-01c • Atur Zona Pantau'), findsOneWidget);
+        expect(find.text('Atur Area Pantau'), findsOneWidget);
         expect(paths, [
           '/api/v1/health',
           '/api/v1/auth/${register ? 'register' : 'login'}',

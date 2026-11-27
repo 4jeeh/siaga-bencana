@@ -322,7 +322,7 @@ void main() {
     await _reveal(tester, find.text('Prioritas 74.3 — Tinggi'));
     await _tap(tester, 'Mengapa?');
     await _reveal(tester, find.text(distanceReason));
-    await _reveal(tester, find.text('Potensi'));
+    await _reveal(tester, find.text('Potensi'), delta: -220);
     expect(find.text(potential), findsOneWidget);
     await _reveal(tester, find.text('Tidak tersedia dari sumber'));
     await _reveal(tester, find.byType(FlutterMap));
