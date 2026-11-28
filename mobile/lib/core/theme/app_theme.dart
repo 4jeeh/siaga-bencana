@@ -173,9 +173,15 @@ ThemeData appTheme() {
       style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
     ),
     chipTheme: base.chipTheme.copyWith(
+      selectedColor: AppColors.primaryContainer,
+      checkmarkColor: AppColors.primary,
+      side: WidgetStateBorderSide.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? const BorderSide(color: AppColors.primary, width: 1.5)
+            : const BorderSide(color: AppColors.outline),
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.sm),
-        side: const BorderSide(color: AppColors.outline),
       ),
     ),
     bottomSheetTheme: const BottomSheetThemeData(

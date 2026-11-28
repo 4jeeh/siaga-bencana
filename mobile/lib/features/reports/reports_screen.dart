@@ -143,12 +143,17 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         for (final entry in filters.entries)
                           FilterChip(
                             materialTapTargetSize: MaterialTapTargetSize.padded,
+                            showCheckmark: entry.key == null,
                             avatar: entry.key == null
                                 ? null
                                 : Icon(
                                     index == 0
                                         ? reportCategoryIcon(entry.key!)
                                         : reportStatusIcon(entry.key!),
+                                    size: 18,
+                                    color: selected == entry.key
+                                        ? AppColors.primary
+                                        : AppColors.textMuted,
                                   ),
                             label: Text(entry.value),
                             selected: selected == entry.key,

@@ -50,7 +50,14 @@ class _ReportFormState extends State<ReportForm> {
               children: [
                 for (final key in reportCategoryOrder)
                   ChoiceChip(
-                    avatar: Icon(reportCategoryIcon(key), size: 18),
+                    showCheckmark: false,
+                    avatar: Icon(
+                      reportCategoryIcon(key),
+                      size: 18,
+                      color: vm.draftCategory == key
+                          ? AppColors.primary
+                          : AppColors.textMuted,
+                    ),
                     label: Text(reportCategories[key]!),
                     selected: vm.draftCategory == key,
                     materialTapTargetSize: MaterialTapTargetSize.padded,

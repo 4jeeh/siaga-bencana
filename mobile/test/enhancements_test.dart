@@ -538,4 +538,57 @@ void main() {
       semantics.dispose();
     }
   });
+
+  testWidgets('chips with avatar icons hide checkmarks to prevent overlap', (tester) async {
+    final session = signedIn();
+    await tester.pumpWidget(SiagaApp(
+      key: const ValueKey('chip-avatar-check'),
+      baseUrl: base,
+      session: session,
+      initialLocation: '/reports',
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
+      client: MockClient((r) async => switch (r.url.path) {
+        '/api/v1/health' => ok({'status': 'ok'}),
+        '/api/v1/me/zone' => ok(zoneJson),
+        '/api/v1/reports' => emptyFeed(),
+        _ => ok(null),
+      }),
+    ));
+    await tester.pumpAndSettle();
+
+    final semuaChip = tester.widget<FilterChip>(
+      find.ancestor(of: find.text('Semua'), matching: find.byType(FilterChip)),
+    );
+    expect(semuaChip.avatar, isNull);
+    expect(semuaChip.showCheckmark, isTrue);
+
+    for (final label in ['Gempa', 'Banjir', 'Erupsi']) {
+      final chip = tester.widget<FilterChip>(
+        find.ancestor(of: find.text(label), matching: find.byType(FilterChip)),
+      );
+      expect(chip.avatar, isNotNull);
+      expect(chip.showCheckmark, isFalse);
+    }
+
+    await tapVisible(tester, find.text('Tulis Laporan'));
+    for (final label in ['Gempa', 'Banjir']) {
+      final formChip = tester.widget<ChoiceChip>(
+        find.ancestor(of: find.text(label), matching: find.byType(ChoiceChip)).last,
+      );
+      expect(formChip.avatar, isNotNull);
+      expect(formChip.showCheckmark, isFalse);
+    }
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    session.clear();
+
+    await openBrowse(tester, markers([]));
+    final mapReportChip = tester.widget<FilterChip>(
+      find.ancestor(of: find.text('Laporan warga'), matching: find.byType(FilterChip)),
+    );
+    expect(mapReportChip.avatar, isNotNull);
+    expect(mapReportChip.showCheckmark, isFalse);
+    await closeApp(tester);
+  });
 }

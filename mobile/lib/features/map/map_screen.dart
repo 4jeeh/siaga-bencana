@@ -657,6 +657,7 @@ class _BrowseMapState extends State<_BrowseMap> {
       ),
       FilterChip(
         label: const Text('Laporan warga'),
+        showCheckmark: false,
         avatar: _Symbol.report.glyph,
         selected: vm.includeReports,
         materialTapTargetSize: MaterialTapTargetSize.padded,
