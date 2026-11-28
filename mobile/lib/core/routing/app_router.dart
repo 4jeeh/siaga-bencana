@@ -111,22 +111,30 @@ class NavigationShell extends StatelessWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
+        height: MediaQuery.textScalerOf(context).scale(12) > 18 ? 96 : 80,
         selectedIndex: tabs.indexOf(location).clamp(0, 3),
         onDestinationSelected: (index) => context.go(tabs[index]),
         destinations: [
           const NavigationDestination(
             icon: Icon(Icons.home_outlined),
             label: 'Beranda',
+            tooltip: 'Beranda',
           ),
-          const NavigationDestination(icon: Icon(Icons.map_outlined), label: 'Peta'),
+          const NavigationDestination(
+            icon: Icon(Icons.map_outlined),
+            label: 'Peta',
+            tooltip: 'Peta',
+          ),
           const NavigationDestination(
             icon: Icon(Icons.campaign_outlined),
             label: 'Lapor',
+            tooltip: 'Lapor',
           ),
           NavigationDestination(
             icon: Badge.count(count: unread, isLabelVisible: unread > 0,
               child: const Icon(Icons.person_outline)),
             label: 'Profil',
+            tooltip: 'Profil',
           ),
         ],
       ),

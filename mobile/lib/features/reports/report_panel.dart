@@ -65,6 +65,7 @@ class ReportStatusPill extends StatelessWidget {
       label: reportStatusLabels[status] ?? status,
       foreground: color,
       background: color.withValues(alpha: 0.10),
+      textColor: color == AppColors.warning ? AppColors.textPrimary : null,
     );
   }
 }
@@ -209,9 +210,12 @@ class ReportPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 8,
         children: [
-          Text(
-            'Detail laporan warga',
-            style: Theme.of(context).textTheme.titleLarge,
+          Semantics(
+            header: true,
+            child: Text(
+              'Detail laporan warga',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
           ),
           if (vm.conflictMessage != null) reportNotice(vm.conflictMessage!),
           if (vm.actionError != null) reportNotice(vm.actionError!),
@@ -243,7 +247,7 @@ class ReportPanel extends StatelessWidget {
             if (report.eventId != null) Text('Terkait event: ${report.eventId}'),
             if (report.hasPhoto && !vm.panelLoading) ...[
               if (vm.photoError != null)
-                Text(vm.photoError!)
+                reportNotice(vm.photoError!)
               else if (vm.photoUrl != null)
                 Stack(
                   children: [
@@ -267,7 +271,7 @@ class ReportPanel extends StatelessWidget {
                   if (vm.verificationsLoading)
                     const LinearProgressIndicator()
                   else if (vm.verificationsError != null)
-                    Text(vm.verificationsError!)
+                    reportNotice(vm.verificationsError!)
                   else if (vm.verifications.isEmpty)
                     const Text('Belum ada jejak peninjauan.')
                   else

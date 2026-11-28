@@ -53,6 +53,7 @@ class StatusPill extends StatelessWidget {
     required this.foreground,
     required this.background,
     this.border,
+    this.textColor,
   });
 
   final IconData icon;
@@ -60,6 +61,7 @@ class StatusPill extends StatelessWidget {
   final Color foreground;
   final Color background;
   final Color? border;
+  final Color? textColor;
 
   @override
   Widget build(BuildContext context) => MergeSemantics(
@@ -87,7 +89,7 @@ class StatusPill extends StatelessWidget {
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: foreground,
+                    color: textColor ?? foreground,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),

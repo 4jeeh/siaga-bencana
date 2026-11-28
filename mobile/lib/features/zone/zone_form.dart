@@ -21,9 +21,12 @@ class ZoneForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Atur Area Pantau',
-          style: Theme.of(context).textTheme.titleLarge,
+        Semantics(
+          header: true,
+          child: Text(
+            'Atur Area Pantau',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
         ),
         const SizedBox(height: AppSpace.s),
         Text(

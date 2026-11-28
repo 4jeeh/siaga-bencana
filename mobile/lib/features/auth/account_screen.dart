@@ -188,11 +188,14 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSpace.l),
-                  Text(
-                    session.isValid
-                        ? 'Zona pantau Anda'
-                        : 'Siap, peduli, terhubung.',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      session.isValid
+                          ? 'Zona pantau Anda'
+                          : 'Siap, peduli, terhubung.',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
                   ),
                   const SizedBox(height: AppSpace.s),
                   Text(

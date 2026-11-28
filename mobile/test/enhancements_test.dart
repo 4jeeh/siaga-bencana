@@ -28,7 +28,7 @@ import 'package:siaga_bencana/features/zone/zone_view_model.dart';
 import 'events_feed_test.dart' show quakeId;
 import 'map_browse_test.dart' show closeApp, marker, markers, openBrowse;
 import 'notifications_profile_test.dart' show FakeLocal;
-import 'widget_test.dart' show FakeLocationService, TestTileProvider, authJson, base, emptyFeed, ok,
+import 'widget_test.dart' show FakeLocationService, TestTileProvider, authJson, base, emptyFeed, meta, ok,
     signedIn, tapVisible, userJson, zoneJson;
 
 const suggestion = {
@@ -465,5 +465,77 @@ void main() {
     final title = tester.widget<Text>(find.text('Potensi'));
     expect(title.style?.color, AppColors.error);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('key screens satisfy Flutter accessibility guidelines (tap targets, contrast, labels)', (tester) async {
+    final semantics = tester.ensureSemantics();
+    try {
+
+    // 1. AccountScreen (login)
+    await tester.pumpWidget(SiagaApp(
+      baseUrl: base,
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
+      client: MockClient((r) async => r.url.path == '/api/v1/health' ? ok({'status': 'ok'}) : ok(null)),
+    ));
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await tester.pumpWidget(const SizedBox.shrink());
+
+    // 2. HomeScreen + ProfileScreen + ReportsScreen
+    final session = signedIn();
+    await tester.pumpWidget(SiagaApp(
+      key: const ValueKey('signed-in-a11y'),
+      baseUrl: base,
+      session: session,
+      initialLocation: '/home',
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
+      client: MockClient((r) async => switch (r.url.path) {
+        '/api/v1/health' => ok({'status': 'ok'}),
+        '/api/v1/me/zone' => ok(zoneJson),
+        '/api/v1/me/weather' => ok(null),
+        '/api/v1/events' => emptyFeed(),
+        '/api/v1/reports' => emptyFeed(),
+        '/api/v1/me/notifications' => http.Response(jsonEncode({
+          'items': <Object>[],
+          'page': {'limit': 20, 'offset': 0, 'next_offset': null, 'has_more': false},
+          'unread_count': 0,
+          'meta': meta,
+        }), 200),
+        '/api/v1/me/notifications/sync' => http.Response(jsonEncode({
+          'items': <Object>[],
+          'next_since_sequence': 0,
+          'cursor_user_id': userJson['id'],
+          'has_more': false,
+          'meta': meta,
+        }), 200),
+        _ => ok(null),
+      }),
+    ));
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    await tester.tap(find.text('Lapor'));
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    await tester.tap(find.text('Profil'));
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    session.clear();
+    } finally {
+      semantics.dispose();
+    }
   });
 }

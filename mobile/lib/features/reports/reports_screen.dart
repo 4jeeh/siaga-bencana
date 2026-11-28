@@ -274,9 +274,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             report.latestReason!,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
-                        OutlinedButton(
-                          onPressed: () => showReportPanel(context, report),
-                          child: Text(index == 2 ? 'Lihat / Tinjau' : 'Lihat'),
+                        Semantics(
+                          button: true,
+                          label:
+                              '${index == 2 ? 'Lihat atau tinjau' : 'Lihat'} laporan ${reportCategories[report.category] ?? report.category}',
+                          excludeSemantics: true,
+                          child: OutlinedButton(
+                            onPressed: () => showReportPanel(context, report),
+                            child: Text(index == 2 ? 'Lihat / Tinjau' : 'Lihat'),
+                          ),
                         ),
                       ],
                     ),

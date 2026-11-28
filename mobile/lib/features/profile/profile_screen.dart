@@ -112,7 +112,10 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
                       if (profile.currentAccountError != null)
-                        Text(profile.currentAccountError!),
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(profile.currentAccountError!),
+                        ),
                     ]),
                     _section(context, 'Zona Pantau', [
                       if (zoneVm.loading) const LinearProgressIndicator(),
@@ -138,7 +141,7 @@ class ProfileScreen extends StatelessWidget {
                       ] else if (!zoneVm.loading)
                         const Text('Zona belum tersedia.'),
                       if (zoneVm.error != null) ...[
-                        Text(zoneVm.error!),
+                        Semantics(liveRegion: true, child: Text(zoneVm.error!)),
                         TextButton(
                           onPressed: zoneVm.load,
                           child: const Text('Coba Lagi'),
@@ -171,7 +174,11 @@ class ProfileScreen extends StatelessWidget {
                         const Text('Terakhir diterima'),
                         _time(channel.lastReceivedAt!),
                       ],
-                      if (channel.notice != null) Text(channel.notice!),
+                      if (channel.notice != null)
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(channel.notice!),
+                        ),
                       _status(
                         'Izin notifikasi',
                         permission == NotificationPermissionState.granted
@@ -195,7 +202,10 @@ class ProfileScreen extends StatelessWidget {
                           child: const Text('Buka pengaturan OS'),
                         ),
                       if (profile.permissionNotice != null)
-                        Text(profile.permissionNotice!),
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(profile.permissionNotice!),
+                        ),
                       Text(
                         'Pembaruan otomatis saat aplikasi aktif. Tidak dijamin saat aplikasi ditutup.',
                         style: Theme.of(context).textTheme.bodySmall,
@@ -229,7 +239,10 @@ class ProfileScreen extends StatelessWidget {
                           history.loadingMore)
                         const LinearProgressIndicator(),
                       if (history.error != null) ...[
-                        Text(history.error!),
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(history.error!),
+                        ),
                         if (history.lastLoadedAt != null) ...[
                           const Text('Riwayat terakhir diperbarui'),
                           _time(history.lastLoadedAt!),
@@ -245,11 +258,18 @@ class ProfileScreen extends StatelessWidget {
                               ? 'Semua notifikasi sudah dibaca'
                               : 'Belum ada notifikasi untuk akun ini',
                         ),
-                      if (history.notice != null) Text(history.notice!),
+                      if (history.notice != null)
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(history.notice!),
+                        ),
                       for (final item in history.items)
                         _historyTile(context, item),
                       if (history.loadMoreError != null)
-                        Text(history.loadMoreError!),
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(history.loadMoreError!),
+                        ),
                       if (history.page?.nextOffset != null)
                         OutlinedButton(
                           onPressed: history.loadingMore

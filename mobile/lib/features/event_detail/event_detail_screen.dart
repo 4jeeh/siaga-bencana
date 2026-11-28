@@ -229,7 +229,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   else ...[
                     if (current && vm.error != null)
                       _Section('Gagal memuat detail', [
-                        Text(vm.error!),
+                        reportNotice(vm.error!),
                         if (vm.lastLoadedAt != null)
                           Text(
                             'Data terakhir dimuat ${formatLocalDateTime(vm.lastLoadedAt!)}',
@@ -321,9 +321,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           ),
                         for (final report in vm.relatedReports) ...[
                           Text(report.description),
-                          OutlinedButton(
-                            onPressed: () => showReportPanel(context, report),
-                            child: const Text('Lihat'),
+                          Semantics(
+                            button: true,
+                            label: 'Lihat laporan ${report.category}',
+                            excludeSemantics: true,
+                            child: OutlinedButton(
+                              onPressed: () => showReportPanel(context, report),
+                              child: const Text('Lihat'),
+                            ),
                           ),
                         ],
                       ]),
@@ -390,6 +395,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 : 'Prioritas ${p.priorityDisplay} — ${priorityLevelLabels[p.priorityLabel]}',
             foreground: quakeColor,
             background: quakeColor.withValues(alpha: 0.10),
+            textColor: quakeColor == AppColors.warning
+                ? AppColors.textPrimary
+                : null,
           ),
         )
       else
@@ -403,6 +411,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   'Keparahan: ${capSeverityLabel(d.cap?.severity) ?? _missing}',
               foreground: AppColors.warning,
               background: AppColors.warning.withValues(alpha: 0.10),
+              textColor: AppColors.textPrimary,
             ),
             StatusPill(
               icon: Icons.flag_outlined,

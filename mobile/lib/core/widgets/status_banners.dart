@@ -118,7 +118,10 @@ class FreshnessBanner extends StatelessWidget {
           icon: icon,
           text: '$name — ${sourceStateLabel(source.state)}',
           color: color,
-          style: TextStyle(fontWeight: FontWeight.w600, color: color),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: color == AppColors.warning ? AppColors.textPrimary : color,
+          ),
         ),
         if (source.state != 'healthy')
           Padding(

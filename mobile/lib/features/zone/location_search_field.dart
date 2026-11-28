@@ -55,7 +55,8 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
         if (_showResults) ...[
           const SizedBox(height: AppSpace.s),
           if (vm.searchingLocations) const LinearProgressIndicator(),
-          if (vm.locationSearchError != null) Text(vm.locationSearchError!),
+          if (vm.locationSearchError != null)
+            Semantics(liveRegion: true, child: Text(vm.locationSearchError!)),
           if (vm.locationResults.isNotEmpty)
             Card(
               clipBehavior: Clip.antiAlias,

@@ -36,9 +36,12 @@ class _ReportFormState extends State<ReportForm> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 12,
           children: [
-            Text(
-              'Tulis laporan warga',
-              style: Theme.of(context).textTheme.titleLarge,
+            Semantics(
+              header: true,
+              child: Text(
+                'Tulis laporan warga',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
             const SectionHeader('Kategori'),
             Wrap(

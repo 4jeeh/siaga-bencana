@@ -397,13 +397,14 @@ class _ZoneHeroCard extends StatelessWidget {
             ],
             if (weather != null) ...[
               Divider(color: Colors.white.withValues(alpha: 0.24), height: 24),
-              Semantics(
-                label:
-                    'Cuaca saat ini: ${weather!.conditionLabel} · ${weather!.temperatureC.toStringAsFixed(0)}°C',
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Semantics(
+                    label:
+                        'Cuaca saat ini: ${weather!.conditionLabel} · ${weather!.temperatureC.toStringAsFixed(0)}°C',
+                    excludeSemantics: true,
+                    child: Row(
                       children: [
                         ExcludeSemantics(
                           child: Icon(
@@ -443,36 +444,36 @@ class _ZoneHeroCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: AppSpace.m),
-                    MetricStrip(
-                      tiles: [
-                        MetricTile(
-                          label: 'Kelembapan',
-                          value: '${weather!.humidityPercent.toStringAsFixed(0)}%',
-                          icon: Icons.water_drop_outlined,
-                          dark: true,
-                        ),
-                        MetricTile(
-                          label: 'Angin',
-                          value: '${weather!.windSpeedKmh.toStringAsFixed(0)} km/j',
-                          icon: Icons.air,
-                          dark: true,
-                        ),
-                        MetricTile(
-                          label: 'Hujan',
-                          value: '${weather!.precipitationMm.toStringAsFixed(1)} mm',
-                          icon: Icons.umbrella_outlined,
-                          dark: true,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpace.s),
-                    Text(
-                      'Cuaca: Open-Meteo',
-                      style: textTheme.bodySmall?.copyWith(color: subWhite),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: AppSpace.m),
+                  MetricStrip(
+                    tiles: [
+                      MetricTile(
+                        label: 'Kelembapan',
+                        value: '${weather!.humidityPercent.toStringAsFixed(0)}%',
+                        icon: Icons.water_drop_outlined,
+                        dark: true,
+                      ),
+                      MetricTile(
+                        label: 'Angin',
+                        value: '${weather!.windSpeedKmh.toStringAsFixed(0)} km/j',
+                        icon: Icons.air,
+                        dark: true,
+                      ),
+                      MetricTile(
+                        label: 'Hujan',
+                        value: '${weather!.precipitationMm.toStringAsFixed(1)} mm',
+                        icon: Icons.umbrella_outlined,
+                        dark: true,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpace.s),
+                  Text(
+                    'Cuaca: Open-Meteo',
+                    style: textTheme.bodySmall?.copyWith(color: subWhite),
+                  ),
+                ],
               ),
             ],
           ],
@@ -638,6 +639,9 @@ class _EventCard extends StatelessWidget {
                     : 'Prioritas ${p.priorityDisplay} — ${priorityLevelLabels[p.priorityLabel]}',
                 foreground: priorityFg,
                 background: priorityFg.withValues(alpha: 0.10),
+                textColor: priorityFg == AppColors.warning
+                    ? AppColors.textPrimary
+                    : null,
               ),
               const SizedBox(height: AppSpace.s),
               Wrap(
@@ -677,6 +681,7 @@ class _EventCard extends StatelessWidget {
                         'Keparahan: ${capSeverityLabel(cap?.severity) ?? 'Belum tersedia'}',
                     foreground: AppColors.warning,
                     background: AppColors.warning.withValues(alpha: 0.10),
+                    textColor: AppColors.textPrimary,
                   ),
                   StatusPill(
                     icon: item.lifecycleStatus == 'active'

@@ -753,8 +753,11 @@ class _BrowseMapState extends State<_BrowseMap> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (_tileFailed && !vm.listMode) ...[
-            const Text(
-              'Peta dasar tidak tersedia. Daftar dan koordinat tetap dapat digunakan.',
+            Semantics(
+              liveRegion: true,
+              child: const Text(
+                'Peta dasar tidak tersedia. Daftar dan koordinat tetap dapat digunakan.',
+              ),
             ),
             TextButton.icon(
               onPressed: vm.toggleListMode,
@@ -763,14 +766,17 @@ class _BrowseMapState extends State<_BrowseMap> {
             ),
           ],
           if (vm.zoneRequired) ...[
-            const Text('Zona pantau belum aktif.'),
+            Semantics(
+              liveRegion: true,
+              child: const Text('Zona pantau belum aktif.'),
+            ),
             TextButton(
               onPressed: () => context.go('/account?edit=zone'),
               child: const Text('Ubah Zona'),
             ),
           ],
           if (vm.error != null) ...[
-            Text(vm.error!),
+            Semantics(liveRegion: true, child: Text(vm.error!)),
             if (vm.lastLoadedAt != null)
               Text(
                 'Data terakhir dimuat ${formatLocalDateTime(vm.lastLoadedAt!)}',
@@ -781,7 +787,10 @@ class _BrowseMapState extends State<_BrowseMap> {
           if (vm.truncated)
             const Text('Hasil dibatasi 100. Persempit area/filter.'),
           if (emptyResult) ...[
-            const Text('Belum ada marker sesuai area/filter'),
+            Semantics(
+              liveRegion: true,
+              child: const Text('Belum ada marker sesuai area/filter'),
+            ),
             Wrap(
               children: [
                 TextButton(
@@ -815,9 +824,12 @@ class _BrowseMapState extends State<_BrowseMap> {
             )
           : ConstrainedBox(
               constraints: BoxConstraints(maxHeight: maxBannerHeight),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
-                child: list,
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
+                  child: list,
+                ),
               ),
             );
     }
@@ -935,7 +947,12 @@ class _BrowseMapState extends State<_BrowseMap> {
                         child: Column(
                           children: [
                             if (simulated) const SimulationBanner(),
-                            _controls(vm, maxBannerHeight: height * 0.18),
+                            _controls(
+                              vm,
+                              maxBannerHeight: MediaQuery.textScalerOf(
+                                context,
+                              ).scale(120).clamp(height * 0.18, height * 0.35),
+                            ),
                             SizedBox(
                               height: 4,
                               child: vm.loading
