@@ -128,6 +128,10 @@ class LocationService:
             result = nominatim_search(query.q, query.limit)
         except (httpx.HTTPError, ValueError, KeyError, TypeError, OverflowError, RecursionError):
             result = None
-        result = result or local_search(*key)
-        self.cache.put(key, result)
-        return result
+        if result is not None:
+            self.cache.put(key, result)
+            return result
+        fallback = local_search(*key)
+        if fallback.items:
+            self.cache.put(key, fallback)
+        return fallback

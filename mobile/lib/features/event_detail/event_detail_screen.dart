@@ -641,6 +641,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             child: Image.network(
               image.toString(),
               semanticLabel: 'Shakemap BMKG',
+              loadingBuilder: (context, child, progress) => progress == null
+                  ? child
+                  : const Padding(
+                      padding: EdgeInsets.symmetric(vertical: AppSpace.l),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
               errorBuilder: (_, _, _) => const Text(
                 'Pratinjau shakemap tidak dapat dimuat. Detail teks tetap tersedia.',
               ),

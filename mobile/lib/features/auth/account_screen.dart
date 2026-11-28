@@ -265,6 +265,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     const SizedBox(height: 20),
                     Form(
                       key: _form,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [

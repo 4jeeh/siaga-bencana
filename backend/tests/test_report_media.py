@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import json
 import os
@@ -20,6 +21,7 @@ from app.models.citizen_report import CitizenReport, MediaCleanupJob
 from app.models.user import User
 from app.services import media
 from app.services.media_cleanup import (
+    cleanup_scheduler,
     enqueue_cleanup,
     process_cleanup_jobs,
     reconcile_orphan_objects,
@@ -371,3 +373,45 @@ def test_cleanup_skips_locked_and_retries(db_engine):
         adapter.delete_object.side_effect = None
         assert process_cleanup_jobs(db, adapter, storage_backend="local", now=retry_at) == 1
         assert job.status == "done" and job.last_error is None
+
+
+def test_cleanup_scheduler_processes_due_job_and_stops(db_engine, tmp_path):
+    settings = Settings(
+        _env_file=None,
+        database_url=db_engine.url.render_as_string(hide_password=False),
+        jwt_secret="j" * 32,
+        media_signing_secret="m" * 32,
+        storage_root=tmp_path / "private",
+    )
+    adapter = LocalStorageAdapter(settings)
+    key = generate_object_key()
+    adapter.put_bytes(key, b"orphan")
+    with Session(db_engine) as db, db.begin():
+        enqueue_cleanup(
+            db,
+            storage_backend="local",
+            object_key=key,
+            object_created_at=NOW,
+            now=datetime.now(UTC) - timedelta(minutes=1),
+        )
+
+    async def run():
+        stop = asyncio.Event()
+        probe = Mock(ready=False)
+        task = asyncio.create_task(
+            cleanup_scheduler(
+                db_engine, adapter, probe, set(), settings, stop, interval_seconds=0.05
+            )
+        )
+        for _ in range(40):
+            if not adapter.list_objects():
+                break
+            await asyncio.sleep(0.05)
+        stop.set()
+        await task
+
+    asyncio.run(run())
+    assert adapter.list_objects() == []
+    with Session(db_engine) as db:
+        job = db.scalars(select(MediaCleanupJob).where(MediaCleanupJob.object_key == key)).one()
+        assert job.status == "done"

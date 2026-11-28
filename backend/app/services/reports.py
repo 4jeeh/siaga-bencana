@@ -210,7 +210,9 @@ def submit(state, session, user, fields, upload):
         updated_at=now,
     )
     snapshot = _dto(row, by_user(session, reporter_id), True)
-    if key:
+    if photo:
+        # Release the lookup transaction slot before external object upload.
+        session.rollback()
         state.in_flight_uploads.add(key)
     try:
         if photo:
@@ -238,10 +240,12 @@ def signed_url(request, session, user, report_id):
     row = visible_report(session, user, report_id)
     if row.photo_object_key is None:
         raise photo_missing()
+    report_uuid, object_key, is_simulated = row.id, row.photo_object_key, row.is_simulated
+    session.close()
     url, expiry, ttl = request.app.state.storage.create_signed_url(
-        request.base_url, row.id, row.photo_object_key, ttl_seconds=300
+        request.base_url, report_uuid, object_key, ttl_seconds=300
     )
-    return PhotoUrlData(url=url, expires_at=expiry, expires_in=ttl, is_simulated=row.is_simulated)
+    return PhotoUrlData(url=url, expires_at=expiry, expires_in=ttl, is_simulated=is_simulated)
 
 
 def local_photo(state, session, report_id, expires, signature):

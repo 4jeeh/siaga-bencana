@@ -138,6 +138,12 @@ class _SignedPhotoState extends State<_SignedPhoto> {
   Widget build(BuildContext context) => Image.network(
     widget.url,
     semanticLabel: 'Foto laporan warga',
+    loadingBuilder: (context, child, progress) => progress == null
+        ? child
+        : const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpace.l),
+            child: Center(child: CircularProgressIndicator()),
+          ),
     errorBuilder: (_, _, _) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) widget.onFailure();

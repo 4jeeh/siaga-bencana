@@ -23,6 +23,7 @@ from app.schemas.notifications import (
 from app.schemas.reports import ReportListQuery, SignedPhotoQuery, VerificationQuery
 from app.services.bmkg_sync import scheduler
 from app.services.locations import LocationService
+from app.services.media_cleanup import cleanup_scheduler
 from app.services.notification_stream import StreamRegistry
 from app.services.readiness import StorageProbe, start_storage, stop_storage
 from app.services.storage import build_storage_adapter
@@ -87,6 +88,17 @@ def create_app(settings: Settings | None = None):
     async def lifespan(app):
         task = await start_storage(app.state.storage_probe)
         stop = app.state.stop = asyncio.Event()
+        cleanup_stop = asyncio.Event()
+        cleanup_task = asyncio.create_task(
+            cleanup_scheduler(
+                app.state.engine,
+                app.state.storage,
+                app.state.storage_probe,
+                app.state.in_flight_uploads,
+                settings,
+                cleanup_stop,
+            )
+        )
         worker = (
             asyncio.create_task(scheduler(app.state.engine, settings, stop))
             if settings.bmkg_sync_enabled
@@ -96,6 +108,8 @@ def create_app(settings: Settings | None = None):
             yield
         finally:
             stop.set()
+            cleanup_stop.set()
+            await cleanup_task
             if worker is not None:
                 await worker
             await stop_storage(task)

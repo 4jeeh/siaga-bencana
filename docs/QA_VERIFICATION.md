@@ -73,3 +73,34 @@ Seluruh 24 Acceptance Criteria ([PRD.md](PRD.md)) telah memiliki cakupan penguji
   - `UI-05` Profil: Info akun/zona, status kanal **`Notifikasi Real-Time Aktif`**, status izin `Diizinkan`, riwayat notifikasi.
   - `UI-06` Detail Bencana: Header kejadian, pill keparahan/prioritas, ikon pin lokasi sejajar, panel `Mengapa?`, dan atribut cuaca.
 - **Pemeriksaan `adb logcat -s flutter`:** Nol `RenderFlex overflowed`, nol uncaught exception.
+
+---
+
+## 6. Sweep Visual QA (`eea64f3`) & QA Bagian Dalam + Penyelarasan Materi Dosen (`28 Nov 2026`)
+
+### A. Ringkasan 9 Perbaikan Visual QA (`eea64f3`, terverifikasi di `CPH2145`)
+1. **MetricStrip & MetricTile:** Menjaga label dan nilai metrik (`Kelembapan`, `1053.7 km`) tetap 1 baris bersih menggunakan `FittedBox(fit: BoxFit.scaleDown)` di [ui_kit.dart](../mobile/lib/core/widgets/ui_kit.dart).
+2. **Kartu Rumus Skor Radar (`S = 60P + 25M + 15T`):** Menyusun kartu `P · Kedekatan`, `M · Magnitudo`, `T · Kebaruan` menjadi baris lebar penuh di layar HP di [event_detail_screen.dart](../mobile/lib/features/event_detail/event_detail_screen.dart) agar tidak terpotong per huruf.
+3. **Filter & Pin Peta:** Menampilkan filter Peta dalam `Wrap` pada skala normal agar `Laporan warga` & `Kategori: Semua` tampil utuh (tetap horizontal scrollable pada tinggi kompak `<520dp` / skala font `>=1.5x` agar bebas overflow), plus border dan shadow pin peta di [map_screen.dart](../mobile/lib/features/map/map_screen.dart).
+4. **Root-Navigator Modal Sheet & SafeArea:** Menampilkan modal bottom sheet **Tulis laporan warga**, **Detail laporan warga**, dan **sheet marker Peta** di atas `NavigationBar` (`useRootNavigator: true` + guard sesi) dengan `SafeArea(top: false)`.
+5. **Distingsi Ikon Kategori:** Mengubah ikon `Banjir` menjadi `Icons.flood_outlined` di [report_panel.dart](../mobile/lib/features/reports/report_panel.dart).
+6. **Validasi Progresif Form Lapor Warga:** Menggunakan `helperText` / teks netral sebelum field disentuh pada [report_form.dart](../mobile/lib/features/reports/report_form.dart) dan memperbaiki teks duplikat tautan event.
+7. **Detail Media & Mini Map:** Sudut membulat `ClipRRect` pada Shakemap dan foto warga, posisi badge `SIMULASI`, serta warna kontras merah/teal pin di `_MiniMap`.
+8. **Halaman `Ubah Zona Pantau`:** Menyembunyikan header onboarding redundan saat edit dari Profil di [account_screen.dart](../mobile/lib/features/auth/account_screen.dart), merapikan label pencarian di [location_search_field.dart](../mobile/lib/features/zone/location_search_field.dart), dan menyamakan tinggi tombol `GPS` + `Pilih di peta` di [zone_form.dart](../mobile/lib/features/zone/zone_form.dart).
+9. **Komponen Sekunder:** Menghilangkan divider `ExpansionTile` di [home_screen.dart](../mobile/lib/features/home/home_screen.dart) & detail, mengganti `Chip` `Kedaluwarsa` menjadi `StatusPill`, dan merapatkan timestamp di [profile_screen.dart](../mobile/lib/features/profile/profile_screen.dart).
+
+### B. Penyelarasan 10 Materi Dosen (Non-Security) & Perbaikan QA Bagian Dalam
+- **Materi Dosen Terpenuhi Sejak Awal:** Feature-first + MVVM (`Provider`/`ChangeNotifier`), `go_router`, REST API bridge tunggal (FastAPI -> SQLModel/PostgreSQL), 4 UI state eksplisit (`Loading`/`Empty`/`Error`/`Success`), `flutter_secure_storage` untuk sesi, aset font `PlusJakartaSans` offline, `dispose()` seluruh controller/VM, dan validasi server cermin dengan Pydantic v2 + PostgreSQL constraints.
+- **Peningkatan Dari Materi & Audit Internal:**
+  - `MTR-01`: Menambahkan `loadingBuilder` di [event_detail_screen.dart](../mobile/lib/features/event_detail/event_detail_screen.dart) (Shakemap) dan [report_panel.dart](../mobile/lib/features/reports/report_panel.dart) (foto laporan) agar gambar jaringan punya indikator pemuatan eksplisit.
+  - `MTR-02`: Menambahkan `AutovalidateMode.onUserInteraction` pada `Form` login/register di [account_screen.dart](../mobile/lib/features/auth/account_screen.dart).
+  - `IQA-01`: Menghubungkan background worker `cleanup_scheduler` di [media_cleanup.py](../backend/app/services/media_cleanup.py) & `lifespan` [main.py](../backend/app/main.py) agar `media_cleanup_jobs` dan objek yatim diproses otomatis.
+  - `IQA-02`: Melepas slot koneksi DB pool (`session.close()` / `session.rollback()`) di [reports.py](../backend/app/services/reports.py) sebelum request eksternal ke Supabase Storage pada `signed_url` dan `submit` dengan foto.
+  - `IQA-03`: Tidak meng-cache hasil `LOCAL_FALLBACK` kosong di [locations.py](../backend/app/services/locations.py) ketika Nominatim gagal sesaat.
+
+### C. Checklist Persiapan Hari 12 (Security Audit & Deploy Railway — dari 4 Materi Security Dosen)
+Seluruh item keamanan berikut **sengaja dipisah untuk dikerjakan besok (Hari 12, `29 Nov`)** bersama deploy Railway & Supabase advisor:
+1. **Android Manifest & Release Hardening (`mobile/android/`):** Setel `android:allowBackup="false"`, cek `usesCleartextTraffic="false"` (release) vs fallback dev/emulator, audit permission minimal & atribut `android:exported`, serta cek R8/minify + strip log rilis.
+2. **Backend HTTP & Proxy Hardening (`backend/`):** Evaluasi `TrustedHost` / trusted proxy header untuk `RateLimiter` di balik reverse proxy Railway, tambahkan security headers global (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, dll.), dan verifikasi `debug=False` / sanitasi error & log (tanpa PII/token/DSN).
+3. **Database & Supabase Pooler Verification:** Jalankan `supabase` `get_advisors` (RLS/exposure schema `siaga` non-PostgREST), review SQL (`postgresql-code-review`), dan verifikasi URL PostgreSQL **Session Pooler (`:5432`)** vs **Transaction Pooler (`:6543`)** karena [session.py](../backend/app/db/session.py) mengirim `connect_args={"options": "-c statement_timeout=5000 -c timezone=UTC"}` dan PgBouncer mode transaction tidak mendukung parameter `options` startup maupun prepared statement tanpa `prepare_threshold=None`.
+4. **Full Security Audit (`security-audit`, `coderabbit`, SCA):** Audit OWASP MASVS/Top 10, BOLA/IDOR semua endpoint, upload & path traversal, JWT/Argon2/expiry, riwayat Git untuk rahasia/`.env`, dan cek CVE dependency (`requirements.txt` & `pubspec.lock`).

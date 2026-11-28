@@ -211,3 +211,22 @@ def test_login_uses_configured_ttl(client, account, app, settings, ttl):
         audience=config.jwt_audience, issuer=config.jwt_issuer,
     )
     assert data["expires_in"] == claims["exp"] - claims["iat"] == config.jwt_ttl_seconds == ttl
+
+
+def test_empty_location_fallback_is_not_cached(client, account, fetch, monkeypatch):
+    clock = 10.0
+    monkeypatch.setattr("app.services.locations.monotonic", lambda: clock)
+    fetch.side_effect = [
+        httpx.ReadTimeout("offline"),
+        httpx.Response(200, json=[
+            {"display_name": "Kecamatan Sukolilo, Surabaya", "lat": "-7.289", "lon": "112.797"}
+        ]),
+    ]
+
+    empty = payload(client, SEARCH, account[2], q="Sukolilo")
+    assert empty == {"items": []}
+
+    clock += 2.0
+    recovered = payload(client, SEARCH, account[2], q="Sukolilo")
+    assert recovered["items"][0]["source"] == "NOMINATIM"
+    assert fetch.call_count == 2

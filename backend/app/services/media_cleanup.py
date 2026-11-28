@@ -1,8 +1,11 @@
+import asyncio
+import logging
 from collections.abc import Iterable
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
@@ -10,6 +13,7 @@ from app.models.citizen_report import CitizenReport, MediaCleanupJob
 from app.services.storage import LocalStorageAdapter, SupabaseStorageAdapter, validate_object_key
 
 type Adapter = LocalStorageAdapter | SupabaseStorageAdapter
+logger = logging.getLogger("siaga.media_cleanup")
 
 
 def enqueue_cleanup(
@@ -132,3 +136,66 @@ def reconcile_orphan_objects(
         if scheduled:
             queued.append(key)
     return queued
+
+
+def run_cleanup_cycle(
+    engine,
+    storage,
+    *,
+    storage_backend: str,
+    in_flight_uploads: Iterable[str],
+    reconcile: bool = False,
+    db_healthy: bool = False,
+) -> int:
+    now = datetime.now(UTC)
+    with Session(engine) as session:
+        if reconcile and db_healthy:
+            reconcile_orphan_objects(
+                session,
+                storage,
+                storage_backend=storage_backend,
+                db_healthy=True,
+                now=now,
+                active_keys=list(in_flight_uploads),
+            )
+        processed = process_cleanup_jobs(
+            session,
+            storage,
+            storage_backend=storage_backend,
+            now=now,
+            active_keys=list(in_flight_uploads),
+        )
+        session.commit()
+        return processed
+
+
+async def cleanup_scheduler(
+    engine,
+    storage,
+    storage_probe,
+    in_flight_uploads,
+    settings,
+    stop: asyncio.Event,
+    *,
+    interval_seconds: float = 60.0,
+):
+    ticks = 0
+    while not stop.is_set():
+        try:
+            await asyncio.wait_for(stop.wait(), timeout=max(0.05, interval_seconds))
+            return
+        except TimeoutError:
+            pass
+        ticks += 1
+        try:
+            await asyncio.to_thread(
+                run_cleanup_cycle,
+                engine,
+                storage,
+                storage_backend=settings.storage_backend,
+                in_flight_uploads=in_flight_uploads,
+                reconcile=ticks % 60 == 0 and storage_probe.ready,
+                db_healthy=True,
+            )
+        except (SQLAlchemyError, ApiError, OSError) as exc:
+            logger.warning("media_cleanup failure=%s", type(exc).__name__)
