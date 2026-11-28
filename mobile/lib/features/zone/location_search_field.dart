@@ -39,7 +39,7 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
           key: const Key('zone-search-query'),
           controller: _query,
           decoration: InputDecoration(
-            labelText: 'Cari provinsi, kota, atau kecamatan',
+            labelText: 'Cari kota atau kecamatan',
             prefixIcon: const Icon(Icons.search),
             suffixIcon: IconButton(
               key: const Key('zone-search-btn'),

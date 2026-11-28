@@ -18,6 +18,9 @@ class ReportForm extends StatefulWidget {
 
 class _ReportFormState extends State<ReportForm> {
   bool selectingEvent = false;
+  bool _touchedCategory = false;
+  bool _touchedDescription = false;
+  bool _touchedLocation = false;
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ReportsViewModel>();
@@ -27,120 +30,152 @@ class _ReportFormState extends State<ReportForm> {
         health.healthMeta?.isSimulated == true ||
         vm.nearby.meta?.isSimulated == true;
     final count = vm.descriptionLength;
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: SingleChildScrollView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 12,
-          children: [
-            Semantics(
-              header: true,
-              child: Text(
-                'Tulis laporan warga',
-                style: Theme.of(context).textTheme.titleLarge,
+    final invalidDesc = count < 20 || count > 1000;
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 12,
+            children: [
+              Semantics(
+                header: true,
+                child: Text(
+                  'Tulis laporan warga',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
-            ),
-            const SectionHeader('Kategori'),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final key in reportCategoryOrder)
-                  ChoiceChip(
-                    showCheckmark: false,
-                    avatar: Icon(
-                      reportCategoryIcon(key),
-                      size: 18,
-                      color: vm.draftCategory == key
-                          ? AppColors.primary
-                          : AppColors.textMuted,
+              const SectionHeader('Kategori'),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final key in reportCategoryOrder)
+                    ChoiceChip(
+                      showCheckmark: false,
+                      avatar: Icon(
+                        reportCategoryIcon(key),
+                        size: 18,
+                        color: vm.draftCategory == key
+                            ? AppColors.primary
+                            : AppColors.textMuted,
+                      ),
+                      label: Text(reportCategories[key]!),
+                      selected: vm.draftCategory == key,
+                      materialTapTargetSize: MaterialTapTargetSize.padded,
+                      onSelected: vm.submitting
+                          ? null
+                          : (_) {
+                              setState(() => _touchedCategory = true);
+                              vm.setCategory(key);
+                            },
                     ),
-                    label: Text(reportCategories[key]!),
-                    selected: vm.draftCategory == key,
-                    materialTapTargetSize: MaterialTapTargetSize.padded,
-                    onSelected: vm.submitting
-                        ? null
-                        : (_) => vm.setCategory(key),
-                  ),
-              ],
-            ),
-            if (vm.draftCategory == null)
-              Text(
-                'Pilih kategori.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppColors.error),
+                ],
               ),
-            const SectionHeader('Ceritakan kondisinya'),
-            TextFormField(
-              initialValue: vm.draftDescription,
-              enabled: !vm.submitting,
-              minLines: 3,
-              maxLines: 6,
-              onChanged: vm.setDescription,
-              decoration: InputDecoration(
-                labelText: 'Deskripsi',
-                counterText: '$count/1000',
-                errorText: count < 20 || count > 1000
-                    ? 'Masukkan 20–1000 karakter.'
+              if (vm.draftCategory == null)
+                Text(
+                  'Pilih kategori.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: _touchedCategory
+                        ? AppColors.error
+                        : AppColors.textMuted,
+                  ),
+                ),
+              const SectionHeader('Ceritakan kondisinya'),
+              TextFormField(
+                initialValue: vm.draftDescription,
+                enabled: !vm.submitting,
+                minLines: 3,
+                maxLines: 6,
+                onChanged: (value) {
+                  if (!_touchedDescription) {
+                    setState(() => _touchedDescription = true);
+                  }
+                  vm.setDescription(value);
+                },
+                decoration: InputDecoration(
+                  labelText: 'Deskripsi',
+                  counterText: '$count/1000',
+                  helperText: invalidDesc && !_touchedDescription
+                      ? 'Masukkan 20–1000 karakter.'
+                      : null,
+                  errorText: invalidDesc && _touchedDescription
+                      ? 'Masukkan 20–1000 karakter.'
+                      : null,
+                ),
+              ),
+              IconLabel(
+                icon: Icons.privacy_tip_outlined,
+                text:
+                    'Privasi foto dan lokasi: Hindari wajah/identitas dan titik rumah yang tak relevan.',
+                color: AppColors.textMuted,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SectionHeader('Lokasi'),
+              InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Lokasi laporan',
+                  helperText: vm.locationError == null &&
+                          vm.draftLatitude == null &&
+                          !_touchedLocation
+                      ? 'Pilih lokasi laporan.'
+                      : null,
+                  errorText:
+                      vm.locationError ??
+                      (vm.draftLatitude == null && _touchedLocation
+                          ? 'Pilih lokasi laporan.'
+                          : null),
+                ),
+                child: Text(
+                  vm.draftLatitude == null
+                      ? 'Belum dipilih'
+                      : '${vm.draftLatitude}, ${vm.draftLongitude}',
+                ),
+              ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: vm.locating || vm.submitting
+                        ? null
+                        : () {
+                            setState(() => _touchedLocation = true);
+                            vm.gps();
+                          },
+                    icon: const Icon(Icons.my_location),
+                    label: Text(vm.locating ? 'Mencari lokasi…' : 'GPS sekali'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: vm.locating || vm.submitting
+                        ? null
+                        : () {
+                            setState(() => _touchedLocation = true);
+                            Navigator.pop(context, true);
+                          },
+                    icon: const Icon(Icons.map_outlined),
+                    label: const Text('Pilih titik manual'),
+                  ),
+                  if (vm.canOpenSettings)
+                    TextButton(
+                      onPressed: vm.openSettings,
+                      child: const Text('Buka Pengaturan'),
+                    ),
+                ],
+              ),
+              const SectionHeader('Kejadian terkait (opsional)'),
+              Text(
+                vm.draftEventId == null
+                    ? 'Belum ada kejadian yang ditautkan.'
+                    : 'Terkait event: ${vm.draftEventId}',
+                style: vm.draftEventId == null
+                    ? Theme.of(context).textTheme.bodySmall
                     : null,
               ),
-            ),
-            IconLabel(
-              icon: Icons.privacy_tip_outlined,
-              text:
-                  'Privasi foto dan lokasi: Hindari wajah/identitas dan titik rumah yang tak relevan.',
-              color: AppColors.textMuted,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SectionHeader('Lokasi'),
-            InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'Lokasi laporan',
-                errorText:
-                    vm.locationError ??
-                    (vm.draftLatitude == null
-                        ? 'Pilih lokasi laporan.'
-                        : null),
-              ),
-              child: Text(
-                vm.draftLatitude == null
-                    ? 'Belum dipilih'
-                    : '${vm.draftLatitude}, ${vm.draftLongitude}',
-              ),
-            ),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: vm.locating || vm.submitting ? null : vm.gps,
-                  icon: const Icon(Icons.my_location),
-                  label: Text(vm.locating ? 'Mencari lokasi…' : 'GPS sekali'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: vm.locating || vm.submitting
-                      ? null
-                      : () => Navigator.pop(context, true),
-                  icon: const Icon(Icons.map_outlined),
-                  label: const Text('Pilih titik manual'),
-                ),
-                if (vm.canOpenSettings)
-                  TextButton(
-                    onPressed: vm.openSettings,
-                    child: const Text('Buka Pengaturan'),
-                  ),
-              ],
-            ),
-            const SectionHeader('Kejadian terkait (opsional)'),
-            Text(
-              vm.draftEventId == null
-                  ? 'Event terkait (opsional)'
-                  : 'Terkait event: ${vm.draftEventId}',
-            ),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -276,6 +311,7 @@ class _ReportFormState extends State<ReportForm> {
           ],
         ),
       ),
+    ),
     );
   }
 }

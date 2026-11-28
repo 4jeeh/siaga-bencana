@@ -20,6 +20,7 @@ import 'package:siaga_bencana/features/home/home_screen.dart';
 import 'package:siaga_bencana/features/map/map_dto.dart';
 import 'package:siaga_bencana/features/notifications/local_notification_service.dart';
 import 'package:siaga_bencana/features/profile/profile_screen.dart';
+import 'package:siaga_bencana/features/reports/report_panel.dart';
 import 'package:siaga_bencana/features/weather/weather_view_model.dart';
 import 'package:siaga_bencana/features/zone/location_service.dart';
 import 'package:siaga_bencana/features/zone/zone_dto.dart';
@@ -589,6 +590,73 @@ void main() {
     );
     expect(mapReportChip.avatar, isNotNull);
     expect(mapReportChip.showCheckmark, isFalse);
+    await closeApp(tester);
+  });
+
+  testWidgets('visual QA regressions: distinct flood icon, non-error fresh form, root sheet, wrapped map filters', (tester) async {
+    expect(reportCategoryIcon('flood'), isNot(reportCategoryIcon('earthquake')));
+    expect(reportCategoryIcon('flood'), isNot(Icons.water));
+
+    final session = signedIn();
+    await tester.pumpWidget(SiagaApp(
+      key: const ValueKey('vqa-regression'),
+      baseUrl: base,
+      session: session,
+      initialLocation: '/reports',
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
+      client: MockClient((r) async => switch (r.url.path) {
+        '/api/v1/health' => ok({'status': 'ok'}),
+        '/api/v1/me/zone' => ok(zoneJson),
+        '/api/v1/reports' => emptyFeed(),
+        _ => ok(null),
+      }),
+    ));
+    await tester.pumpAndSettle();
+
+    await tapVisible(tester, find.text('Tulis Laporan'));
+    final descField = tester.widget<TextField>(find.byType(TextField).first);
+    expect(descField.decoration?.errorText, isNull);
+    expect(descField.decoration?.helperText, 'Masukkan 20–1000 karakter.');
+    final sheetRect = tester.getRect(find.byType(BottomSheet));
+    final navRect = tester.getRect(find.byType(NavigationBar));
+    expect(sheetRect.bottom, greaterThan(navRect.top));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    session.clear();
+
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final mapSession = signedIn();
+    addTearDown(mapSession.dispose);
+    await tester.pumpWidget(SiagaApp(
+      key: const ValueKey('vqa-map-wrap'),
+      baseUrl: base,
+      session: mapSession,
+      initialLocation: '/map',
+      autoStartNotifications: false,
+      localNotificationService: const NoopLocalNotificationService(),
+      tileProvider: TestTileProvider(),
+      client: MockClient((r) async => switch (r.url.path) {
+        '/api/v1/health' => ok({'status': 'ok'}),
+        '/api/v1/me/zone' => ok(zoneJson),
+        '/api/v1/events' => emptyFeed(),
+        '/api/v1/map/markers' => http.Response(jsonEncode(markers([])), 200),
+        _ => ok(null),
+      }),
+    ));
+    await tester.pumpAndSettle();
+    final reportChipWrap = find.ancestor(
+      of: find.text('Laporan warga'),
+      matching: find.byType(Wrap),
+    );
+    final categoryWrap = find.ancestor(
+      of: find.text('Kategori: Semua'),
+      matching: find.byType(Wrap),
+    );
+    expect(reportChipWrap, findsOneWidget);
+    expect(categoryWrap, findsOneWidget);
     await closeApp(tester);
   });
 }

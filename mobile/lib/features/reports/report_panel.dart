@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/session/session_coordinator.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/time_format.dart';
 import '../../core/widgets/status_banners.dart';
@@ -16,15 +17,28 @@ Future<void> showReportById(
   String id, {
   ReportDto? initial,
 }) async {
+  final session = context.read<SessionCoordinator>();
+  final generation = session.generation;
   final model = context.read<ModerationViewModel>();
   model.openId(id, initial: initial);
   final owner = model.panelOwner;
   try {
     await showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       useSafeArea: true,
       isScrollControlled: true,
-      builder: (_) => ReportPanel(id: id),
+      builder: (sheet) {
+        if (sheet.watch<SessionCoordinator>().generation != generation) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (sheet.mounted && ModalRoute.of(sheet)?.isCurrent == true) {
+              Navigator.of(sheet).pop();
+            }
+          });
+          return const SizedBox.shrink();
+        }
+        return ReportPanel(id: id);
+      },
     );
   } finally {
     if (owner != null && identical(model.panelOwner, owner)) {
@@ -35,7 +49,7 @@ Future<void> showReportById(
 
 IconData reportCategoryIcon(String key) => switch (key) {
   'earthquake' => Icons.waves,
-  'flood' => Icons.water,
+  'flood' => Icons.flood_outlined,
   'eruption' => Icons.terrain,
   'extreme_weather' => Icons.thunderstorm,
   _ => Icons.cloud,
@@ -204,9 +218,11 @@ class ReportPanel extends StatelessWidget {
     final vm = context.watch<ModerationViewModel>();
     final report = vm.panelReport;
     final revision = vm.photoRevision;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-      child: Column(
+    return SafeArea(
+      top: false,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 8,
         children: [
@@ -251,14 +267,21 @@ class ReportPanel extends StatelessWidget {
               else if (vm.photoUrl != null)
                 Stack(
                   children: [
-                    _SignedPhoto(
-                      key: ValueKey(revision),
-                      url: vm.photoUrl!,
-                      onFailure: () =>
-                          vm.refreshPhotoUrlOnce(revision: revision),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      child: _SignedPhoto(
+                        key: ValueKey(revision),
+                        url: vm.photoUrl!,
+                        onFailure: () =>
+                            vm.refreshPhotoUrlOnce(revision: revision),
+                      ),
                     ),
                     if (report.isSimulated || vm.photoIsSimulated)
-                      const SimulationBadge(),
+                      const Positioned(
+                        top: 8,
+                        left: 8,
+                        child: SimulationBadge(),
+                      ),
                   ],
                 )
               else
@@ -341,6 +364,7 @@ class ReportPanel extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

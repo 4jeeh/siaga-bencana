@@ -56,12 +56,20 @@ class _ReportsScreenState extends State<ReportsScreen> {
     while (mounted && session.generation == generation) {
       final manual = await showModalBottomSheet<bool>(
         context: context,
+        useRootNavigator: true,
         useSafeArea: true,
         isScrollControlled: true,
-        builder: (sheet) =>
-            sheet.watch<SessionCoordinator>().generation == generation
-            ? const ReportForm()
-            : const SizedBox.shrink(),
+        builder: (sheet) {
+          if (sheet.watch<SessionCoordinator>().generation != generation) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (sheet.mounted && ModalRoute.of(sheet)?.isCurrent == true) {
+                Navigator.of(sheet).pop();
+              }
+            });
+            return const SizedBox.shrink();
+          }
+          return const ReportForm();
+        },
       );
       if (manual != true || !mounted || session.generation != generation) return;
       await context.push<void>('/map?mode=pick_report');

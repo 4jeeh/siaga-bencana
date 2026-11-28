@@ -431,6 +431,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         ),
         child: ExpansionTile(
           key: PageStorageKey('detail-why-${d.id}'),
+          shape: const Border(),
+          collapsedShape: const Border(),
           leading: const Icon(Icons.help_outline, size: 20),
           title: const Text('Mengapa?'),
           childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -467,11 +469,22 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   Widget _radarScoreExplanation(PriorityDto p) {
     final c = p.components;
-    Widget bentoTile(String title, String formula, String? compKey, int w) {
+    Widget bentoTile(
+      String title,
+      String formula,
+      String? compKey,
+      int w, {
+      required bool compactRow,
+    }) {
       final raw = c?[compKey];
       final detail = raw == null
           ? null
           : 'nilai ${raw.toStringAsFixed(2)} → ${(w * raw).toStringAsFixed(1)} poin';
+      final detailStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
+        color: AppColors.primary,
+        fontWeight: FontWeight.w700,
+        fontFeatures: tabularFigures,
+      );
       return DecoratedBox(
         decoration: BoxDecoration(
           color: AppColors.surfaceVariant,
@@ -480,34 +493,53 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(AppSpace.m),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 2),
-              Text(formula, style: Theme.of(context).textTheme.bodySmall),
-              if (detail != null) ...[
-                const SizedBox(height: AppSpace.xs),
-                Text(
-                  detail,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: tabularFigures,
-                  ),
+          child: compactRow
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            formula,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (detail != null) ...[
+                      const SizedBox(width: AppSpace.m),
+                      Flexible(
+                        child: Text(
+                          detail,
+                          textAlign: TextAlign.right,
+                          style: detailStyle,
+                        ),
+                      ),
+                    ],
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 2),
+                    Text(formula, style: Theme.of(context).textTheme.bodySmall),
+                    if (detail != null) ...[
+                      const SizedBox(height: AppSpace.xs),
+                      Text(detail, style: detailStyle),
+                    ],
+                  ],
                 ),
-              ],
-            ],
-          ),
         ),
       );
     }
-
-    final tiles = [
-      bentoTile('P · Kedekatan', '60% · 1 − jarak/radius', 'p', 60),
-      bentoTile('M · Magnitudo', '25% · M/10', 'm', 25),
-      bentoTile('T · Kebaruan', '15% · 1 − umur jam/24', 't', 15),
-    ];
 
     return _Section('Cara skor Radar Radius dihitung', [
       DecoratedBox(
@@ -532,17 +564,42 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       LayoutBuilder(
         builder: (context, constraints) {
           final fitsRow =
-              constraints.maxWidth / 3 >=
-              MediaQuery.textScalerOf(context).scale(96);
+              constraints.maxWidth >=
+              MediaQuery.textScalerOf(context).scale(480);
+          final tiles = [
+            bentoTile(
+              'P · Kedekatan',
+              '60% · 1 − jarak/radius',
+              'p',
+              60,
+              compactRow: !fitsRow,
+            ),
+            bentoTile(
+              'M · Magnitudo',
+              '25% · M/10',
+              'm',
+              25,
+              compactRow: !fitsRow,
+            ),
+            bentoTile(
+              'T · Kebaruan',
+              '15% · 1 − umur jam/24',
+              't',
+              15,
+              compactRow: !fitsRow,
+            ),
+          ];
           if (fitsRow) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (var i = 0; i < tiles.length; i++) ...[
-                  if (i > 0) const SizedBox(width: AppSpace.s),
-                  Expanded(child: tiles[i]),
+            return IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < tiles.length; i++) ...[
+                    if (i > 0) const SizedBox(width: AppSpace.s),
+                    Expanded(child: tiles[i]),
+                  ],
                 ],
-              ],
+              ),
             );
           }
           return Column(
@@ -579,11 +636,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       if (image != null)
         Padding(
           padding: const EdgeInsets.only(top: AppSpace.m),
-          child: Image.network(
-            image.toString(),
-            semanticLabel: 'Shakemap BMKG',
-            errorBuilder: (_, _, _) => const Text(
-              'Pratinjau shakemap tidak dapat dimuat. Detail teks tetap tersedia.',
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            child: Image.network(
+              image.toString(),
+              semanticLabel: 'Shakemap BMKG',
+              errorBuilder: (_, _, _) => const Text(
+                'Pratinjau shakemap tidak dapat dimuat. Detail teks tetap tersedia.',
+              ),
             ),
           ),
         ),
@@ -750,13 +810,20 @@ class _MiniMapState extends State<_MiniMap> {
                   markers: [
                     Marker(
                       point: center,
-                      child: Icon(Icons.location_on, semanticLabel: pointLabel),
+                      child: Icon(
+                        Icons.location_on,
+                        color: AppColors.error,
+                        size: 32,
+                        semanticLabel: pointLabel,
+                      ),
                     ),
                     if (zone != null)
                       Marker(
                         point: LatLng(zone.latitude, zone.longitude),
                         child: const Icon(
                           Icons.my_location,
+                          color: AppColors.primary,
+                          size: 24,
                           semanticLabel: 'Titik pantau',
                         ),
                       ),

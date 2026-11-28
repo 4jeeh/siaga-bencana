@@ -170,10 +170,17 @@ class ProfileScreen extends StatelessWidget {
                         },
                         channelLabel,
                       ),
-                      if (channel.lastReceivedAt != null) ...[
-                        const Text('Terakhir diterima'),
-                        _time(channel.lastReceivedAt!),
-                      ],
+                      if (channel.lastReceivedAt != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Terakhir diterima',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            _time(channel.lastReceivedAt!),
+                          ],
+                        ),
                       if (channel.notice != null)
                         Semantics(
                           liveRegion: true,
@@ -368,15 +375,22 @@ class ProfileScreen extends StatelessWidget {
           ),
           if (item.isSimulated) const SimulationBadge(),
           if (!item.presentAsActiveAlert)
-            Chip(
-              label: Text(
-                switch (item.currentLifecycleStatus) {
-                  'expired' => 'Kedaluwarsa',
-                  'cancelled' => 'Dibatalkan',
-                  'superseded' => 'Digantikan',
-                  'incomplete' || 'invalid_time' => 'Data belum lengkap',
-                  _ => 'Histori',
-                },
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: StatusPill(
+                  icon: Icons.history,
+                  label: switch (item.currentLifecycleStatus) {
+                    'expired' => 'Kedaluwarsa',
+                    'cancelled' => 'Dibatalkan',
+                    'superseded' => 'Digantikan',
+                    'incomplete' || 'invalid_time' => 'Data belum lengkap',
+                    _ => 'Histori',
+                  },
+                  foreground: AppColors.textMuted,
+                  background: AppColors.surfaceVariant,
+                ),
               ),
             ),
         ],

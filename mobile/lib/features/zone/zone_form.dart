@@ -54,7 +54,11 @@ class ZoneForm extends StatelessWidget {
         const SizedBox(height: AppSpace.m),
         LayoutBuilder(
           builder: (context, constraints) {
+            final compactStyle = OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            );
             final gpsBtn = OutlinedButton.icon(
+              style: compactStyle,
               onPressed: vm.busy ? null : vm.locateOnce,
               icon: const Icon(Icons.my_location),
               label: Text(
@@ -62,6 +66,7 @@ class ZoneForm extends StatelessWidget {
               ),
             );
             final mapBtn = OutlinedButton.icon(
+              style: compactStyle,
               onPressed: vm.busy
                   ? null
                   : () => context.push('/map?mode=pick_zone'),
@@ -71,12 +76,15 @@ class ZoneForm extends StatelessWidget {
             final sideBySide =
                 constraints.maxWidth >= MediaQuery.textScalerOf(context).scale(300);
             if (sideBySide) {
-              return Row(
-                children: [
-                  Expanded(child: gpsBtn),
-                  const SizedBox(width: AppSpace.s),
-                  Expanded(child: mapBtn),
-                ],
+              return IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: gpsBtn),
+                    const SizedBox(width: AppSpace.s),
+                    Expanded(child: mapBtn),
+                  ],
+                ),
               );
             }
             return Column(

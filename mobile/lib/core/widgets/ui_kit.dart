@@ -169,17 +169,45 @@ class _MetricTileCard extends StatelessWidget {
           fontFeatures: tabularFigures,
         );
 
-    final labelWidget = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (icon != null) ...[
-          ExcludeSemantics(child: Icon(icon, size: 14, color: labelColor)),
-          const SizedBox(width: 4),
-        ],
-        Flexible(child: Text(label, style: labelStyle)),
-      ],
-    );
-    final valueWidget = Text(display, style: valueStyle);
+    final labelWidget = horizontal
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                ExcludeSemantics(child: Icon(icon, size: 14, color: labelColor)),
+                const SizedBox(width: 4),
+              ],
+              Flexible(child: Text(label, style: labelStyle)),
+            ],
+          )
+        : FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  ExcludeSemantics(
+                    child: Icon(icon, size: 14, color: labelColor),
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                Text(label, maxLines: 1, softWrap: false, style: labelStyle),
+              ],
+            ),
+          );
+    final valueWidget = horizontal
+        ? Text(display, style: valueStyle)
+        : FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              display,
+              maxLines: 1,
+              softWrap: false,
+              style: valueStyle,
+            ),
+          );
 
     return Semantics(
       label: missing ? '$label: tidak tersedia' : '$label: $display',
@@ -192,8 +220,8 @@ class _MetricTileCard extends StatelessWidget {
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: horizontal ? AppSpace.m : 10,
-            vertical: horizontal ? AppSpace.m : 10,
+            horizontal: horizontal ? AppSpace.m : 8,
+            vertical: 10,
           ),
           child: horizontal
               ? Row(

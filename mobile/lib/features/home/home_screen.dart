@@ -737,6 +737,8 @@ class _EventCard extends StatelessWidget {
               ),
               child: ExpansionTile(
                 key: PageStorageKey(item.id),
+                shape: const Border(),
+                collapsedShape: const Border(),
                 leading: const Icon(Icons.help_outline, size: 20),
                 title: const Text('Mengapa?'),
                 expandedAlignment: Alignment.centerLeft,

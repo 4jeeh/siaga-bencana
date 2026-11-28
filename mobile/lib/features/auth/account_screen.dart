@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/session/session_coordinator.dart';
@@ -6,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/status_banners.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../zone/zone_form.dart';
+import '../zone/zone_view_model.dart';
 import 'auth_view_model.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -121,14 +123,27 @@ class _AccountScreenState extends State<AccountScreen> {
       );
     }
     final isDuplicateEmail = vm.error?.code == 'EMAIL_ALREADY_REGISTERED';
+    final editingZone = widget.editZone && session.isValid && session.verified;
     return Scaffold(
-      appBar: AppBar(title: const Text('Siaga Bencana')),
+      appBar: AppBar(
+        title: Text(editingZone ? 'Ubah Zona Pantau' : 'Siaga Bencana'),
+        leading: editingZone
+            ? IconButton(
+                tooltip: 'Kembali',
+                onPressed: () {
+                  context.read<ZoneViewModel>().resetDraft();
+                  context.go('/profile');
+                },
+                icon: const Icon(Icons.arrow_back),
+              )
+            : null,
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpace.xl),
+              padding: EdgeInsets.all(editingZone ? AppSpace.l : AppSpace.xl),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -169,42 +184,44 @@ class _AccountScreenState extends State<AccountScreen> {
                           )
                         : const SizedBox.shrink(),
                   ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryContainer,
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                      ),
-                      child: const SizedBox(
-                        width: 64,
-                        height: 64,
-                        child: Icon(
-                          Icons.shield_outlined,
-                          size: 36,
-                          color: AppColors.primary,
+                  if (!editingZone) ...[
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryContainer,
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                        ),
+                        child: const SizedBox(
+                          width: 64,
+                          height: 64,
+                          child: Icon(
+                            Icons.shield_outlined,
+                            size: 36,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpace.l),
-                  Semantics(
-                    header: true,
-                    child: Text(
-                      session.isValid
-                          ? 'Zona pantau Anda'
-                          : 'Siap, peduli, terhubung.',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                    const SizedBox(height: AppSpace.l),
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        session.isValid
+                            ? 'Zona pantau Anda'
+                            : 'Siap, peduli, terhubung.',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpace.s),
-                  Text(
-                    'Informasi bencana dan laporan warga dalam satu aplikasi.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textMuted,
+                    const SizedBox(height: AppSpace.s),
+                    Text(
+                      'Informasi bencana dan laporan warga dalam satu aplikasi.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textMuted,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpace.xl),
+                    const SizedBox(height: AppSpace.xl),
+                  ],
                   if (session.message != null) ...[
                     Semantics(
                       liveRegion: true,
@@ -216,11 +233,13 @@ class _AccountScreenState extends State<AccountScreen> {
                     const SizedBox(height: AppSpace.l),
                   ],
                   if (session.isValid && session.verified) ...[
-                    Text(
-                      'Selamat datang, ${session.user!.displayName}.',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: AppSpace.l),
+                    if (!editingZone) ...[
+                      Text(
+                        'Selamat datang, ${session.user!.displayName}.',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: AppSpace.l),
+                    ],
                     ZoneForm(editZone: widget.editZone),
                   ] else ...[
                     SegmentedButton<bool>(

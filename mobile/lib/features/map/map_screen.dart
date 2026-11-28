@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/routing/placeholder_page.dart';
+import '../../core/session/session_coordinator.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/labels.dart';
 import '../../core/utils/time_format.dart';
@@ -434,11 +435,22 @@ class _BrowseMapState extends State<_BrowseMap> {
   }
 
   Future<void> _openMarker(MapMarkerDto marker) async {
+    final session = context.read<SessionCoordinator>();
+    final generation = session.generation;
     final detail = await showModalBottomSheet<bool>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       builder: (sheet) {
+        if (sheet.watch<SessionCoordinator>().generation != generation) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (sheet.mounted && ModalRoute.of(sheet)?.isCurrent == true) {
+              Navigator.of(sheet).pop();
+            }
+          });
+          return const SizedBox.shrink();
+        }
         final hasQuakeMetrics =
             marker.magnitude != null || marker.depthKm != null;
         return SafeArea(
@@ -619,13 +631,30 @@ class _BrowseMapState extends State<_BrowseMap> {
                 child: Semantics(
                   label: '${_sourceLabel(marker)}, ${marker.title}',
                   button: true,
-                  child: IconButton(
-                    key: ValueKey('pin-${marker.id}'),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.surface,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: _Symbol.forMarker(
+                          marker,
+                        ).color.withValues(alpha: 0.5),
+                        width: 1.5,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x33000000),
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    icon: _Symbol.forMarker(marker).glyph,
-                    onPressed: () => _openMarker(marker),
+                    child: IconButton(
+                      key: ValueKey('pin-${marker.id}'),
+                      padding: EdgeInsets.zero,
+                      icon: _Symbol.forMarker(marker).glyph,
+                      onPressed: () => _openMarker(marker),
+                    ),
                   ),
                 ),
               ),
@@ -635,7 +664,7 @@ class _BrowseMapState extends State<_BrowseMap> {
     );
   }
 
-  Widget _filters(MapViewModel vm, {bool wrap = false}) {
+  Widget _filters(MapViewModel vm, {bool wrap = true}) {
     final items = [
       SegmentedButton<bool>(
         style: SegmentedButton.styleFrom(minimumSize: const Size(48, 48)),
@@ -684,7 +713,7 @@ class _BrowseMapState extends State<_BrowseMap> {
             constraints: const BoxConstraints(minHeight: 48),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 12,
+                horizontal: 10,
                 vertical: 8,
               ),
               child: Row(
@@ -731,7 +760,11 @@ class _BrowseMapState extends State<_BrowseMap> {
     );
   }
 
-  Widget _controls(MapViewModel vm, {double? maxBannerHeight}) {
+  Widget _controls(
+    MapViewModel vm, {
+    double? maxBannerHeight,
+    bool wrapFilters = true,
+  }) {
     final emptyResult =
         !vm.loading &&
         vm.meta != null &&
@@ -839,7 +872,7 @@ class _BrowseMapState extends State<_BrowseMap> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ?topArea,
-        _filters(vm, wrap: maxBannerHeight == null),
+        _filters(vm, wrap: wrapFilters),
       ],
     );
   }
@@ -943,6 +976,9 @@ class _BrowseMapState extends State<_BrowseMap> {
                 : LayoutBuilder(
                     builder: (context, box) {
                       final height = box.maxHeight.clamp(480.0, double.infinity);
+                      final wrapFilters =
+                          box.maxHeight >= 520 &&
+                          MediaQuery.textScalerOf(context).scale(14) <= 20;
                       final body = SizedBox(
                         height: height,
                         child: Column(
@@ -953,6 +989,7 @@ class _BrowseMapState extends State<_BrowseMap> {
                               maxBannerHeight: MediaQuery.textScalerOf(
                                 context,
                               ).scale(120).clamp(height * 0.18, height * 0.35),
+                              wrapFilters: wrapFilters,
                             ),
                             SizedBox(
                               height: 4,
